@@ -75,6 +75,7 @@ World.prototype = {
     
     moveUnit: function(unit, path, callback) {
         //delete this.units[unit.x+","+unit.y];
+        ui.moveHappening = true;
 
         socket.emit("move", {
             gameId: 1,
@@ -161,7 +162,7 @@ function onSpaceHover(e) {
 function onSpaceClick(e) {
     var space = e.target.owner;
 
-    if(!pathSource) {
+    if(!pathSource && !ui.moveHappening) {
         if(world.getUnitAt(space)) {
             pathSource = space;
         }

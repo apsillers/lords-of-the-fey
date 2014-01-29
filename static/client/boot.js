@@ -78,6 +78,7 @@ window.addEventListener("load", function() {
             
             if(!nextSpace) {
                 world.units[currSpace.x+","+currSpace.y] = unit;
+                ui.moveHappening = false;
             } else {
                 start = timestamp;
                 window.requestAnimationFrame(step);
