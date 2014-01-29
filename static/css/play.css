@@ -1,0 +1,47 @@
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  div.top-status {
+    float: left;
+    width: 60px;
+    height: 16px;
+    background-color: #000000;
+    color: #FFFFFF;
+    padding: 0px 2px 6px 2px;
+    margin: 5px 3px;
+    font-size: 12px;
+  }
+
+  div.top-status img {
+    position: relative;
+    top: 3px;
+  }
+
+  .upper-tile {
+
+  }
+
+  .unit {
+    position: absolute;
+  }
+
+  #cursor {
+    position: absolute;
+  }
+
+  .translucent {
+    filter:alpha(opacity=60); 
+    -moz-opacity: 0.6; 
+    opacity: 0.6; 
+  }
+
+  .tilesize {
+    height: 72px;
+    width: 72px;
+  }
+
+  #battlefield {
+
+  }

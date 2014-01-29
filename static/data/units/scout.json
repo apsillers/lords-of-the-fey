@@ -1,0 +1,12 @@
+{
+  "name": "Scout",
+  "img": "/data/img/units/scout.png",
+  "move": 6,
+  "moveCost": {
+    "grass": 1,
+    "dirt": 1,
+    "swamp": 3
+  },
+  "maxHp": 17,
+  "maxXp": 20
+}
