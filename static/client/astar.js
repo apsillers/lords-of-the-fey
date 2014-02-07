@@ -34,7 +34,7 @@ function aStar(world, unit, start, goal) {
         closedset[current] = current;
         
         var neighbors = world.getNeighbors(current);
-        neighbors = neighbors.filter(not_blocked_by_enemy);
+        neighbors = neighbors.filter(not_blocked_by_enemy).filter(not_blocked_by_friend);
         for(var i=0; i < neighbors.length; ++i) {
             var neighbor = neighbors[i];
 
@@ -102,6 +102,13 @@ function aStar(world, unit, start, goal) {
     function not_blocked_by_enemy(space) {
         var occupant = world.getUnitAt(space);
         if(occupant && occupant.team != unit.team && space != goal) { return false; }
+        return true;
+    }
+
+    // is this space non-final or ?
+    function not_blocked_by_friend(space) {
+        var occupant = world.getUnitAt(space);
+        if(occupant && occupant.team == unit.team && space == goal) { return false; }
         return true;
     }
 }

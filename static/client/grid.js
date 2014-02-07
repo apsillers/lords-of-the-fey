@@ -158,11 +158,18 @@ function onSpaceHover(e) {
     }
 }
 
+var debugTeamToggle = true;
+
 function onSpaceClick(e) {
     var space = e.target.owner;
 
     if(e.nativeEvent.button == 2) {
-	socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
+	if(debugTeamToggle) {
+	    socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
+	} else {
+	    socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
+	}
+	debugTeamToggle = !debugTeamToggle;
 	return;
     }
 

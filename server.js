@@ -76,13 +76,21 @@ function initListeners(socket, mongo, collections) {
     });
 
     socket.on("create", function(data) {
-	loadUnit(data.type, function(err, type) {
-            data["xp"] = 0;
-	    data["hp"] = type.maxHp;
-            collections.units.insert(data, function(err) {
-		if(!err) {
-		    socket.emit("created", data);
-		}
+	var gameId = data.gameId;
+	collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
+	    cursor.nextObject(function(err, o) {
+		// if the space is populated, abort
+		if(o) { return; }
+
+		loadUnit(data.type, function(err, type) {
+		    data["xp"] = 0;
+		    data["hp"] = type.maxHp;
+		    collections.units.insert(data, function(err) {
+			if(!err) {
+			    socket.emit("created", data);
+			}
+		    });
+		});
 	    });
 	});
     });
