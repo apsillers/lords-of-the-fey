@@ -15,7 +15,7 @@ var unitLib = {
         unit.xp = options.xp || 0;
 
         unit.team = team;
-        unit.shape = new createjs.Bitmap(proto.img);
+        unit.shape = new createjs.Bitmap(proto.imgObj);
         
         return unit;
     }

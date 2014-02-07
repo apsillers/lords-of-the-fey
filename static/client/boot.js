@@ -25,18 +25,25 @@ window.addEventListener("load", function() {
             queue.loadManifest(
                 Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })
             );
-            queue.loadManifest(
+           queue.loadManifest(
                 Object.keys(Terrain.types).map(function(k){ return {id:k, src:Terrain.types[k].img }; })
             );
             queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
 
             function handleComplete() {
+		for(var k in unitLib.protos) {
+		    unitLib.protos[k].imgObj = queue.getResult(k);
+		}
+
+		for(k in Terrain.types) {
+		    Terrain.types[k].imgObj = queue.getResult(k);
+		}
+
                 world = new World("c");
                 world.initGrid(toMapDict(queue.getResult("map")));
 
                 for(var i=0; i<data.units.length; i++) {
                     var unit = data.units[i];
-                    console.log(unit);
                     var unitObj = unitLib.create(unitLib.protos[unit.type], unit.team);
                     world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
                 }
@@ -44,13 +51,26 @@ window.addEventListener("load", function() {
         });
     });
 
+    socket.on("created", function(unit) {
+	var unitObj = unitLib.create(unitLib.protos[unit.type], unit.team);
+        world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
+    });
+
     socket.on("moved", function(response) {
         var path = response.path;
-        console.log(path);
         var currSpace = world.getSpaceByCoords(path[0]),
             nextSpace = world.getSpaceByCoords(path[1]),
             unit = world.units[currSpace.x+","+currSpace.y]
             start = null, stepProgress = 0, prevX = unit.shape.x, prevY = unit.shape.y, pathPos = 1;
+
+	// TODO: reveal response.revealedUnits
+
+        if(path.length < 2) {
+	    ui.moveHappening = false;
+	    return;
+	}
+
+	delete world.units[unit.x+","+unit.y];
 
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
@@ -115,7 +135,7 @@ function toMapDict(map_data) {
                 if(components.length == 1) {
                     map_dict[tile_num+","+row] = { "terrain": Terrain.getTerrainBySymbol(components[0]) };
                 } else {
-	                map_dict[tile_num+","+row] = { "start": components[0], "terrain": Terrain.getTerrainBySymbol(components[1]) };
+	            map_dict[tile_num+","+row] = { "start": components[0], "terrain": Terrain.getTerrainBySymbol(components[1]) };
                 }
             }
             row++;

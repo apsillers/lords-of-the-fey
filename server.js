@@ -56,11 +56,11 @@ function initListeners(socket, mongo, collections) {
 
         collections.games.findOne({id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
-                var unit = collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
+                collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
                     loadUnit(unit.type, function(err, type) {
                         collections.units.find({ gameId: gameId }, function(err, cursor) {
                             cursor.toArray(function(err, unitArray) { 
-                                var moveResult = executePath(path, unit, type, mapData);
+                                var moveResult = executePath(path, unit, type, unitArray, mapData);
                                 var endPoint = moveResult.path[moveResult.path.length-1];
                                 unit.x = endPoint.x;
                                 unit.y = endPoint.y;
@@ -76,26 +76,51 @@ function initListeners(socket, mongo, collections) {
     });
 
     socket.on("create", function(data) {
-        var gameId = data.gameId;
-        var location = data.location.split(",");
-
-        mongo.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId });
+	loadUnit(data.type, function(err, type) {
+            data["xp"] = 0;
+	    data["hp"] = type.maxHp;
+            collections.units.insert(data, function(err) {
+		if(!err) {
+		    socket.emit("created", data);
+		}
+	    });
+	});
     });
 }
 
-function executePath(path) {
-    return { path: path, revealedUnits: [] };
+function executePath(path, unit, type, unitArray, mapData) {
+    var actualPath = [];
+    var standingClear = true;
+
+    for(var i=0; i<path.length; ++i) {
+	var coords = path[i];
+	var isLastSpace = (i == path.length-1);
+
+	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
+	if(occupant) {
+	    if(occupant.team != unit.team) {
+		if(isLastSpace) { /* attack?? */ }
+		return { path:actualPath, revealedUnits:[] };
+	    } else {
+		// invalid move; ending space must be clear
+		if(isLastSpace) return { path:[path[0]], revealedUnits: [] };
+	    }
+	}
+
+	actualPath.push(path[i]);
+    }
+
+    return { path: actualPath, revealedUnits: [] };
 }
 
 function loadMap(filename, callback) {
-    fs.readFile('static/data/maps/'+filename, { encoding: "ascii"}, function(err, data) {
+    fs.readFile('static/data/maps/'+filename, { encoding: "utf8"}, function(err, data) {
         callback(err, toMapDict(data));
     });
 }
 
-
 function loadUnit(type, callback) {
-    fs.readFile('static/data/units/'+type+".json", { encoding: "ascii"}, function(err, data) {
+    fs.readFile('static/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
         callback(err, JSON.parse(data));
     });
 }

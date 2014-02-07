@@ -74,7 +74,6 @@ World.prototype = {
     },
     
     moveUnit: function(unit, path, callback) {
-        //delete this.units[unit.x+","+unit.y];
         ui.moveHappening = true;
 
         socket.emit("move", {
@@ -108,7 +107,7 @@ Space.prototype = {
     toString: function() { return this.x + "," + this.y; },
     
     setShape: function(terrain) {
-        this.shape =  new createjs.Bitmap(terrain.img)
+        this.shape =  new createjs.Bitmap(terrain.imgObj);
         this.shape.owner = this;
         this.shape.x = this.x * (this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
@@ -127,7 +126,7 @@ function onSpaceHover(e) {
     
     if(pathSource && space != pathTarget) {
         pathTarget = space;
-
+	
         path = aStar(world, world.getUnitAt(pathSource), pathSource, pathTarget);
         world.stage.removeChild(pathShape);
         
@@ -136,9 +135,9 @@ function onSpaceHover(e) {
             var s = path[i].space;
             var pip = new createjs.Container();
             pip.x = s.shape.x + 17;
-            pip.y = s.shape.y;
+            pip.y = s.shape.y + 16;
                 var bar = new createjs.Shape();
-                bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 70);
+                bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 38);
                 bar.regX = 0;
                 bar.regY = 0;
                 pip.addChild(bar);
@@ -162,6 +161,11 @@ function onSpaceHover(e) {
 function onSpaceClick(e) {
     var space = e.target.owner;
 
+    if(e.nativeEvent.button == 2) {
+	socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
+	return;
+    }
+
     if(!pathSource && !ui.moveHappening) {
         if(world.getUnitAt(space)) {
             pathSource = space;
@@ -169,9 +173,11 @@ function onSpaceClick(e) {
     } else {
         world.stage.removeChild(pathShape);
         
-        var unit = world.getUnitAt(pathSource);
-        world.moveUnit(unit, path, function() { console.log("move complete"); });
-        
+        if(space != pathSource) {
+            var unit = world.getUnitAt(pathSource);
+            world.moveUnit(unit, path, function() { console.log("move complete"); });
+        }
+
         pathSource = null;
         world.stage.update();
     }

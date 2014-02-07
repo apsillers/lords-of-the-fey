@@ -74,10 +74,15 @@ function aStar(world, unit, start, goal) {
     }
 
     function cost_to_move_here(space) {
+	var occupant = world.getUnitAt(space);
+        var is_enemy_present = occupant && occupant.team != unit.team;
+
+	if(space == goal && is_enemy_present) { return 0; }
+
         // test if this pace has an enemy adjacent
         var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
-            var occupant = world.getUnitAt(n);
-            if(occupant && occupant.team != unit.team) {
+            var n_occupant = world.getUnitAt(n);
+            if(n_occupant && n_occupant.team != unit.team) {
                 return true;
             }
         });
