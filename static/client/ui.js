@@ -48,7 +48,10 @@ var ui = {
 
     onSpaceClick: function(e) {
 	var space = e.target.owner;
+	console.log(e.target, space);
 	
+	if(ui.moveHappening) { return; }
+
 	if(e.nativeEvent.button == 2) {
 	    if(ui.debugTeamToggle) {
 		socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
@@ -58,8 +61,8 @@ var ui = {
 	    ui.debugTeamToggle = !ui.debugTeamToggle;
 	    return;
 	}
-	
-	if(!ui.pathSource && !ui.moveHappening) {
+
+	if(!ui.pathSource) {
             if(world.getUnitAt(space)) {
 		ui.pathSource = space;
             }
@@ -93,7 +96,8 @@ var ui = {
 	// TODO: reveal response.revealedUnits
 
         if(path.length < 2) {
-	    ui.moveHappening = false;
+	    if(moveData.combat) { ui.animateAttack(moveData); }
+            else { ui.moveHappening = false; }
 	    return;
 	}
 
@@ -125,11 +129,60 @@ var ui = {
             
             if(!nextSpace) {
                 world.units[currSpace.x+","+currSpace.y] = unit;
-                ui.moveHappening = false;
+		if(moveData.combat) { ui.animateAttack(moveData); }
+                else { ui.moveHappening = false; }
             } else {
                 start = timestamp;
                 window.requestAnimationFrame(step);
             }
         });
+    },
+
+    animateAttack: function(moveData) {
+	var offender = world.getUnitAt(moveData.combat.offender);
+	var defender = world.getUnitAt(moveData.combat.defender);
+	var record = moveData.combat.record;
+
+	var dX = (offender.shape.x - defender.shape.x) / 15;
+	var dY = (offender.shape.y - defender.shape.y) / 15;
+
+	for(var i = 0; i < record.length; ++i) {
+	    var entry = record[i];
+
+	    var attackStep = function(entry, i) {
+		return function() {
+		    var actor = entry.offense ? offender : defender;
+		    var oldActor = entry.offense ? defender : offender;
+		    
+		    if(i != 0) {
+			oldActor.shape.x += (entry.offense ? -1 : 1) * dX;
+			oldActor.shape.y += (entry.offense ? -1 : 1) * dY;
+		    }
+		    
+		    actor.shape.x += (entry.offense ? -1 : 1) * dX;
+		    actor.shape.y += (entry.offense ? -1 : 1) * dY;
+		    
+		    world.stage.update();
+
+		    if(entry.damage) {
+			oldActor.hp -= entry.damage;
+		    }
+
+		    if(entry.kill) {
+			world.removeUnit(oldActor);
+		    }
+		    
+		    if(i == record.length - 1) {
+			// TODO: reset positions
+			ui.moveHappening = false;
+		    }
+		}
+	    };
+
+	    setTimeout(attackStep(entry, i), i*1000);
+	    
+	}
+
+	console.log(offender, defender, moveData.combat.record);
     }
 }

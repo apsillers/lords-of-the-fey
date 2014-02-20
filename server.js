@@ -172,32 +172,36 @@ function executePath(path, unit, type, unitArray, mapData) {
 function executeAttack(offender, offenderType, attackIndex, defender, defenderType, units, mapData) {
     var battleRecord = [];
     var swingResult;
+    var defenseIndex;
 
     var defense = null, offense = offenderType.attacks[attackIndex];
 
     for(var j=0; j < defenderType.attacks.length; ++j){
-	if(offense.type == defenderType.attacks[j].type) { defense = defenderType.attacks[j]; }
+	if(offense.type == defenderType.attacks[j].type) {
+	    defenseIndex = j;
+	    defense = defenderType.attacks[j];
+	}
     }
 
     var defenderTerrain = mapData[defender.x+","+defender.y].terrain;
     var defenderCover = defenderType.cover[defenderTerrain];
     var offenderTerrain = mapData[offender.x+","+offender.y].terrain;
     var offenderCover = offenderType.cover[offenderTerrain];
-    for(var round = 0; round < offense.number || round < defense.number; round++) {
+    for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
 	if(round < offense.number) {
 	    swingResult = attackSwing(true, offense, offender, offenderType, defender, defenderType, defenderCover, units);
 	    battleRecord.push(swingResult);
 	    if(swingResult.kill) { break; }
 	}
 
-	if(round < defense.number) {
+	if(defense && round < defense.number) {
 	    swingResult = attackSwing(false, defense, defender, defenderType, offender, offenderType, offenderCover, units);
 	    battleRecord.push(swingResult);
 	    if(swingResult.kill) { break; }
 	}
     }
 
-    return battleRecord;
+    return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex };
 }
 
 // perform one swing of an attack, by the hitter, on the hittee

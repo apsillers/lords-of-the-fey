@@ -72,6 +72,13 @@ World.prototype = {
         world.stage.addChild(unit.shape);
         world.stage.update();
     },
+
+    removeUnit: function(unit) {
+	delete this.units[unit.x+","+unit.y];
+        
+        world.stage.removeChild(unit.shape);
+        world.stage.update();
+    },
     
     moveUnit: function(unit, path, attackIndex) {
         ui.moveHappening = true;
