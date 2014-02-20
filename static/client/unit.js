@@ -9,7 +9,7 @@ var unitLib = {
     
     create: function(unitData, proto) {
         var unit = Object.create(proto);
-	unit.movesLeft = unitData.moveLeft;
+	unit.moveLeft = unitData.moveLeft;
         unit.hp = unitData.hp;
         unit.xp = unitData.xp;
 

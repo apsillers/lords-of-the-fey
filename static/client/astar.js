@@ -2,7 +2,7 @@
 
 Absolute rubbish implementation of A*
 
-Only finds paths whose cost is less than the `movesLeft` property of the unit.
+Only finds paths whose cost is less than the `moveLeft` property of the unit.
 
 */
 
@@ -41,8 +41,8 @@ function aStar(world, unit, start, goal) {
             if(neighbor in closedset) { continue; }
             var tentative_g_score = g_score[current] + cost_to_move_here(neighbor);
 
-            if(tentative_g_score > unit.movesLeft) { continue; }
-            //console.log(tentative_g_score, unit.movesLeft)
+            if(tentative_g_score > unit.moveLeft) { continue; }
+            //console.log(tentative_g_score, unit.moveLeft)
 
             if(!(neighbor in openset) || tentative_g_score < g_score[neighbor]) {
                 came_from[neighbor] = current;
@@ -87,10 +87,11 @@ function aStar(world, unit, start, goal) {
             }
         });
 
-        // if so, moving heere either costs all our remaining move
+        // if so, moving here either costs all our remaining move
         // OR the normal cost for this terrain (in case that's MORE than all our remaining move)
-        if(is_enemy_adjacent) {
-            var all_remaining_move = unit.movesLeft - g_score[current];
+        // so you can move adjacent to an enemy only if you could move there normally
+	if(is_enemy_adjacent) {
+            var all_remaining_move = unit.moveLeft - g_score[current];
             return Math.max(all_remaining_move, unit.moveCost[space.terrain]);
         } else {
             // just normal move cost
@@ -105,7 +106,7 @@ function aStar(world, unit, start, goal) {
         return true;
     }
 
-    // is this space non-final or ?
+    // is this space non-final or free of friendly units?
     function not_blocked_by_friend(space) {
         var occupant = world.getUnitAt(space);
         if(occupant && occupant.team == unit.team && space == goal) { return false; }
