@@ -28,8 +28,9 @@ mongoClient.open(function(err, mongoClient) {
 app.use(express.directory('static'));
 app.use(express.static(__dirname + '/static'));
 
+// initialize all socket.io listeners on a socket
 function initListeners(socket, mongo, collections) {
-
+    // request for all game data
     socket.on("alldata", function(data, callback) {
         var gameId = data.gameId;
         collections.units.find({ gameId:gameId }, function(err, cursor) {
@@ -41,32 +42,59 @@ function initListeners(socket, mongo, collections) {
         });
     });
 
+    // subscribe to a game channel
     socket.on("join game", function(gameId) {
         socket.join("game"+gameId);
     });
 
+    // create a new game
     socket.on("new game", function(data) {
         // data.opponentList
         // 
     });
 
+    // move a unit
     socket.on("move", function(data) {
         var gameId = data.gameId;
         var path = data.path;
-
+	var attackIndex = data.attackIndex;
+	
         collections.games.findOne({id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
                     loadUnit(unit.type, function(err, type) {
                         collections.units.find({ gameId: gameId }, function(err, cursor) {
-                            cursor.toArray(function(err, unitArray) { 
+                            cursor.toArray(function(err, unitArray) {
                                 var moveResult = executePath(path, unit, type, unitArray, mapData);
+
                                 var endPoint = moveResult.path[moveResult.path.length-1];
                                 unit.x = endPoint.x;
                                 unit.y = endPoint.y;
-                                collections.units.save(unit, {safe:true}, function() {
-                                    io.sockets.in("game"+gameId).emit("moved", { path: moveResult.path, revealedUnits: moveResult.revealedUnits });
-                                });
+
+                                var emitMove = function() {
+				    io.sockets.in("game"+gameId).emit("moved", moveResult);
+                                };
+
+				if(moveResult.attack) {
+				    var targetCoords = path[path.length-1];
+				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
+				        loadUnit(defender.type, function(err, defenderType) {
+					    console.log("Defender HP: " + defender.hp);
+					    moveResult.combat = executeAttack(unit, type, attackIndex, defender, defenderType, unitArray, mapData);
+					    console.log("Defender HP: " + defender.hp);
+					    var handleDefender = function() {
+						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
+						else { collections.units.save(defender, {safe: true}, emitMove); }
+					    }
+	
+					    if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
+					    else { collections.units.save(unit, {safe: true}, handleDefender); }
+				
+					});
+				    });
+				} else {
+                                    collections.units.save(unit, {safe:true}, emitMove);
+				}
                             });
                         });
                     });
@@ -75,6 +103,7 @@ function initListeners(socket, mongo, collections) {
         });
     });
 
+    // create a new unit
     socket.on("create", function(data) {
 	var gameId = data.gameId;
 	collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
@@ -85,6 +114,7 @@ function initListeners(socket, mongo, collections) {
 		loadUnit(data.type, function(err, type) {
 		    data["xp"] = 0;
 		    data["hp"] = type.maxHp;
+		    data["moveLeft"] = type.move;
 		    collections.units.insert(data, function(err) {
 			if(!err) {
 			    socket.emit("created", data);
@@ -96,9 +126,11 @@ function initListeners(socket, mongo, collections) {
     });
 }
 
+// attempt to move a unit through a given path
 function executePath(path, unit, type, unitArray, mapData) {
     var actualPath = [];
     var standingClear = true;
+    var totalMoveCost = 0;
 
     for(var i=0; i<path.length; ++i) {
 	var coords = path[i];
@@ -107,7 +139,9 @@ function executePath(path, unit, type, unitArray, mapData) {
 	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
 	if(occupant) {
 	    if(occupant.team != unit.team) {
-		if(isLastSpace) { /* attack?? */ }
+		if(isLastSpace) {
+		    return { path:actualPath, revealedUnits:[], attack: true };
+		}
 		return { path:actualPath, revealedUnits:[] };
 	    } else {
 		// invalid move; ending space must be clear
@@ -115,10 +149,78 @@ function executePath(path, unit, type, unitArray, mapData) {
 	    }
 	}
 
+	// add cost to move on this sapce
+	totalMoveCost += type.moveCost[mapData[coords.x+","+coords.y].terrain];
+
+	// if the move is too costly, abort
+	if(totalMoveCost > unit.moveLeft) {
+	    return { path:[path[0]], revealedUnits: [] };
+	}
+
 	actualPath.push(path[i]);
     }
 
     return { path: actualPath, revealedUnits: [] };
+}
+
+// offender attacks defender with the attack of the given index
+// returns an array of objects representing swings
+// [ {
+//     "offense": Boolean, (is swing by initiator)
+//     "event": "hit"/"miss",
+//     "damage": Number,
+//     "kill": Boolean
+//   }, ...]
+function executeAttack(offender, offenderType, attackIndex, defender, defenderType, units, mapData) {
+    var battleRecord = [];
+    var swingResult;
+
+    var defense = null, offense = offenderType.attacks[attackIndex];
+
+    for(var j=0; j < defenderType.attacks.length; ++j){
+	if(offense.type == defenderType.attacks[j].type) { defense = defenderType.attacks[j]; }
+    }
+
+    var defenderTerrain = mapData[defender.x+","+defender.y].terrain;
+    var defenderCover = defenderType.cover[defenderTerrain];
+    var offenderTerrain = mapData[offender.x+","+offender.y].terrain;
+    var offenderCover = offenderType.cover[offenderTerrain];
+    for(var round = 0; round < offense.number || round < defense.number; round++) {
+	if(round < offense.number) {
+	    swingResult = attackSwing(true, offense, offender, offenderType, defender, defenderType, defenderCover, units);
+	    battleRecord.push(swingResult);
+	    if(swingResult.kill) { break; }
+	}
+
+	if(round < defense.number) {
+	    swingResult = attackSwing(false, defense, defender, defenderType, offender, offenderType, offenderCover, units);
+	    battleRecord.push(swingResult);
+	    if(swingResult.kill) { break; }
+	}
+    }
+
+    return battleRecord;
+}
+
+// perform one swing of an attack, by the hitter, on the hittee
+// return a swing record object
+function attackSwing(isOffense, attack, hitter, hitterType, hittee, hitteeType, hitteeCover, units) {
+    var swingRecord;
+
+    if(Math.random() > hitteeCover) {
+	console.log(hitter._id + " " + hitterType.name + " hits " + hittee._id + " " + hitteeType.name + " for " + attack.damage);
+	hittee.hp -= attack.damage;
+	swingRecord = { event: "hit", offense: isOffense, damage: attack.damage };
+	
+	if(hittee.hp < 0) {
+	    swingRecord.kill = true;
+	}
+    } else {
+	console.log(hitter._id + " " + hitterType.name + " misses " + hittee._id + " " + hitteeType.name);
+	swingRecord = { event: "miss", offense: isOffense };
+    }
+
+    return swingRecord;
 }
 
 function loadMap(filename, callback) {
@@ -160,7 +262,7 @@ function toMapDict(map_data) {
                 if(components.length == 1) {
                     map_dict[tile_num+","+row] = { "terrain": Terrain.getTerrainBySymbol(components[0]) };
                 } else {
-	                map_dict[tile_num+","+row] = { "start": components[0], "terrain": Terrain.getTerrainBySymbol(components[1]) };
+	            map_dict[tile_num+","+row] = { "start": components[0], "terrain": Terrain.getTerrainBySymbol(components[1]) };
                 }
             }
             row++;

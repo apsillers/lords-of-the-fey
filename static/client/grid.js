@@ -73,12 +73,13 @@ World.prototype = {
         world.stage.update();
     },
     
-    moveUnit: function(unit, path, callback) {
+    moveUnit: function(unit, path, attackIndex) {
         ui.moveHappening = true;
 
         socket.emit("move", {
             gameId: 1,
-            path: path.map(function(a) { return {x:a.space.x, y:a.space.y};})
+            path: path.map(function(a) { return {x:a.space.x, y:a.space.y};}),
+	    attackIndex: attackIndex
         });
     },
     
@@ -111,82 +112,12 @@ Space.prototype = {
         this.shape.owner = this;
         this.shape.x = this.x * (this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
-        this.shape.addEventListener("click", onSpaceClick);
-        this.shape.addEventListener("mouseover", onSpaceHover);
+        this.shape.addEventListener("click", ui.onSpaceClick);
+        this.shape.addEventListener("mouseover", ui.onSpaceHover);
     }
 }
 
-var pathSource = null;
-var pathTarget = null;
-var pathShape = null;
-var path = null;
 
-function onSpaceHover(e) {
-    var space = e.target.owner;
-    
-    if(pathSource && space != pathTarget) {
-        pathTarget = space;
-	
-        path = aStar(world, world.getUnitAt(pathSource), pathSource, pathTarget);
-        world.stage.removeChild(pathShape);
-        
-        pathShape = new createjs.Container();
-        for(var i=0;i<path.length;++i){
-            var s = path[i].space;
-            var pip = new createjs.Container();
-            pip.x = s.shape.x + 17;
-            pip.y = s.shape.y + 16;
-                var bar = new createjs.Shape();
-                bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 38);
-                bar.regX = 0;
-                bar.regY = 0;
-                pip.addChild(bar);
-                
-            pathShape.addChild(pip);
-        }
-        world.stage.addChild(pathShape);
-        world.stage.update();
-    }
 
-    // show a unit's stats in the right side area
-    var hoveringUnit = world.getUnitAt(space);
-    if(hoveringUnit) {
-        $("#right_data_image").attr("src", hoveringUnit.img);
-        $("#right_data_hp").html(hoveringUnit.hp + "/" + hoveringUnit.maxHp);
-        $("#right_data_xp").html(hoveringUnit.xp + "/" + hoveringUnit.maxXp);
-        $("#right_data_name").html(hoveringUnit.name);
-    }
-}
 
-var debugTeamToggle = true;
-
-function onSpaceClick(e) {
-    var space = e.target.owner;
-
-    if(e.nativeEvent.button == 2) {
-	if(debugTeamToggle) {
-	    socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
-	} else {
-	    socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
-	}
-	debugTeamToggle = !debugTeamToggle;
-	return;
-    }
-
-    if(!pathSource && !ui.moveHappening) {
-        if(world.getUnitAt(space)) {
-            pathSource = space;
-        }
-    } else {
-        world.stage.removeChild(pathShape);
-        
-        if(space != pathSource) {
-            var unit = world.getUnitAt(pathSource);
-            world.moveUnit(unit, path, function() { console.log("move complete"); });
-        }
-
-        pathSource = null;
-        world.stage.update();
-    }
-}
 

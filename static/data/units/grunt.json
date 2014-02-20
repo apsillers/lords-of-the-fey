@@ -7,9 +7,20 @@
     "dirt":1,
     "swamp": 2
   },
+  "cover": {
+    "grass": 0.5,
+    "dirt":0.5,
+    "swamp": 0.5
+  },
   "attacks":[
-    { "type":"blade", "ranged":0, "power":9, "number":2 }
+    {
+      "name":"Sword",
+      "type":"melee",
+      "number":2,
+      "damage":9
+    }
   ],
+  "alignment":"chaotic",
   "maxHp": 25,
   "maxXp": 28
 }

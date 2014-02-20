@@ -7,14 +7,13 @@ var unitLib = {
         
     },
     
-    create: function(proto, team, options) {
-        options = options || {};
+    create: function(unitData, proto) {
         var unit = Object.create(proto);
-        unit.movesLeft = options.movesLeft || proto.move;
-        unit.hp = options.hp || proto.maxHp;
-        unit.xp = options.xp || 0;
+	unit.movesLeft = unitData.moveLeft;
+        unit.hp = unitData.hp;
+        unit.xp = unitData.xp;
 
-        unit.team = team;
+        unit.team = unitData.team;
         unit.shape = new createjs.Bitmap(proto.imgObj);
         
         return unit;

@@ -3,9 +3,15 @@ canvas.width = 900;
 canvas.height = 500;
 var world;
 var socket;
+var gameInfo = { 
+    gameId: location.search.match(/game=([^&]*)/)[1],
+    team: location.search.match(/player=([^&]*)/)[1]
+};
 
 /**************************/
 window.addEventListener("load", function() {
+
+
     socket = io.connect('//' + location.host);
 
     socket.emit("join game", 1);
@@ -44,7 +50,7 @@ window.addEventListener("load", function() {
 
                 for(var i=0; i<data.units.length; i++) {
                     var unit = data.units[i];
-                    var unitObj = unitLib.create(unitLib.protos[unit.type], unit.team);
+                    var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
                     world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
                 }
             }
@@ -52,59 +58,11 @@ window.addEventListener("load", function() {
     });
 
     socket.on("created", function(unit) {
-	var unitObj = unitLib.create(unitLib.protos[unit.type], unit.team);
+	var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
         world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
     });
 
-    socket.on("moved", function(response) {
-        var path = response.path;
-        var currSpace = world.getSpaceByCoords(path[0]),
-            nextSpace = world.getSpaceByCoords(path[1]),
-            unit = world.units[currSpace.x+","+currSpace.y]
-            start = null, stepProgress = 0, prevX = unit.shape.x, prevY = unit.shape.y, pathPos = 1;
-
-	// TODO: reveal response.revealedUnits
-
-        if(path.length < 2) {
-	    ui.moveHappening = false;
-	    return;
-	}
-
-	delete world.units[unit.x+","+unit.y];
-
-        window.requestAnimationFrame(function step(timestamp) {
-            if (start == null) { start = timestamp; }
-            
-            var diffX = nextSpace.shape.x - currSpace.shape.x,
-                diffY = nextSpace.shape.y - currSpace.shape.y;
-            var fraction = (timestamp - start) / 600;
-            stepProgress += fraction;
-            stepProgress = Math.min(1, stepProgress);
-            
-            unit.shape.x = prevX + stepProgress * diffX;
-            unit.shape.y = prevY + stepProgress * diffY;
-            world.stage.update();
-            
-            if(stepProgress == 1) {
-                currSpace = world.getSpaceByCoords(path[pathPos]);
-                nextSpace = world.getSpaceByCoords(path[pathPos + 1]);
-                
-                prevX = unit.shape.x;
-                prevY = unit.shape.y;
-                
-                pathPos += 1;
-                stepProgress = 0;
-            }
-            
-            if(!nextSpace) {
-                world.units[currSpace.x+","+currSpace.y] = unit;
-                ui.moveHappening = false;
-            } else {
-                start = timestamp;
-                window.requestAnimationFrame(step);
-            }
-        });
-    });
+    socket.on("moved", ui.animateUnitMove);
 });
 
 
