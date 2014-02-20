@@ -79,9 +79,7 @@ function initListeners(socket, mongo, collections) {
 				    var targetCoords = path[path.length-1];
 				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
 				        loadUnit(defender.type, function(err, defenderType) {
-					    console.log("Defender HP: " + defender.hp);
 					    moveResult.combat = executeAttack(unit, type, attackIndex, defender, defenderType, unitArray, mapData);
-					    console.log("Defender HP: " + defender.hp);
 					    var handleDefender = function() {
 						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
 						else { collections.units.save(defender, {safe: true}, emitMove); }
@@ -128,11 +126,11 @@ function initListeners(socket, mongo, collections) {
 
 // attempt to move a unit through a given path
 function executePath(path, unit, type, unitArray, mapData) {
-    var actualPath = [];
+    var actualPath = [path[0]];
     var standingClear = true;
     var totalMoveCost = 0;
 
-    for(var i=0; i<path.length; ++i) {
+    for(var i=1; i<path.length; ++i) {
 	var coords = path[i];
 	var isLastSpace = (i == path.length-1);
 
