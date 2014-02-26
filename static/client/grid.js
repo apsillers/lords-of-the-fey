@@ -73,6 +73,15 @@ World.prototype = {
         world.stage.update();
     },
 
+    positionUnit: function(unit, spaceCoords) {
+	delete world.units[unit.x+","+unit.y];
+
+	unit.x = spaceCoords.x;
+	unit.y = spaceCoords.y;
+
+	world.units[unit.x+","+unit.y] = unit;
+    },
+
     removeUnit: function(unit) {
 	delete this.units[unit.x+","+unit.y];
         
@@ -82,6 +91,8 @@ World.prototype = {
     
     moveUnit: function(unit, path, attackIndex) {
         ui.moveHappening = true;
+
+	console.log("sending path: ", path);
 
         socket.emit("move", {
             gameId: 1,

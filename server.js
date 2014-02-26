@@ -209,8 +209,9 @@ function executeAttack(offender, offenderType, attackIndex, defender, defenderTy
 function attackSwing(isOffense, attack, hitter, hitterType, hittee, hitteeType, hitteeCover, units) {
     var swingRecord;
 
+    hitteeCover = attack.magic ? Math.min(hitteeCover, .3) : hitteeCover;
+
     if(Math.random() > hitteeCover) {
-	console.log(hitter._id + " " + hitterType.name + " hits " + hittee._id + " " + hitteeType.name + " for " + attack.damage);
 	hittee.hp -= attack.damage;
 	swingRecord = { event: "hit", offense: isOffense, damage: attack.damage };
 	
@@ -218,7 +219,6 @@ function attackSwing(isOffense, attack, hitter, hitterType, hittee, hitteeType, 
 	    swingRecord.kill = true;
 	}
     } else {
-	console.log(hitter._id + " " + hitterType.name + " misses " + hittee._id + " " + hitteeType.name);
 	swingRecord = { event: "miss", offense: isOffense };
     }
 

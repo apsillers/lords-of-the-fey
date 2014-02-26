@@ -9,6 +9,7 @@ var ui = {
     pathShape: null,
     path: null,
     hoverSpace: null,
+    hoverUnit: null,
 
     onSpaceHover: function(e) {
 	var space = e.target.owner;
@@ -39,22 +40,38 @@ var ui = {
 	}
 
 	// show a unit's stats in the right side area
-	ui.updateUnitDisplay();
+	ui.updateUnitSidebar();
     },
 
-    updateUnitDisplay: function() {
+    updateUnitSidebar: function() {
 	var hoveringUnit = world.getUnitAt(this.hoverSpace);
 	if(hoveringUnit) {
-            $("#right_data_image").attr("src", hoveringUnit.img);
-            $("#right_data_hp").html(hoveringUnit.hp + "/" + hoveringUnit.maxHp);
-            $("#right_data_xp").html(hoveringUnit.xp + "/" + hoveringUnit.maxXp);
-            $("#right_data_name").html(hoveringUnit.name);
+	    ui.hoverUnit = hoveringUnit;
 	}
+
+	if(ui.hoverUnit) {
+            $("#right_data_image").attr("src", ui.hoverUnit.img);
+            $("#right_data_hp").html(ui.hoverUnit.hp + "/" + ui.hoverUnit.maxHp);
+            $("#right_data_xp").html(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
+            $("#right_data_name").html(ui.hoverUnit.name);
+	    
+	    if(ui.hoverUnit.hp <= 0) {
+		ui.clearUnitSidebar();
+	    }
+	}
+    },
+
+    clearUnitSidebar: function() {
+        $("#right_data_image").attr("src", "");
+        $("#right_data_hp").html(" ");
+        $("#right_data_xp").html(" ");
+        $("#right_data_name").html(" ");
+
+	delete ui.hoverUnit;
     },
 
     onSpaceClick: function(e) {
 	var space = e.target.owner;
-	console.log(e.target, space);
 	
 	if(ui.moveHappening) { return; }
 
@@ -107,13 +124,6 @@ var ui = {
 	    return;
 	}
 
-	delete world.units[unit.x+","+unit.y];
-
-	unit.x = path[path.length-1].x;
-	unit.y = path[path.length-1].y;
-
-	world.units[unit.x+","+unit.y] = unit;
-
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
             
@@ -139,7 +149,7 @@ var ui = {
             }
             
             if(!nextSpace) {
-                world.units[currSpace.x+","+currSpace.y] = unit;
+		world.positionUnit(unit, currSpace);
 		if(moveData.combat) { ui.animateAttack(moveData); }
                 else { ui.moveHappening = false; }
             } else {
@@ -160,40 +170,33 @@ var ui = {
 	for(var i = 0; i < record.length; ++i) {
 	    var entry = record[i];
 
-	    var attackStep = function(entry, i) {
+	    var attackStep = function(entry, i, retreat) {
 		return function() {
 		    var actor = entry.offense ? offender : defender;
-		    var oldActor = entry.offense ? defender : offender;
-		    
-		    if(i != 0) {
-			oldActor.shape.x += (entry.offense ? -1 : 1) * dX;
-			oldActor.shape.y += (entry.offense ? -1 : 1) * dY;
-		    }
-		    
-		    actor.shape.x += (entry.offense ? -1 : 1) * dX;
-		    actor.shape.y += (entry.offense ? -1 : 1) * dY;
-		    
+		    var hittee = entry.offense ? defender : offender;
+
+		    actor.shape.x += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dX;
+		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
+
 		    world.stage.update();
 
-		    if(entry.damage) {
-			oldActor.hp -= entry.damage;
+		    if(entry.damage) {			
+			hittee.hp -= entry.damage;
+			ui.updateUnitSidebar();
 		    }
 
 		    if(entry.kill) {
-			world.removeUnit(oldActor);
+			world.removeUnit(hittee);
 		    }
 		    
-		    if(i == record.length - 1) {
-			// TODO: reset positions
+		    if(i == record.length - 1 && retreat) {
 			ui.moveHappening = false;
 		    }
 		}
 	    };
 
-	    setTimeout(attackStep(entry, i), i*1000);
-	    
+	    setTimeout(attackStep(entry, i, false), i*1000);
+	    setTimeout(attackStep({ offense: entry.offense }, i, true), i*1000+500);
 	}
-
-	console.log(offender, defender, moveData.combat.record);
     }
 }
