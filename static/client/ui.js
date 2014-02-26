@@ -8,9 +8,11 @@ var ui = {
     pathTarget: null,
     pathShape: null,
     path: null,
+    hoverSpace: null,
 
     onSpaceHover: function(e) {
 	var space = e.target.owner;
+	ui.hoverSpace = space;
     
 	if(ui.pathSource && space != ui.pathTarget) {
             ui.pathTarget = space;
@@ -37,7 +39,11 @@ var ui = {
 	}
 
 	// show a unit's stats in the right side area
-	var hoveringUnit = world.getUnitAt(space);
+	ui.updateUnitDisplay();
+    },
+
+    updateUnitDisplay: function() {
+	var hoveringUnit = world.getUnitAt(this.hoverSpace);
 	if(hoveringUnit) {
             $("#right_data_image").attr("src", hoveringUnit.img);
             $("#right_data_hp").html(hoveringUnit.hp + "/" + hoveringUnit.maxHp);
@@ -102,6 +108,11 @@ var ui = {
 	}
 
 	delete world.units[unit.x+","+unit.y];
+
+	unit.x = path[path.length-1].x;
+	unit.y = path[path.length-1].y;
+
+	world.units[unit.x+","+unit.y] = unit;
 
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
