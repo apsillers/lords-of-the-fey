@@ -178,11 +178,10 @@ var ui = {
 		    actor.shape.x += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dX;
 		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
 
-		    world.stage.update();
-
 		    if(entry.damage) {			
 			hittee.hp -= entry.damage;
 			ui.updateUnitSidebar();
+			unitLib.drawHpBar(hittee);
 		    }
 
 		    if(entry.kill) {
@@ -192,6 +191,8 @@ var ui = {
 		    if(i == record.length - 1 && retreat) {
 			ui.moveHappening = false;
 		    }
+
+		    world.stage.update();
 		}
 	    };
 
