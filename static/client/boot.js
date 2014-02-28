@@ -4,19 +4,18 @@ canvas.height = 500;
 var world;
 var socket;
 var gameInfo = { 
-    gameId: location.search.match(/game=([^&]*)/)[1],
-    team: location.search.match(/player=([^&]*)/)[1]
+    gameId: +location.search.match(/game=([^&]*)/)[1],
+    team: +location.search.match(/player=([^&]*)/)[1]
 };
 
 /**************************/
 window.addEventListener("load", function() {
 
-
     socket = io.connect('//' + location.host);
 
-    socket.emit("join game", 1);
+    socket.emit("join game", gameInfo.gameId);
 
-    socket.emit("alldata", { gameId: 1 }, function(data) {
+    socket.emit("alldata", gameInfo, function(data) {
         var queue = new createjs.LoadQueue();
         queue.loadManifest(
             unitLib.protoList.map(function(k){ return { id:k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON } })
