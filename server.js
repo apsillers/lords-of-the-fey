@@ -33,6 +33,7 @@ function initListeners(socket, mongo, collections) {
     // request for all game data
     socket.on("alldata", function(data, callback) {
         var gameId = data.gameId;
+	console.log(data);
         collections.units.find({ gameId:gameId }, function(err, cursor) {
             collections.games.findOne({ id:gameId }, function(err, game) {
                 cursor.toArray(function(err, docs) {
@@ -61,6 +62,7 @@ function initListeners(socket, mongo, collections) {
 	
         collections.games.findOne({id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
+		console.log("finding " + path[0].x + "," + path[0].y + " in " + gameId);
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
                     loadUnit(unit.type, function(err, type) {
                         collections.units.find({ gameId: gameId }, function(err, cursor) {
@@ -137,14 +139,18 @@ function executePath(path, unit, type, unitArray, mapData) {
 	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
 	if(occupant) {
 	    if(occupant.team != unit.team) {
-		if(isLastSpace) {
+		if(isLastSpace && standingClear) {
 		    return { path:actualPath, revealedUnits:[], attack: true };
 		}
-		return { path:actualPath, revealedUnits:[] };
+		return { path:[path[0]], revealedUnits:[] };
 	    } else {
 		// invalid move; ending space must be clear
 		if(isLastSpace) return { path:[path[0]], revealedUnits: [] };
 	    }
+
+	    standingClear = false;
+	} else {
+	    standingClear = true;
 	}
 
 	// add cost to move on this sapce
