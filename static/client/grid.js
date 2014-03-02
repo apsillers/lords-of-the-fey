@@ -128,7 +128,7 @@ Space.prototype = {
     setShape: function(terrain) {
         this.shape =  new createjs.Bitmap(terrain.imgObj);
         this.shape.owner = this;
-        this.shape.x = this.x * (this.width * 3/4 + 1);
+        this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
         this.shape.addEventListener("click", ui.onSpaceClick);
         this.shape.addEventListener("mouseover", ui.onSpaceHover);
