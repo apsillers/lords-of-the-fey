@@ -19,7 +19,7 @@ function aStar(world, unit, start, goal, prevPath) {
 	   world.getNeighbors(goal).indexOf(prevDest) != -1 // and the occupied goal space is adjacent to the end of the previous path
 	  ) {
 	    var newPath = prevPath.slice();
-	    newPath.push({ space: goal, g_score:lastDest.g_score }); // return the previous path with the enemy target appended
+	    newPath.push({ space: goal, g_score:prevDest.g_score }); // return the previous path with the enemy target appended
 	    return newPath;
 	}
     }
