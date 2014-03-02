@@ -151,7 +151,10 @@ var ui = {
             if(!nextSpace) {
 		world.positionUnit(unit, currSpace);
 		if(moveData.combat) { ui.animateAttack(moveData); }
-                else { ui.moveHappening = false; }
+                else {
+		    ui.clearPath();
+		    ui.moveHappening = false;
+		}
             } else {
                 start = timestamp;
                 window.requestAnimationFrame(step);
@@ -189,6 +192,7 @@ var ui = {
 		    }
 		    
 		    if(i == record.length - 1 && retreat) {
+			ui.clearPath();
 			ui.moveHappening = false;
 		    }
 
@@ -199,5 +203,12 @@ var ui = {
 	    setTimeout(attackStep(entry, i, false), i*1000);
 	    setTimeout(attackStep({ offense: entry.offense }, i, true), i*1000+500);
 	}
+    },
+
+    clearPath: function() {
+	this.path = null;
+	this.pathShape = null;
+	this.pathTarget = null;
+	this.pathSource = null;
     }
 }

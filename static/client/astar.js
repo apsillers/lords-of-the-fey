@@ -57,7 +57,7 @@ function aStar(world, unit, start, goal, prevPath) {
 	    // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
 	    // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
 	    // because the attacker would not have an empty final space to attack from
-	    if(n == goal && neighborOccupant && currentOccupant) return false;
+	    if(n == goal && neighborOccupant && currentOccupant && currentOccupant != unit) return false;
 	    return true;
 	});
         for(var i=0; i < neighbors.length; ++i) {
