@@ -6,7 +6,24 @@ Only finds paths whose cost is less than the `moveLeft` property of the unit.
 
 */
 
-function aStar(world, unit, start, goal) {
+function aStar(world, unit, start, goal, prevPath) {
+    if(prevPath) {
+	var attackTarget = world.getUnitAt(goal);
+	var prevDest = prevPath[prevPath.length-1].space;
+	
+	// if the previous path was a move adjacent to an enemy, and now the path is *on* that abjecent enemy, do not recompute the path
+	// this allows the player to pcik the offense location, instead of relying on the normal A* path to the enemy
+	if(!world.getUnitAt(prevDest) && // if the previous path did not end on an occupied space (i.e., was not an attack)
+	   attackTarget &&                   // if the goal space is occupied...
+	   attackTarget.team != unit.team && // ...by an opponent
+	   world.getNeighbors(goal).indexOf(prevDest) != -1 // and the occupied goal space is adjacent to the end of the previous path
+	  ) {
+	    var newPath = prevPath.slice();
+	    newPath.push({ space: goal, g_score:lastDest.g_score }); // return the previous path with the enemy target appended
+	    return newPath;
+	}
+    }
+
     var g_score = {}, f_score = {};
     var current;
     var closedset = {};    // The set of nodes already evaluated.

@@ -18,9 +18,9 @@ var ui = {
 	if(ui.pathSource && space != ui.pathTarget) {
             ui.pathTarget = space;
 	
-            ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget);
-            world.stage.removeChild(ui.pathShape);
-            
+            ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget, ui.path);
+	    world.stage.removeChild(ui.pathShape);
+
             ui.pathShape = new createjs.Container();
             for(var i=0;i<ui.path.length;++i){
 		var s = ui.path[i].space;
