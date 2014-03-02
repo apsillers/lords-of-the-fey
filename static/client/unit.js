@@ -30,8 +30,8 @@ var unitLib = {
 	var barColor = ["#D00", "#DD0"][Math.floor(hpRatio * 3)] || "#0D0";
 
 	unit.healthBar = new createjs.Shape();
-	unit.healthBar.graphics.beginFill(barColor).drawRect(55, 10 + 20 * (1 - hpRatio), 5, 20 * hpRatio);
-	unit.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#DDD").setStrokeStyle(2).drawRect(53, 8, 9, 24);
+	unit.healthBar.graphics.beginFill(barColor).drawRect(54, 8.5 + 20 * (1 - hpRatio), 4, 20 * hpRatio);
+	unit.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").setStrokeStyle(1).drawRect(53.5, 8.5, 4, 20);
         unit.shape.addChild(unit.healthBar);
     }
     
