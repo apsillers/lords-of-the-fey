@@ -51,9 +51,22 @@ var ui = {
 
 	if(ui.hoverUnit) {
             $("#right_data_image").attr("src", ui.hoverUnit.img);
-            $("#right_data_hp").html(ui.hoverUnit.hp + "/" + ui.hoverUnit.maxHp);
-            $("#right_data_xp").html(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
-            $("#right_data_name").html(ui.hoverUnit.name);
+            $("#right_data_hp").text(ui.hoverUnit.hp + "/" + ui.hoverUnit.maxHp);
+            $("#right_data_xp").text(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
+            $("#right_data_name").text(ui.hoverUnit.name);
+
+	    $("#right_data_attacks").html("");
+	    for(var i=0; i<ui.hoverUnit.attacks.length; ++i) {
+		var attackNameElm = $("<div style='font-weight: bold;''>");
+		var attackTypeElm = $("<div>");
+		var attack = ui.hoverUnit.attacks[i];
+		attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
+		attackTypeElm.text(attack.type);
+		$("#right_data_attacks").append(attackNameElm);
+		$("#right_data_attacks").append(attackTypeElm);
+	    }
+
+
 	    
 	    if(ui.hoverUnit.hp <= 0) {
 		ui.clearUnitSidebar();
