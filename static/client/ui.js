@@ -105,7 +105,7 @@ var ui = {
 	} else {
             world.stage.removeChild(ui.pathShape);
             
-            if(space != ui.pathSource) {
+            if(ui.path && space != ui.pathSource) {
 		var unit = world.getUnitAt(ui.pathSource);
 		var destUnit = world.getUnitAt(space);
 		

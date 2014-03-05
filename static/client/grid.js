@@ -92,8 +92,6 @@ World.prototype = {
     moveUnit: function(unit, path, attackIndex) {
         ui.moveHappening = true;
 
-	console.log("sending path: ", path);
-
         socket.emit("move", {
             gameId: 1,
             path: path.map(function(a) { return {x:a.space.x, y:a.space.y};}),
