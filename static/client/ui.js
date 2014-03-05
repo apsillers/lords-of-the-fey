@@ -113,7 +113,10 @@ var ui = {
 		    world.moveUnit(unit, ui.path);
 		} else {
 		    // show attack prompt
-		    world.moveUnit(unit, ui.path, 0);
+		    ui.showAttackPrompt(unit, destUnit, function(attackSlot) {
+			if(attackSlot == -1) { return; }
+			world.moveUnit(unit, ui.path, attackSlot);
+		    });
 		}
             }
 	    
@@ -223,5 +226,9 @@ var ui = {
 	this.pathShape = null;
 	this.pathTarget = null;
 	this.pathSource = null;
+    },
+
+    showAttackPrompt: function(attacker, defender, resolutionCallback) {
+        setTimeout(function() { resolutionCallback(0); }, 4);
     }
 }
