@@ -33,6 +33,14 @@ var ui = {
 		bar.regY = 0;
 		pip.addChild(bar);
                 
+		if(i == ui.path.length-1) {
+		    var coverText = 100 * world.getUnitAt(ui.pathSource).cover[space.terrain] + "%";
+		    var textShape = new createjs.Text(coverText);
+		    textShape.font = "14pt sans serif";
+		    textShape.y = 7;
+		    pip.addChild(textShape);
+		}
+
 		ui.pathShape.addChild(pip);
             }
             world.stage.addChild(ui.pathShape);
