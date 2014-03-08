@@ -4,8 +4,8 @@ canvas.height = 500;
 var world;
 var socket;
 var gameInfo = { 
-    gameId: +location.search.match(/game=([^&]*)/)[1],
-    team: +location.search.match(/player=([^&]*)/)[1]
+    gameId: +location.search.match(/game=([^&]*)/)[1] || 1,
+    team: +location.search.match(/player=([^&]*)/)[1] || 1
 };
 
 /**************************/
