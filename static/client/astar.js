@@ -101,6 +101,7 @@ function aStar(world, unit, start, goal, prevPath) {
     function cost_to_move_here(space) {
 	var occupant = world.getUnitAt(space);
         var is_enemy_present = occupant && occupant.team != unit.team;
+	var normal_move_cost = unit.moveCost[space.terrain] || 1;
 
 	if(space == goal && is_enemy_present) { return 0; }
 
@@ -117,10 +118,10 @@ function aStar(world, unit, start, goal, prevPath) {
         // so you can move adjacent to an enemy only if you could move there normally
 	if(is_enemy_adjacent) {
             var all_remaining_move = unit.moveLeft - g_score[current];
-            return Math.max(all_remaining_move, unit.moveCost[space.terrain]);
+            return Math.max(all_remaining_move, normal_move_cost);
         } else {
             // just normal move cost
-            return unit.moveCost[space.terrain];
+            return normal_move_cost;
         }
     }
 

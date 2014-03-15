@@ -3,6 +3,7 @@ var Terrain = {
         GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", toString: function() { return this.name; } },
         SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", toString: function() { return this.name; } },
         DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", toString: function() { return this.name; } },
+	CASTLE: { symbol: "Ch", name: "castle", img: "/data/img/terrain/castle.png", toString: function() { return this.name; } },
     },
 
     getTerrainBySymbol: function(symbol) {
