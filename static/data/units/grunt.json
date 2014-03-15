@@ -11,7 +11,8 @@
     "grass": 0.5,
     "dirt": 0.5,
     "swamp": 0.2,
-    "castle": 0.6
+    "castle": 0.6,
+    "keep": 0.6
   },
   "attacks":[
     {
