@@ -5,7 +5,7 @@ var world;
 var socket;
 var gameInfo = { 
     gameId: location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:1
-    team: location.search.match(/player=([^&]*)/)?+location.search.match(/player=([^&]*)/)[1]:1
+    team: location.search.match(/player=([^&]*)/)?+location.search.match(/player=([^&]*)/)[1]:1,
 };
 
 /**************************/
