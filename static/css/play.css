@@ -14,6 +14,17 @@
     font-size: 12px;
   }
 
+  div#right-column {
+      width:200px;
+      height: 400px;
+      background-color:#999999; 
+      border: thin black solid;
+      border-left: none;
+      border-bottom: none;
+      padding:10px;
+      float: right;
+  }
+
   div.top-status img {
     position: relative;
     top: 3px;

@@ -33,7 +33,6 @@ mongoClient.open(function(err, mongoClient) {
 
 });
 
-app.use(express.directory('static'));
 app.use(express.static(__dirname + '/static'));
 
 app.use(express.cookieParser());
@@ -81,9 +80,6 @@ io.set('authorization', passportSocketIo.authorize({
     success:     onAuthorizeSuccess,  // *optional* callback on success - read more below
     fail:        onAuthorizeFail,     // *optional* callback on fail/error - read more below
 }));
-
-
-
 
 function initAuth(mongo, collections) {
 

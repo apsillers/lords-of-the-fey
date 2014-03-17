@@ -73,8 +73,6 @@ var ui = {
 		$("#right_data_attacks").append(attackNameElm);
 		$("#right_data_attacks").append(attackTypeElm);
 	    }
-
-
 	    
 	    if(ui.hoverUnit.hp <= 0) {
 		ui.clearUnitSidebar();
