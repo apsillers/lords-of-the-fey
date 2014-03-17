@@ -4,8 +4,7 @@ canvas.height = 500;
 var world;
 var socket;
 var gameInfo = { 
-    gameId: location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:1,
-    team: location.search.match(/player=([^&]*)/)?+location.search.match(/player=([^&]*)/)[1]:1
+    gameId: location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:1
 };
 
 /**************************/
@@ -17,6 +16,11 @@ window.addEventListener("load", function() {
 
     socket.emit("alldata", gameInfo, function(data) {
         var queue = new createjs.LoadQueue();
+
+	gameInfo.player = data.player;
+
+	$("#top-gold-text").text(gameInfo.player.gold); 
+
         queue.loadManifest(
             unitLib.protoList.map(function(k){ return { id:k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON } })
         );

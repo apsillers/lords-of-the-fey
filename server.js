@@ -155,11 +155,13 @@ function initListeners(socket, mongo, collections) {
     socket.on("alldata", function(data, callback) {
 	console.log("serving data to", socket.handshake.user.username);
         var gameId = data.gameId;
-//	console.log(data);
+	var user = socket.handshake.user;
+
         collections.units.find({ gameId:gameId }, function(err, cursor) {
             collections.games.findOne({ id:gameId }, function(err, game) {
+		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
-                    callback({map: game.map, units: docs});
+                    callback({map: game.map, units: docs, player: player });
                 });
             });
         });
@@ -188,7 +190,7 @@ function initListeners(socket, mongo, collections) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 		    // ensure that the logged-in user has the right to move this unit
 		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
-		    if(player.team != unit.team) {
+		    if(player && player.team != unit.team) {
 			socket.emit("moved", { path:[path[0]] });
 			return;
 		    }

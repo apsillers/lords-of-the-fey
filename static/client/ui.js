@@ -97,17 +97,17 @@ var ui = {
 	if(ui.moveHappening) { return; }
 
 	if(e.nativeEvent.button == 2) {
-	    if(ui.debugTeamToggle) {
+	    if(gameInfo.player.team == 1) {
 		socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
 	    } else {
 		socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
 	    }
-	    ui.debugTeamToggle = !ui.debugTeamToggle;
 	    return;
 	}
 
 	if(!ui.pathSource) {
-            if(world.getUnitAt(space)) {
+            var unitToMove = world.getUnitAt(space);
+            if(unitToMove && unitToMove.team == gameInfo.player.team) {
 		ui.pathSource = space;
             }
 	} else {
