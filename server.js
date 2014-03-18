@@ -5,7 +5,7 @@ var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server;
 var fs = require('fs');
 var io = require('socket.io').listen(server);
-var crypto = require('crypto');
+var passwordHash = require('password-hash');
 var passport = require("passport");
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -89,12 +89,8 @@ function initAuth(mongo, collections) {
             if(!user){
 		return done(null, false, { message: 'Incorrect username.' });
             }
-
-	    var shasum = crypto.createHash('sha1');
-	    shasum.update(password);
-	    var hash = shasum.digest("hex");
             
-	    if (hash == user.hash) return done(null, user);
+	    if (passwordHash.verify(password, user.hash)) return done(null, user);
 	    done(null, false, { message: 'Incorrect password.' });
         
 	});
@@ -116,11 +112,9 @@ function initAuth(mongo, collections) {
 	    if (!user) {
 
 		if(password == passConfirm) {
-		    var shasum = crypto.createHash('sha1');
-		    shasum.update(password);
-		    var hash = shasum.digest("hex");
+		    var hashedPassword = passwordHash.generate(password);
 
-		    collections.users.save({ username: username, hash: hash }, { safe: true }, function(err) {
+		    collections.users.save({ username: username, hash: hashedPassword }, { safe: true }, function(err) {
 			passport.authenticate('local')(req, res, function () {
 			    res.redirect('/');
 			});
