@@ -255,7 +255,7 @@ function initListeners(socket, mongo, collections) {
 				    var commander = commanders[i];
 
 				    if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
-				       ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 && // check target is a castle
+				       ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 // check target is a castle
 				       // castlePathExists(commander, data) // find a castle-only path from commander to target
 				      ) { createValid = true; }
 				}
