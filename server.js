@@ -231,22 +231,49 @@ function initListeners(socket, mongo, collections) {
     // create a new unit
     socket.on("create", function(data) {
 	var gameId = data.gameId;
-	collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
-	    cursor.nextObject(function(err, o) {
-		// if the space is populated, abort
-		if(o) { 			    
-		    socket.emit("created", {});
-		    return;
-		}
+	var user = socket.handshake.user;
 
-		loadUnit(data.type, function(err, type) {
-		    data["xp"] = 0;
-		    data["hp"] = type.maxHp;
-		    data["moveLeft"] = type.move;
-		    collections.units.insert(data, function(err) {
-			if(!err) {
-			    socket.emit("created", data);
+        collections.games.findOne({id:gameId}, function(err, game) {
+            loadMap(game.map, function(err, mapData) {
+		var player = game.players.filter(function(p) { return p.username == user.username })[0];
+
+		collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
+		    cursor.nextObject(function(err, o) {
+			// if the space is populated, abort
+			if(o) {
+			    socket.emit("created", {});
+			    return;
 			}
+
+			collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
+			
+			    commanderCursor.toArray(function(err, commanders) {
+
+				var createValid = false;
+
+				for(var i=0; i < commanders.length; ++i) {
+				    var commander = commanders[i];
+
+				    if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
+				       ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 && // check target is a castle
+				       // castlePathExists(commander, data) // find a castle-only path from commander to target
+				      ) { createValid = true; }
+				}
+
+				if(!createValid) { socket.emit("created", {}); return; }
+
+				loadUnit(data.type, function(err, type) {
+				    data["xp"] = 0;
+				    data["hp"] = type.maxHp;
+				    data["moveLeft"] = type.move;
+				    collections.units.insert(data, function(err) {
+					if(!err) {
+					    socket.emit("created", data);
+					}
+				    });
+				});
+			    });
+			});
 		    });
 		});
 	    });
@@ -415,6 +442,8 @@ var Terrain = {
         GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", toString: function() { return this.name; } },
         SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", toString: function() { return this.name; } },
         DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", toString: function() { return this.name; } },
+	CASTLE: { symbol: "Ch", name: "castle", img: "/data/img/terrain/castle.png", toString: function() { return this.name; } },
+	KEEP: { symbol: "Kh", name: "keep", img: "/data/img/terrain/keep.png", toString: function() { return this.name; } },
     },
 
     getTerrainBySymbol: function(symbol) {
@@ -425,3 +454,4 @@ var Terrain = {
         }
     }
 }
+

@@ -62,8 +62,10 @@ window.addEventListener("load", function() {
     });
 
     socket.on("created", function(unit) {
-	var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
-        world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
+	if(unit.type) {
+	    var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
+            world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
+	}
 	ui.moveHappening = false;
     });
 
