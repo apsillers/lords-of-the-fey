@@ -50,6 +50,7 @@ window.addEventListener("load", function() {
 
                 world = new World("c");
                 world.initGrid(toMapDict(queue.getResult("map")));
+		world.stage.canvas.addEventListener("contextmenu", function(e) { e.preventDefault(); });
 
                 for(var i=0; i<data.units.length; i++) {
                     var unit = data.units[i];
@@ -63,6 +64,7 @@ window.addEventListener("load", function() {
     socket.on("created", function(unit) {
 	var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
         world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
+	ui.moveHappening = false;
     });
 
     socket.on("moved", ui.animateUnitMove);

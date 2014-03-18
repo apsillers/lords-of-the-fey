@@ -95,11 +95,7 @@ var ui = {
 	if(ui.moveHappening) { return; }
 
 	if(e.nativeEvent.button == 2) {
-	    if(gameInfo.player.team == 1) {
-		socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
-	    } else {
-		socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
-	    }
+	    ui.onContextMenu(space);
 	    return;
 	}
 
@@ -128,6 +124,16 @@ var ui = {
 	    
             ui.pathSource = null;
             world.stage.update();
+	}
+    },
+
+    onContextMenu: function(space) {
+	if(gameInfo.player.team == 1) {
+	    socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
+	    ui.moveHappening = true;
+	} else {
+	    socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
+	    ui.moveHappening = true;
 	}
     },
 

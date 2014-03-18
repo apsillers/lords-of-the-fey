@@ -17,7 +17,11 @@ var unitLib = {
         unit.shape = new createjs.Container();
 	unit.shape.addChild(new createjs.Bitmap(proto.imgObj));
 
+	unit.isCommander = unitData.isCommander;
+
 	this.drawHpBar(unit);
+
+	if(unit.isCommander) { this.drawCrown(unit); }
 
         return unit;
     },
@@ -33,8 +37,13 @@ var unitLib = {
 	unit.healthBar.graphics.beginFill(barColor).drawRect(54, 8.5 + 20 * (1 - hpRatio), 4, 20 * hpRatio);
 	unit.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").setStrokeStyle(1).drawRect(53.5, 8.5, 4, 20);
         unit.shape.addChild(unit.healthBar);
-    }
-    
+    },
+
+    drawCrown: function(unit) {
+	var crown = new createjs.Shape();
+	crown.graphics.beginFill("gold").drawRect(5,5,15,5);
+	unit.shape.addChild(crown);
+    }    
 }
 
 var unitProto = {

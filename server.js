@@ -188,6 +188,7 @@ function initListeners(socket, mongo, collections) {
                     loadUnit(unit.type, function(err, type) {
                         collections.units.find({ gameId: gameId }, function(err, cursor) {
                             cursor.toArray(function(err, unitArray) {
+				// make the move
                                 var moveResult = executePath(path, unit, type, unitArray, mapData);
 
                                 var endPoint = moveResult.path[moveResult.path.length-1];
@@ -198,11 +199,14 @@ function initListeners(socket, mongo, collections) {
 				    io.sockets.in("game"+gameId).emit("moved", moveResult);
                                 };
 
+				// perform the attack
 				if(moveResult.attack) {
 				    var targetCoords = path[path.length-1];
 				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
 				        loadUnit(defender.type, function(err, defenderType) {
+					    // resolve combat
 					    moveResult.combat = executeAttack(unit, type, attackIndex, defender, defenderType, unitArray, mapData);
+					    // injure/kill units models
 					    var handleDefender = function() {
 						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
 						else { collections.units.save(defender, {safe: true}, emitMove); }
@@ -230,7 +234,10 @@ function initListeners(socket, mongo, collections) {
 	collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
 	    cursor.nextObject(function(err, o) {
 		// if the space is populated, abort
-		if(o) { return; }
+		if(o) { 			    
+		    socket.emit("created", {});
+		    return;
+		}
 
 		loadUnit(data.type, function(err, type) {
 		    data["xp"] = 0;
