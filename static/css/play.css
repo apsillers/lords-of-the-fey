@@ -23,11 +23,19 @@
       border-bottom: none;
       padding:10px;
       float: right;
+      position: relative;
   }
 
   div.top-status img {
-    position: relative;
-    top: 3px;
+      position: relative;
+      top: 3px;
+  }
+
+  #end-turn-button {
+      position: absolute;
+      bottom: 0;
+      font-size: 15pt;
+      width: 200px;
   }
 
   .upper-tile {

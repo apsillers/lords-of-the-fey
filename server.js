@@ -142,7 +142,7 @@ function initAuth(mongo, collections) {
 // initialize all socket.io listeners on a socket
 function initListeners(socket, mongo, collections) {
     // request for all game data
-    socket.on("alldata", function(data, callback) {
+    socket.on("alldata", function(data) {
 	console.log("serving data to", socket.handshake.user.username);
         var gameId = data.gameId;
 	var user = socket.handshake.user;
@@ -151,10 +151,12 @@ function initListeners(socket, mongo, collections) {
             collections.games.findOne({ id:gameId }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
-                    callback({map: game.map, units: docs, player: player });
+                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam });
                 });
             });
         });
+
+	
     });
 
     // subscribe to a game channel
@@ -279,6 +281,29 @@ function initListeners(socket, mongo, collections) {
 	    });
 	});
     });
+
+    socket.on("endTurn", function(data) {
+	console.log("ending turn");
+
+        collections.games.findOne({id:data.gameId}, function(err, game) {
+	    if(socketOwnerCanAct(socket, game)) {
+		game.activeTeam %= (game.players.length);
+		game.activeTeam++;
+		collections.games.save(game, { safe: true }, function() {
+		    io.sockets.in("game"+data.gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: {} });
+		});
+	    }
+	});
+    });
+}
+
+function socketOwnerCanAct(socket, game) {
+    var user = socket.handshake.user;
+    if(!user) { return false; }
+    var player = game.players.filter(function(p) { return p.username == user.username })[0];    
+    if(!player) { return false; }
+    console.log(player, game);
+    return player.team == game.activeTeam;
 }
 
 // attempt to move a unit through a given path

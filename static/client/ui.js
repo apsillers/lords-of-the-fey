@@ -1,8 +1,6 @@
 var ui = {
     moveHappening: false,
-    hasTurn: true,
-
-    debugTeamToggle: true,
+    hasTurn: false,
 
     pathSource: null,
     pathTarget: null,
@@ -92,7 +90,7 @@ var ui = {
     onSpaceClick: function(e) {
 	var space = e.target.owner;
 	
-	if(ui.moveHappening) { return; }
+	if(ui.moveHappening || !ui.hasTurn) { return; }
 
 	if(e.nativeEvent.button == 2) {
 	    ui.onContextMenu(space);

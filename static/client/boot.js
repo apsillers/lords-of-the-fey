@@ -14,12 +14,22 @@ window.addEventListener("load", function() {
 
     socket.emit("join game", gameInfo.gameId);
 
-    socket.emit("alldata", gameInfo, function(data) {
+    socket.emit("alldata", gameInfo);
+    socket.on("initdata", function(data) {
         var queue = new createjs.LoadQueue();
 
 	gameInfo.player = data.player;
+	gameInfo.activeTeam = data.activeTeam;
 
-	$("#top-gold-text").text(gameInfo.player.gold); 
+	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
+
+	$("#top-gold-text").text(gameInfo.player.gold);
+	$("#top-active-team-text").text(gameInfo.activeTeam);
+
+	$("#end-turn-button").on("click", function() {
+	    ui.hasTurn = false;
+	    socket.emit("endTurn", gameInfo);
+	});
 
         queue.loadManifest(
             unitLib.protoList.map(function(k){ return { id:k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON } })
@@ -59,6 +69,12 @@ window.addEventListener("load", function() {
                 }
             }
         });
+    });
+
+    socket.on("newTurn", function(data) {
+	gameInfo.activeTeam = data.activeTeam;
+	$("#top-active-team-text").text(gameInfo.activeTeam);
+	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
     });
 
     socket.on("created", function(unit) {
