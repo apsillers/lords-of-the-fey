@@ -187,11 +187,11 @@ function initListeners(socket, mongo, collections) {
 			return;
 		    }
 
-                    loadUnit(unit.type, function(err, type) {
+                    loadUnitType(unit.type, function(err, type) {
                         collections.units.find({ gameId: gameId }, function(err, cursor) {
                             cursor.toArray(function(err, unitArray) {
 				// make the move
-                                var moveResult = executePath(path, unit, type, unitArray, mapData);
+                                var moveResult = require("./executePath")(path, unit, type, unitArray, mapData);
 
                                 var endPoint = moveResult.path[moveResult.path.length-1];
                                 unit.x = endPoint.x;
@@ -205,7 +205,7 @@ function initListeners(socket, mongo, collections) {
 				if(moveResult.attack) {
 				    var targetCoords = path[path.length-1];
 				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-				        loadUnit(defender.type, function(err, defenderType) {
+				        loadUnitType(defender.type, function(err, defenderType) {
 					    // resolve combat
 					    moveResult.combat = executeAttack(unit, type, attackIndex, defender, defenderType, unitArray, mapData);
 					    // injure/kill units models
@@ -248,9 +248,7 @@ function initListeners(socket, mongo, collections) {
 			}
 
 			collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
-			
 			    commanderCursor.toArray(function(err, commanders) {
-
 				var createValid = false;
 
 				for(var i=0; i < commanders.length; ++i) {
@@ -264,7 +262,7 @@ function initListeners(socket, mongo, collections) {
 
 				if(!createValid) { socket.emit("created", {}); return; }
 
-				loadUnit(data.type, function(err, type) {
+				loadUnitType(data.type, function(err, type) {
 				    data["xp"] = 0;
 				    data["hp"] = type.maxHp;
 				    data["moveLeft"] = type.move;
@@ -284,13 +282,49 @@ function initListeners(socket, mongo, collections) {
 
     socket.on("endTurn", function(data) {
 	console.log("ending turn");
+	var gameId = data.gameId;
 
-        collections.games.findOne({id:data.gameId}, function(err, game) {
+        collections.games.findOne({id:gameId}, function(err, game) {
 	    if(socketOwnerCanAct(socket, game)) {
 		game.activeTeam %= (game.players.length);
 		game.activeTeam++;
 		collections.games.save(game, { safe: true }, function() {
-		    io.sockets.in("game"+data.gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: {} });
+
+		    // find all units owned by the newly active player
+		    collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
+			var updates = [];
+			var sendUpdates = function() {
+			    io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
+			};
+
+			unitCursor.next(function updateUnitForNewTurn(err, unit) {
+			    if(unit == null) { sendUpdates(); return; }
+
+			    var update = { x: unit.x, y: unit.y };
+
+			    loadUnitType(unit.type, function(err, type) {
+				// heal unmoved units
+				if(unit.moveLeft == type.move) {
+				    unit.hp = Math.min(unit.hp+2, type.maxHp);
+				    update.hp = unit.hp;
+				}
+
+				// refill move points
+				unit.moveLeft = type.move;
+				update.moveLeft = unit.moveLeft;
+
+				// TODO: if on a village, heal and remove poison
+				// TODO: if poisoned, hurt
+				// TODO: remove slow
+				
+				updates.push(update);
+				
+				collections.units.save(unit, {safe:true}, function() {
+				    unitCursor.next(updateUnitForNewTurn);
+				});
+			    });
+			});
+		    });
 		});
 	    }
 	});
@@ -304,47 +338,6 @@ function socketOwnerCanAct(socket, game) {
     if(!player) { return false; }
     console.log(player, game);
     return player.team == game.activeTeam;
-}
-
-// attempt to move a unit through a given path
-function executePath(path, unit, type, unitArray, mapData) {
-    var actualPath = [path[0]];
-    var standingClear = true;
-    var totalMoveCost = 0;
-
-    for(var i=1; i<path.length; ++i) {
-	var coords = path[i];
-	var isLastSpace = (i == path.length-1);
-
-	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
-	if(occupant) {
-	    if(occupant.team != unit.team) {
-		if(isLastSpace && standingClear) {
-		    return { path:actualPath, revealedUnits:[], attack: true };
-		}
-		return { path:[path[0]], revealedUnits:[] };
-	    } else {
-		// invalid move; ending space must be clear
-		if(isLastSpace) return { path:[path[0]], revealedUnits: [] };
-	    }
-
-	    standingClear = false;
-	} else {
-	    standingClear = true;
-	}
-
-	// add cost to move on this sapce
-	totalMoveCost += type.moveCost[mapData[coords.x+","+coords.y].terrain];
-
-	// if the move is too costly, abort
-	if(totalMoveCost > unit.moveLeft) {
-	    return { path:[path[0]], revealedUnits: [] };
-	}
-
-	actualPath.push(path[i]);
-    }
-
-    return { path: actualPath, revealedUnits: [] };
 }
 
 // offender attacks defender with the attack of the given index
@@ -417,7 +410,7 @@ function loadMap(filename, callback) {
     });
 }
 
-function loadUnit(type, callback) {
+function loadUnitType(type, callback) {
     fs.readFile('static/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
         callback(err, JSON.parse(data));
     });

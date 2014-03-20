@@ -75,6 +75,11 @@ window.addEventListener("load", function() {
 	gameInfo.activeTeam = data.activeTeam;
 	$("#top-active-team-text").text(gameInfo.activeTeam);
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+
+	for(var i=0; i<data.updates.length; ++i) {
+	    var update = data.updates[i];
+	    unitLib.update(world.getUnitAt(update), update);
+	}
     });
 
     socket.on("created", function(unit) {

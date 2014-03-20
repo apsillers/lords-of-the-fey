@@ -208,9 +208,7 @@ var ui = {
 		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
 
 		    if(entry.damage) {			
-			hittee.hp -= entry.damage;
-			ui.updateUnitSidebar();
-			unitLib.drawHpBar(hittee);
+			unitLib.update(hittee, { hp: hittee.hp - entry.damage });
 		    }
 
 		    if(entry.kill) {
