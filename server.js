@@ -182,7 +182,7 @@ function initListeners(socket, mongo, collections) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 		    // ensure that the logged-in user has the right to move this unit
 		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
-		    if(player && player.team != unit.team) {
+		    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
 			socket.emit("moved", { path:[path[0]] });
 			return;
 		    }
@@ -236,41 +236,40 @@ function initListeners(socket, mongo, collections) {
 	var user = socket.handshake.user;
 
         collections.games.findOne({id:gameId}, function(err, game) {
+
             loadMap(game.map, function(err, mapData) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
-		collections.units.find({ gameId: gameId, x: data.x, y: data.y }, function(err, cursor) {
-		    cursor.nextObject(function(err, o) {
-			// if the space is populated, abort
-			if(o) {
-			    socket.emit("created", {});
-			    return;
-			}
+		collections.units.findOne({ gameId: gameId, x: data.x, y: data.y }, function(err, occupant) {
+		    // if the space is populated, or it is not the user's turn, abort
+		    if(occupant || !socketOwnerCanAct(socket, game)) {
+			socket.emit("created", {});
+			return;
+		    }
 
-			collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
-			    commanderCursor.toArray(function(err, commanders) {
-				var createValid = false;
-
-				for(var i=0; i < commanders.length; ++i) {
-				    var commander = commanders[i];
-
-				    if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
-				       ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 // check target is a castle
-				       // castlePathExists(commander, data) // find a castle-only path from commander to target
-				      ) { createValid = true; }
-				}
-
-				if(!createValid) { socket.emit("created", {}); return; }
-
-				loadUnitType(data.type, function(err, type) {
-				    data["xp"] = 0;
-				    data["hp"] = type.maxHp;
-				    data["moveLeft"] = type.move;
-				    collections.units.insert(data, function(err) {
-					if(!err) {
-					    socket.emit("created", data);
-					}
-				    });
+		    collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
+			commanderCursor.toArray(function(err, commanders) {
+			    var createValid = false;
+			    
+			    for(var i=0; i < commanders.length; ++i) {
+				var commander = commanders[i];
+				
+				if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
+				   ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 // check target is a castle
+				   // castlePathExists(commander, data) // find a castle-only path from commander to target
+				  ) { createValid = true; }
+			    }
+			    
+			    if(!createValid) { socket.emit("created", {}); return; }
+			    
+			    loadUnitType(data.type, function(err, type) {
+				data["xp"] = 0;
+				data["hp"] = type.maxHp;
+				data["moveLeft"] = type.move;
+				collections.units.insert(data, function(err) {
+				    if(!err) {
+					socket.emit("created", data);
+				    }
 				});
 			    });
 			});
@@ -285,48 +284,50 @@ function initListeners(socket, mongo, collections) {
 	var gameId = data.gameId;
 
         collections.games.findOne({id:gameId}, function(err, game) {
-	    if(socketOwnerCanAct(socket, game)) {
-		game.activeTeam %= (game.players.length);
-		game.activeTeam++;
-		collections.games.save(game, { safe: true }, function() {
+	    if(!socketOwnerCanAct(socket, game)) {
+		return;
+	    }
 
-		    // find all units owned by the newly active player
-		    collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
-			var updates = [];
-			var sendUpdates = function() {
-			    io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
-			};
-
-			unitCursor.next(function updateUnitForNewTurn(err, unit) {
-			    if(unit == null) { sendUpdates(); return; }
-
-			    var update = { x: unit.x, y: unit.y };
-
-			    loadUnitType(unit.type, function(err, type) {
-				// heal unmoved units
-				if(unit.moveLeft == type.move) {
-				    unit.hp = Math.min(unit.hp+2, type.maxHp);
-				    update.hp = unit.hp;
-				}
-
-				// refill move points
-				unit.moveLeft = type.move;
-				update.moveLeft = unit.moveLeft;
-
-				// TODO: if on a village, heal and remove poison
-				// TODO: if poisoned, hurt
-				// TODO: remove slow
-				
-				updates.push(update);
-				
-				collections.units.save(unit, {safe:true}, function() {
-				    unitCursor.next(updateUnitForNewTurn);
-				});
+	    game.activeTeam %= (game.players.length);
+	    game.activeTeam++;
+	    collections.games.save(game, { safe: true }, function() {
+		
+		// find all units owned by the newly active player
+		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
+		    var updates = [];
+		    var sendUpdates = function() {
+			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
+		    };
+		    
+		    unitCursor.next(function updateUnitForNewTurn(err, unit) {
+			if(unit == null) { sendUpdates(); return; }
+			
+			var update = { x: unit.x, y: unit.y };
+			
+			loadUnitType(unit.type, function(err, type) {
+			    // heal unmoved units
+			    if(unit.moveLeft == type.move) {
+				unit.hp = Math.min(unit.hp+2, type.maxHp);
+				update.hp = unit.hp;
+			    }
+			    
+			    // refill move points
+			    unit.moveLeft = type.move;
+			    update.moveLeft = unit.moveLeft;
+			    
+			    // TODO: if on a village, heal and remove poison
+			    // TODO: if poisoned, hurt
+			    // TODO: remove slow
+			    
+			    updates.push(update);
+			    
+			    collections.units.save(unit, {safe:true}, function() {
+				unitCursor.next(updateUnitForNewTurn);
 			    });
 			});
 		    });
 		});
-	    }
+	    });
 	});
     });
 }
