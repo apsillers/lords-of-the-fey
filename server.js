@@ -10,6 +10,7 @@ var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
 var createUnit = require("./createUnit");
 var loadMap = require("./loadUtils").loadMap;
 var loadUnitType = require("./loadUtils").loadUnitType;
+var initLobbyListeners = require("./lobby").initLobbyListeners;
 
 var mongoClient = new MongoClient(new Server('localhost', 27017));
 mongoClient.open(function(err, mongoClient) {
@@ -30,7 +31,7 @@ mongoClient.open(function(err, mongoClient) {
     require("./auth").initAuth(app, mongo, collections);
 
     io.sockets.on('connection', function (socket) {
-        initListeners(socket, mongo, collections);
+        initListeners(socket, collections);
     });
 
 });
@@ -82,7 +83,9 @@ io.set('authorization', passportSocketIo.authorize({
 }));
 
 // initialize all socket.io listeners on a socket
-function initListeners(socket, mongo, collections) {
+function initListeners(socket, collections) {
+    initLobbyListeners(socket, collections);
+
     // request for all game data
     socket.on("alldata", function(data) {
 	console.log("serving data to", socket.handshake.user.username);
