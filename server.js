@@ -5,9 +5,8 @@ var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server;
 var fs = require('fs');
 var io = require('socket.io').listen(server);
-var passwordHash = require('password-hash');
 var passport = require("passport");
-var LocalStrategy = require('passport-local').Strategy;
+var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
 
 var mongoClient = new MongoClient(new Server('localhost', 27017));
 mongoClient.open(function(err, mongoClient) {
@@ -25,7 +24,7 @@ mongoClient.open(function(err, mongoClient) {
 	});
     });
 
-    initAuth(mongo, collections);
+    require("./auth").initAuth(app, mongo, collections);
 
     io.sockets.on('connection', function (socket) {
         initListeners(socket, mongo, collections);
@@ -34,7 +33,6 @@ mongoClient.open(function(err, mongoClient) {
 });
 
 app.use(express.static(__dirname + '/static'));
-
 app.use(express.cookieParser());
 app.use(express.bodyParser());
 
@@ -69,75 +67,16 @@ function onAuthorizeFail(data, message, error, accept){
     console.log('failed connection to socket.io:', message);
 
   // We use this callback to log all of our failed connections.
-    accept(null, false);
+    accept(null, true);
 }
 
 io.set('authorization', passportSocketIo.authorize({
     cookieParser: express.cookieParser,
-//    key:         'express.sid',       // the name of the cookie where express/connect stores its session_id
     secret:      'keyboard cat',    // the session_secret to parse the cookie
     store:       mongoStore,        // we NEED to use a sessionstore. no memorystore please
     success:     onAuthorizeSuccess,  // *optional* callback on success - read more below
     fail:        onAuthorizeFail,     // *optional* callback on fail/error - read more below
 }));
-
-function initAuth(mongo, collections) {
-
-    passport.use(new LocalStrategy(function(username, password, done){
-	collections.users.findOne({ username : username},function(err,user){
-            if(err) { return done(err); }
-            if(!user){
-		return done(null, false, { message: 'Incorrect username.' });
-            }
-            
-	    if (passwordHash.verify(password, user.hash)) return done(null, user);
-	    done(null, false, { message: 'Incorrect password.' });
-        
-	});
-    }));
-
-    app.post('/login',
-	     passport.authenticate('local', { failureRedirect: '/login.html' }),
-	     function(req, res) {
-		 res.redirect('/');
-	     });
-
-
-    app.post('/signup', function(req, res) {
-	var username = req.body.username;
-	var password = req.body.password;
-	var passConfirm = req.body.passconfirm
-
-	collections.users.findOne({ username: username }, function (err, user) {
-	    if (!user) {
-
-		if(password == passConfirm) {
-		    var hashedPassword = passwordHash.generate(password);
-
-		    collections.users.save({ username: username, hash: hashedPassword }, { safe: true }, function(err) {
-			passport.authenticate('local')(req, res, function () {
-			    res.redirect('/');
-			});
-		    });
-		} else {
-		    res.redirect("/signup.html");
-		}
-	    } else {
-		res.redirect("/signup.html");
-	    }
-	});
-    });
-
-    passport.serializeUser(function(user, done) {
-	done(null, user.username);
-    });
-
-    passport.deserializeUser(function(username, done) {
-	collections.users.findOne({username: username}, function (err, user) {
-	    done(err, user);
-	});
-    });
-}
 
 // initialize all socket.io listeners on a socket
 function initListeners(socket, mongo, collections) {
@@ -255,8 +194,8 @@ function initListeners(socket, mongo, collections) {
 				var commander = commanders[i];
 				
 				if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
-				   ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 // check target is a castle
-				   // castlePathExists(commander, data) // find a castle-only path from commander to target
+				   ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 && // check target is a castle
+				   castlePathExists(commander, data, mapData) // find a castle-only path from commander to target
 				  ) { createValid = true; }
 			    }
 			    
@@ -278,6 +217,46 @@ function initListeners(socket, mongo, collections) {
 	    });
 	});
     });
+
+    function castlePathExists(commander, target, mapData) {
+
+	function getNeighbors(space) {
+            var neighbors = [];
+            
+            var x = space.x, y = space.y;
+            
+            // -1 if odd, +1 if even
+            var offset = 1 - (x % 2) * 2;
+            var coords = [(x-1)+","+(y+offset), x+","+(y+offset), (x+1)+","+(y+offset), (x-1)+","+y, x+","+(y-offset), (x+1)+","+y];
+            
+            for(var i=0; i<coords.length; ++i) {
+		var prospect = mapData[coords[i]];
+		if(prospect && prospect != space) { neighbors.push(prospect); }
+            }
+            return neighbors;
+	}
+
+	var openSet = [commander];
+	var closedSet = [];
+	var currentSpace = null;
+
+	while(currentSpace = openSet.pop()) {
+
+//	    console.log("castlePath: inspecting", currentSpace);
+
+	    if(currentSpace.x == target.x && currentSpace.y == target.y) { return true; }
+
+	    openSet = openSet.concat(getNeighbors(currentSpace).filter(function(s) {
+	    return ["keep", "castle"].indexOf(s.terrain.name) != -1 &&
+		openSet.indexOf(s) == -1 &&
+		closedSet.indexOf(s) == -1
+	    }));
+
+	    closedSet.push(currentSpace);
+	}
+
+	return false;
+    }
 
     socket.on("endTurn", function(data) {
 	console.log("ending turn");
@@ -330,15 +309,6 @@ function initListeners(socket, mongo, collections) {
 	    });
 	});
     });
-}
-
-function socketOwnerCanAct(socket, game) {
-    var user = socket.handshake.user;
-    if(!user) { return false; }
-    var player = game.players.filter(function(p) { return p.username == user.username })[0];    
-    if(!player) { return false; }
-    console.log(player, game);
-    return player.team == game.activeTeam;
 }
 
 // offender attacks defender with the attack of the given index
@@ -442,9 +412,9 @@ function toMapDict(map_data) {
                 // if the tile describes only its terrain, draw it;
                 // otherwise, find the part that describes the terrain
                 if(components.length == 1) {
-                    map_dict[tile_num+","+row] = { "terrain": Terrain.getTerrainBySymbol(components[0]) };
+                    map_dict[tile_num+","+row] = { "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[0]) };
                 } else {
-	            map_dict[tile_num+","+row] = { "start": components[0], "terrain": Terrain.getTerrainBySymbol(components[1]) };
+	            map_dict[tile_num+","+row] = { "start": components[0], "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[1]) };
                 }
             }
             row++;
