@@ -7,6 +7,9 @@ var fs = require('fs');
 var io = require('socket.io').listen(server);
 var passport = require("passport");
 var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
+var createUnit = require("./createUnit");
+var loadMap = require("./loadUtils").loadMap;
+var loadUnitType = require("./loadUtils").loadUnitType;
 
 var mongoClient = new MongoClient(new Server('localhost', 27017));
 mongoClient.open(function(err, mongoClient) {
@@ -175,88 +178,19 @@ function initListeners(socket, mongo, collections) {
 	var user = socket.handshake.user;
 
         collections.games.findOne({id:gameId}, function(err, game) {
-
             loadMap(game.map, function(err, mapData) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
-		collections.units.findOne({ gameId: gameId, x: data.x, y: data.y }, function(err, occupant) {
-		    // if the space is populated, or it is not the user's turn, abort
-		    if(occupant || !socketOwnerCanAct(socket, game)) {
-			socket.emit("created", {});
-			return;
-		    }
-
-		    collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
-			commanderCursor.toArray(function(err, commanders) {
-			    var createValid = false;
-			    
-			    for(var i=0; i < commanders.length; ++i) {
-				var commander = commanders[i];
-				
-				if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
-				   ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 && // check target is a castle
-				   castlePathExists(commander, data, mapData) // find a castle-only path from commander to target
-				  ) { createValid = true; }
-			    }
-			    
-			    if(!createValid) { socket.emit("created", {}); return; }
-			    
-			    loadUnitType(data.type, function(err, type) {
-				data["xp"] = 0;
-				data["hp"] = type.maxHp;
-				data["moveLeft"] = type.move;
-				collections.units.insert(data, function(err) {
-				    if(!err) {
-					socket.emit("created", data);
-				    }
-				});
-			    });
-			});
+		if(socketOwnerCanAct(socket, game)) {
+		    createUnit(data, mapData, collections, player, function(createResult) {
+			socket.emit("created", createResult);
 		    });
-		});
+		} else {
+		    socket.emit("created", {});
+		}
 	    });
 	});
     });
-
-    function castlePathExists(commander, target, mapData) {
-
-	function getNeighbors(space) {
-            var neighbors = [];
-            
-            var x = space.x, y = space.y;
-            
-            // -1 if odd, +1 if even
-            var offset = 1 - (x % 2) * 2;
-            var coords = [(x-1)+","+(y+offset), x+","+(y+offset), (x+1)+","+(y+offset), (x-1)+","+y, x+","+(y-offset), (x+1)+","+y];
-            
-            for(var i=0; i<coords.length; ++i) {
-		var prospect = mapData[coords[i]];
-		if(prospect && prospect != space) { neighbors.push(prospect); }
-            }
-            return neighbors;
-	}
-
-	var openSet = [commander];
-	var closedSet = [];
-	var currentSpace = null;
-
-	while(currentSpace = openSet.pop()) {
-
-//	    console.log("castlePath: inspecting", currentSpace);
-
-	    if(currentSpace.x == target.x && currentSpace.y == target.y) { return true; }
-
-	    openSet = openSet.concat(getNeighbors(currentSpace).filter(function(s) {
-	    return ["keep", "castle"].indexOf(s.terrain.name) != -1 &&
-		openSet.indexOf(s) == -1 &&
-		closedSet.indexOf(s) == -1
-	    }));
-
-	    closedSet.push(currentSpace);
-	}
-
-	return false;
-    }
 
     socket.on("endTurn", function(data) {
 	console.log("ending turn");
@@ -375,72 +309,5 @@ function attackSwing(isOffense, attack, hitter, hitterType, hittee, hitteeType, 
     return swingRecord;
 }
 
-function loadMap(filename, callback) {
-    fs.readFile('static/data/maps/'+filename, { encoding: "utf8"}, function(err, data) {
-        callback(err, toMapDict(data));
-    });
-}
 
-function loadUnitType(type, callback) {
-    fs.readFile('static/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
-        callback(err, JSON.parse(data));
-    });
-}
-
-function toMapDict(map_data) {
-    var misc_lines = 0;
-    var row = 0;
-    var map_array = map_data.split('\n');
-    var map_dict = {};
-
-    // read each line in the map file
-    for(var line_num = 0; line_num < map_array.length; line_num++) {
-        var line = map_array[line_num];
-        line = line.trim();
-        line = line.replace(/\s+/g, ' ');
-
-        // use this line only if it describes terrain
-        if(line.indexOf('=') == -1 && line != '') {
-            var tiles = line.split(",");
-
-            // place each tile described in the line
-            for(var tile_num = 0; tile_num < tiles.length; tile_num++) {
-                var tile = tiles[tile_num];
-                tile = tile.trim();
-                var components = tile.split(' ');
-                //console.log(components);
-                // if the tile describes only its terrain, draw it;
-                // otherwise, find the part that describes the terrain
-                if(components.length == 1) {
-                    map_dict[tile_num+","+row] = { "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[0]) };
-                } else {
-	            map_dict[tile_num+","+row] = { "start": components[0], "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[1]) };
-                }
-            }
-            row++;
-        } else {
-            misc_lines += 1;
-        }
-    }
-    
-    return map_dict;
-}
-
-var Terrain = {
-    types: {
-        GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", toString: function() { return this.name; } },
-        SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", toString: function() { return this.name; } },
-        DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", toString: function() { return this.name; } },
-	CASTLE: { symbol: "Ch", name: "castle", img: "/data/img/terrain/castle.png", toString: function() { return this.name; } },
-	KEEP: { symbol: "Kh", name: "keep", img: "/data/img/terrain/keep.png", toString: function() { return this.name; } },
-    },
-
-    getTerrainBySymbol: function(symbol) {
-        for(var prop in this.types) {
-            if(this.types[prop].symbol == symbol) {
-                return this.types[prop];
-            }
-        }
-    }
-}
 

@@ -127,10 +127,10 @@ var ui = {
 
     onContextMenu: function(space) {
 	if(gameInfo.player.team == 1) {
-	    socket.emit("create", { gameId: 1, team: 1, type: "scout", x: space.x, y: space.y });
+	    socket.emit("create", { gameId: gameInfo.gameId, type: "scout", x: space.x, y: space.y });
 	    ui.moveHappening = true;
 	} else {
-	    socket.emit("create", { gameId: 1, team: 2, type: "grunt", x: space.x, y: space.y });
+	    socket.emit("create", { gameId: gameInfo.gameId, type: "grunt", x: space.x, y: space.y });
 	    ui.moveHappening = true;
 	}
     },
