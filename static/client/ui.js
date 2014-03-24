@@ -1,6 +1,7 @@
 var ui = {
     moveHappening: false,
     hasTurn: false,
+    showingMenu: false,
 
     pathSource: null,
     pathTarget: null,
@@ -10,6 +11,8 @@ var ui = {
     hoverUnit: null,
 
     onSpaceHover: function(e) {
+	if(ui.showingMenu && ui.modal) { return; }
+
 	var space = e.target.owner;
 	ui.hoverSpace = space;
     
@@ -88,12 +91,19 @@ var ui = {
     },
 
     onSpaceClick: function(e) {
+	if(ui.modal) { return; }
+
+	if(ui.showingMenu) {
+	    ui.hideMenus();
+	    return;
+	}
+
 	var space = e.target.owner;
 	
 	if(ui.moveHappening || !ui.hasTurn) { return; }
 
 	if(e.nativeEvent.button == 2) {
-	    ui.onContextMenu(space);
+	    ui.onContextMenu(space, { x: e.stageX, y: e.stageY });
 	    return;
 	}
 
@@ -125,7 +135,17 @@ var ui = {
 	}
     },
 
-    onContextMenu: function(space) {
+    onContextMenu: function(space, coords) {
+	var cm = ui.contextMenu = new createjs.Shape();
+	cm.x = coords.x;
+	cm.y = coords.y;
+
+	cm.graphics.beginFill("rgb(0,0,170)").drawRect(0, 0, 100, 200);
+	world.stage.addChild(cm);
+	world.stage.update();
+
+	ui.showingMenu = true;
+
 	if(gameInfo.player.team == 1) {
 	    socket.emit("create", { gameId: gameInfo.gameId, type: "scout", x: space.x, y: space.y });
 	    ui.moveHappening = true;
@@ -133,6 +153,13 @@ var ui = {
 	    socket.emit("create", { gameId: gameInfo.gameId, type: "grunt", x: space.x, y: space.y });
 	    ui.moveHappening = true;
 	}
+
+    },
+
+    hideMenus: function() {
+	world.stage.removeChild(ui.contextMenu);
+	world.stage.update();
+	ui.showingMenu = false;
     },
 
     animateUnitMove: function(moveData) {
@@ -237,6 +264,59 @@ var ui = {
     },
 
     showAttackPrompt: function(attacker, defender, resolutionCallback) {
-        setTimeout(function() { resolutionCallback(0); }, 4);
+	var canvas = world.stage.canvas;
+
+	ui.modal = new createjs.Container();
+	var modalWall = new createjs.Shape();
+	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
+	ui.modal.addChild(modalWall);
+	world.stage.addChild(ui.modal);
+
+	var promptWidth = 300;
+	var promptHeight = 52 * attacker.attacks.length + 50;
+	ui.attackPrompt = new createjs.Container();
+	ui.attackPrompt.x = (canvas.width - promptWidth) / 2;
+	ui.attackPrompt.y = (canvas.height - promptHeight) / 2;
+
+	var promptShape = new createjs.Shape();
+	promptShape.graphics.beginFill("rgb(0,0,128)").drawRect(0, 0, promptWidth, promptHeight);
+	ui.attackPrompt.addChild(promptShape);
+
+	for(var i=0; i<attacker.attacks.length; ++i) {
+	    var attack = attacker.attacks[i];
+	    var attackText = new createjs.Text(JSON.stringify(attack));
+	    var attackButton = new createjs.Shape();
+	    attackButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
+
+	    attackText.y = 30 + 52 * i;
+	    attackText.x = 20;
+	    attackText.color = "#fff";
+	    ui.attackPrompt.addChild(attackButton);
+	    ui.attackPrompt.addChild(attackText);
+
+	    attackButton.addEventListener("click", resolutionCallback.bind(null, i));
+	    attackButton.addEventListener("click", ui.clearModal);
+	}
+
+	var cancelText = new createjs.Text("Cancel");
+	var cancelButton = new createjs.Shape();
+	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 52 * i, 60, 30);
+	
+	cancelText.y = 15 + 52 * i;
+	cancelText.x = promptWidth - 60;
+	cancelText.color = "#fff";
+	ui.attackPrompt.addChild(cancelButton);
+	ui.attackPrompt.addChild(cancelText);
+	
+	cancelButton.addEventListener("click", resolutionCallback.bind(null, -1));
+	cancelButton.addEventListener("click", ui.clearModal);
+	
+	ui.modal.addChild(ui.attackPrompt);
+    },
+
+    clearModal: function() {
+	world.stage.removeChild(ui.modal);
+	ui.modal = undefined;
+	world.stage.update();
     }
 }
