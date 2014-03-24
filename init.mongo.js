@@ -8,7 +8,8 @@ db.games.save({
     "players" : [
 	{ "team": 1, "gold": 60, "username": "hello" },
 	{ "team": 2, "gold": 40, "username": "goodbye" }
-    ]
+    ],
+    "activeTeam": 1
 });
 
 // password for each account is "world"
