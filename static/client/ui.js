@@ -33,9 +33,10 @@ var ui = {
 		bar.regX = 0;
 		bar.regY = 0;
 		pip.addChild(bar);
-                
-		if(i == ui.path.length-1) {
-		    var coverText = 100 * world.getUnitAt(ui.pathSource).cover[space.terrain] + "%";
+
+		// draw the cover for the final space: the real final space if not an attack, otherwise the second-to-last
+		if(i == ui.path.length-(world.getUnitAt(ui.path[ui.path.length-1].space)?2:1)) {
+		    var coverText = 100 * world.getUnitAt(ui.pathSource).cover[s.terrain] + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
 		    textShape.y = 7;
