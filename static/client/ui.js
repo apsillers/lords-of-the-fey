@@ -15,12 +15,16 @@ var ui = {
 
 	var space = e.target.owner;
 	ui.hoverSpace = space;
-    
+
 	if(ui.pathSource && space != ui.pathTarget) {
             ui.pathTarget = space;
-	
+
             ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget, ui.path);
 	    world.stage.removeChild(ui.pathShape);
+
+	    if(ui.path) {
+		var attackTarget = world.getUnitAt(ui.path[ui.path.length-1].space);
+	    }
 
             ui.pathShape = new createjs.Container();
             for(var i=0;i<ui.path.length;++i){
@@ -35,11 +39,21 @@ var ui = {
 		pip.addChild(bar);
 
 		// draw the cover for the final space: the real final space if not an attack, otherwise the second-to-last
-		if(i == ui.path.length-(world.getUnitAt(ui.path[ui.path.length-1].space)?2:1)) {
+		if(i == ui.path.length-(attackTarget?2:1)) {
 		    var coverText = 100 * world.getUnitAt(ui.pathSource).cover[s.terrain] + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
 		    textShape.y = 7;
+		    pip.addChild(textShape);
+		}
+
+		// draw cover for attack target
+		if(i == ui.path.length-1 && attackTarget) {
+		    var coverText = 100 * attackTarget.cover[s.terrain] + "%";
+		    var textShape = new createjs.Text(coverText);
+		    textShape.font = "14pt sans serif";
+		    textShape.y = 7;
+		    textShape.color = "#F00";
 		    pip.addChild(textShape);
 		}
 
@@ -137,24 +151,107 @@ var ui = {
     },
 
     onContextMenu: function(space, coords) {
-	var cm = ui.contextMenu = new createjs.Shape();
+	var cm = ui.contextMenu = new createjs.Container();
 	cm.x = coords.x;
 	cm.y = coords.y;
 
-	cm.graphics.beginFill("rgb(0,0,170)").drawRect(0, 0, 100, 200);
+	var cmBacking = new createjs.Shape();
+	cmBacking.graphics.beginFill("rgb(0,0,170)").drawRect(0, 0, 100, 205);
+	cm.addChild(cmBacking);
+
+	for(pos in world.units) {
+	    var unit = world.units[pos];
+	    if(unit.isCommander) {
+		var foundPath = utils.castlePathExists(unit, space, world.grid);
+		if(foundPath) { break; }
+	    }
+	}
+
+	function createMenuItem(row, text, callback) {
+	    var item = new createjs.Shape();
+	    item.graphics.beginFill("#99F").drawRect(5, row * 50 + 5, 90, 45);
+	    cm.addChild(item);
+
+	    var itemText = new createjs.Text(text);
+	    itemText.x = 10;
+	    itemText.y = row * 50 + 10;
+	    cm.addChild(itemText);
+
+	    item.addEventListener("click", callback);
+	    item.addEventListener("click", ui.hideMenus);
+	}
+
+	if(foundPath) {
+	    createMenuItem(0, "Recruit", function() {
+		ui.showRecruitPrompt(function(typeName) {
+		    socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
+		    console.log("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
+		    ui.moveHappening = true;
+		});
+	    });
+	}
+
 	world.stage.addChild(cm);
 	world.stage.update();
 
 	ui.showingMenu = true;
 
-	if(gameInfo.player.team == 1) {
-	    socket.emit("create", { gameId: gameInfo.gameId, type: "scout", x: space.x, y: space.y });
-	    ui.moveHappening = true;
-	} else {
-	    socket.emit("create", { gameId: gameInfo.gameId, type: "grunt", x: space.x, y: space.y });
-	    ui.moveHappening = true;
+    },
+
+    showRecruitPrompt: function(resolutionCallback) {
+	var canvas = world.stage.canvas;
+
+	ui.modal = new createjs.Container();
+	var modalWall = new createjs.Shape();
+	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
+	ui.modal.addChild(modalWall);
+	world.stage.addChild(ui.modal);
+
+	// FIXME: move this server side
+	gameInfo.player.recruitList = ["scout", "scout"];
+
+	var promptWidth = 400;
+	var promptHeight = 52 * gameInfo.player.recruitList.length + 50;
+	ui.recruitPrompt = new createjs.Container();
+	ui.recruitPrompt.x = (canvas.width - promptWidth) / 2;
+	ui.recruitPrompt.y = (canvas.height - promptHeight) / 2;
+
+	var promptShape = new createjs.Shape();
+	promptShape.graphics.beginFill("rgb(0,0,128)").drawRect(0, 0, promptWidth, promptHeight);
+	ui.recruitPrompt.addChild(promptShape);
+
+	for(var i=0; i<gameInfo.player.recruitList.length; ++i) {
+	    var unitId = gameInfo.player.recruitList[i];
+	    var unit = unitLib.protos[unitId];
+	    var unitText = new createjs.Text(unit.name);
+	    var unitButton = new createjs.Shape();
+	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
+
+	    unitText.y = 30 + 52 * i;
+	    unitText.x = 20;
+	    unitText.color = "#fff";
+	    ui.recruitPrompt.addChild(unitButton);
+	    ui.recruitPrompt.addChild(unitText);
+
+	    unitButton.addEventListener("click", resolutionCallback.bind(null, unitId));
+	    unitButton.addEventListener("click", ui.clearModal);
 	}
 
+	var cancelText = new createjs.Text("Cancel");
+	var cancelButton = new createjs.Shape();
+	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 52 * i, 60, 30);
+	
+	cancelText.y = 15 + 52 * i;
+	cancelText.x = promptWidth - 60;
+	cancelText.color = "#fff";
+	ui.recruitPrompt.addChild(cancelButton);
+	ui.recruitPrompt.addChild(cancelText);
+	
+	cancelButton.addEventListener("click", resolutionCallback.bind(null, -1));
+	cancelButton.addEventListener("click", ui.clearModal);
+	
+	ui.modal.addChild(ui.recruitPrompt);
+	world.stage.update();
     },
 
     hideMenus: function() {

@@ -100,8 +100,6 @@ function initListeners(socket, collections) {
                 });
             });
         });
-
-	
     });
 
     // subscribe to a game channel
@@ -111,6 +109,13 @@ function initListeners(socket, collections) {
 
     // create a new game
     socket.on("new game", function(data) {
+        collections.games.insert({ }, {safe: true}, function(err, item) {
+	    
+	});
+    });
+
+    // create a new game
+    socket.on("launch game", function(data) {
         // data.opponentList
         // 
     });
