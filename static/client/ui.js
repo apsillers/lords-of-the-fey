@@ -207,9 +207,6 @@ var ui = {
 	ui.modal.addChild(modalWall);
 	world.stage.addChild(ui.modal);
 
-	// FIXME: move this server side
-	gameInfo.player.recruitList = ["scout", "scout"];
-
 	var promptWidth = 400;
 	var promptHeight = 52 * gameInfo.player.recruitList.length + 50;
 	ui.recruitPrompt = new createjs.Container();
@@ -222,7 +219,9 @@ var ui = {
 
 	for(var i=0; i<gameInfo.player.recruitList.length; ++i) {
 	    var unitId = gameInfo.player.recruitList[i];
+	    console.log(unitId);
 	    var unit = unitLib.protos[unitId];
+	    console.log(unit);
 	    var unitText = new createjs.Text(unit.name);
 	    var unitButton = new createjs.Shape();
 	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);

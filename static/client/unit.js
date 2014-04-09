@@ -1,6 +1,6 @@
 var unitLib = {
     
-    protoList: ["grunt", "scout"],
+    protoList: ["grunt", "scout", "elven_archer", "orcish_archer"],
     protos: {},
     
     create: function(unitData, proto) {

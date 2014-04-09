@@ -6,6 +6,8 @@ var socket;
 var gameInfo = { 
     gameId: location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:1
 };
+var raceList = ["elves", "orcs"];
+var raceDict = {};
 
 /**************************/
 window.addEventListener("load", function() {
@@ -31,20 +33,33 @@ window.addEventListener("load", function() {
 	    socket.emit("endTurn", gameInfo);
 	});
 
-        queue.loadManifest(
-            unitLib.protoList.map(function(k){ return { id:k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON } })
-        );
+	var unitManifest = unitLib.protoList.map(function(k){
+	    return { id:"unit"+k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON }
+	});
+
+	var raceManifest = raceList.map(function(k){
+	    return { id:"race"+k, src:"/data/races/"+k+".json", type:createjs.LoadQueue.JSON }
+	});
+
+        queue.loadManifest(unitManifest);
+        queue.loadManifest(raceManifest);
 
         queue.on("fileload", function(e) {
-            unitLib.protos[e.item.id] = e.result;
+	    if(e.item.id.indexOf("unit") == 0) {
+		unitLib.protos[e.item.id.substr(4)] = e.result;
+	    } else if(e.item.id.indexOf("race") == 0) {
+		raceDict[e.item.id.substr(4)] = e.result;
+	    }
         });
         queue.on("complete", function() {
+	    gameInfo.player.recruitList = raceDict[gameInfo.player.race].recruitList;
+
             var queue = new createjs.LoadQueue();
             queue.on("complete", handleComplete, this);
             queue.loadManifest(
                 Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })
             );
-           queue.loadManifest(
+            queue.loadManifest(
                 Object.keys(Terrain.types).map(function(k){ return {id:k, src:Terrain.types[k].img }; })
             );
             queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
