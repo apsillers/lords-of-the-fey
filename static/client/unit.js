@@ -10,8 +10,12 @@ var unitLib = {
 	unit.xp = unitData.xp;
 	
 	unit.team = unitData.team;
+	unit.imgObj = unit.colorImgList[unit.team];
+	console.log(unit.team+1);
+	unit.img = unit.imgObj.src;
+
 	unit.shape = new createjs.Container();
-	unit.shape.addChild(new createjs.Bitmap(proto.imgObj));
+	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
 	
 	unit.isCommander = unitData.isCommander;
 	

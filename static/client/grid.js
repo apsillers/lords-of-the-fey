@@ -1,21 +1,3 @@
-var Terrain = {
-    types: {
-        GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", toString: function() { return this.name; } },
-        SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", toString: function() { return this.name; } },
-        DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", toString: function() { return this.name; } },
-	CASTLE: { symbol: "Ch", name: "castle", img: "/data/img/terrain/castle.png", toString: function() { return this.name; } },
-	KEEP: { symbol: "Kh", name: "keep", img: "/data/img/terrain/keep.png", toString: function() { return this.name; } },
-    },
-
-    getTerrainBySymbol: function(symbol) {
-        for(var prop in this.types) {
-            if(this.types[prop].symbol == symbol) {
-                return this.types[prop];
-            }
-        }
-    }
-}
-
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
     this.stage.enableMouseOver(20);

@@ -68,7 +68,34 @@ window.addEventListener("load", function() {
 
             function handleComplete() {
 		for(var k in unitLib.protos) {
-		    unitLib.protos[k].imgObj = queue.getResult(k);
+		    var img = queue.getResult(k);
+		    unitLib.protos[k].imgObj = img;
+		    unitLib.protos[k].colorImgList = [img];
+
+		    var colorCanvas = document.createElement("canvas");
+		    colorCanvas.width = img.width;
+		    colorCanvas.height = img.height;
+		    colorContext = colorCanvas.getContext("2d");
+		    var teamColors = [[255,255,0], [0,255,255], [255,255,255]]
+
+		    for(var j=0; j<teamColors.length; ++j) {
+			colorContext.drawImage(img, 0, 0);
+			var imgd = colorContext.getImageData(0,0,img.width,img.height);
+			var pix = imgd.data;
+
+			for(var i=0, n=pix.length; i < n; i += 4) {
+			    if(pix[i] > pix[i+1] && pix[i+2] > pix[i+1]) {
+				pix[i] = pix[i] & teamColors[j][0];
+				pix[i+1] = pix[i+1] & teamColors[j][1];
+				pix[i+2] = pix[i+2] & teamColors[j][2];
+			    }
+			}
+
+			colorContext.putImageData(imgd, 0, 0);
+			var coloredImg = new Image();
+			coloredImg.src = colorCanvas.toDataURL();
+			unitLib.protos[k].colorImgList.push(coloredImg);
+		    }
 		}
 
 		for(k in Terrain.types) {
