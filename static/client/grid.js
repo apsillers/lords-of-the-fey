@@ -134,8 +134,3 @@ Space.prototype = {
         this.shape.addEventListener("mouseover", ui.onSpaceHover);
     }
 }
-
-
-
-
-
