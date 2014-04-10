@@ -26,7 +26,6 @@ var unitLib = {
 	if(unit.healthBar) { unit.shape.removeChild(unit.healthBar); }
 	
 	var hpRatio = unit.hp / unit.maxHp;
-	
 	var barColor = ["#D00", "#DD0"][Math.floor(hpRatio * 3)] || "#0D0";
 	
 	unit.healthBar = new createjs.Shape();

@@ -75,13 +75,18 @@ var ui = {
 
 	if(ui.hoverUnit) {
             $("#right_data_image").attr("src", ui.hoverUnit.img);
+
             $("#right_data_hp").text(ui.hoverUnit.hp + "/" + ui.hoverUnit.maxHp);
+	    var hpRatio = ui.hoverUnit.hp / ui.hoverUnit.maxHp;
+	    var hpColor = ["#A00", "#f0ed00"][Math.floor(hpRatio * 3)] || "green";
+	    $("#right_data_hp").css("color", hpColor);
+
             $("#right_data_xp").text(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
             $("#right_data_name").text(ui.hoverUnit.name);
 
 	    $("#right_data_attacks").html("");
 	    for(var i=0; i<ui.hoverUnit.attacks.length; ++i) {
-		var attackNameElm = $("<div style='font-weight: bold;''>");
+		var attackNameElm = $("<div style='font-weight: bold;'>");
 		var attackTypeElm = $("<div>");
 		var attack = ui.hoverUnit.attacks[i];
 		attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
