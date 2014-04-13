@@ -1,6 +1,6 @@
 {
   "name": "Elven Archer",
-  "img": "/data/img/units/scout.png",
+  "img": "/data/img/units/elven_archer.png",
   "move": 4,
   "moveCost": {
     "grass": 1,

@@ -1,6 +1,6 @@
 {
   "name": "Orcish Archer",
-  "img": "/data/img/units/grunt.png",
+  "img": "/data/img/units/orcish_archer.png",
   "move": 4,
   "moveCost": {
     "grass": 1,
