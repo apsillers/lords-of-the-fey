@@ -276,9 +276,9 @@ function executeAttack(offender, offenderType, attackIndex, defender, defenderTy
     }
 
     var defenderTerrain = mapData[defender.x+","+defender.y].terrain;
-    var defenderCover = defenderType.cover[defenderTerrain];
+    var defenderCover = Math.min.apply(Math, defenderTerrain.properties.map(function(i) { return defenderType.cover[i]; }));
     var offenderTerrain = mapData[offender.x+","+offender.y].terrain;
-    var offenderCover = offenderType.cover[offenderTerrain];
+    var offenderCover = Math.min.apply(Math, offenderTerrain.properties.map(function(i) { return offenderType.cover[i]; }));
     for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
 	if(round < offense.number) {
 	    swingResult = attackSwing(true, offense, offender, offenderType, defender, defenderType, defenderCover, units);

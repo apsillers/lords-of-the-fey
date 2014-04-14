@@ -3,13 +3,12 @@
   "img": "/data/img/units/scout.png",
   "move": 6,
   "moveCost": {
-    "grass": 1,
-    "dirt": 1,
-    "swamp": 3
+    "flat": 1,
+    "swamp": 3,
+    "castle": 1
   },
   "cover": {
-    "grass": 0.5,
-    "dirt": 0.5,
+    "flat": 0.5,
     "swamp": 0.3,
     "castle": 0.5,
     "keep": 0.5

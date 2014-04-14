@@ -3,13 +3,12 @@
   "img": "/data/img/units/grunt.png",
   "move": 4,
   "moveCost": {
-    "grass": 1,
-    "dirt":1,
-    "swamp": 2
+    "flat": 1,
+    "swamp": 2,
+    "castle": 1
   },
   "cover": {
-    "grass": 0.5,
-    "dirt": 0.5,
+    "flat": 0.5,
     "swamp": 0.2,
     "castle": 0.6,
     "keep": 0.6

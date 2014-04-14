@@ -3,13 +3,12 @@
   "img": "/data/img/units/orcish_archer.png",
   "move": 4,
   "moveCost": {
-    "grass": 1,
-    "dirt": 1,
-    "swamp": 2
+    "flat": 1,
+    "swamp": 2,
+    "casle": 1
   },
   "cover": {
-    "grass": 0.4,
-    "dirt": 0.4,
+    "flat": 0.4,
     "swamp": 0.5,
     "castle": 0.5,
     "keep": 0.5
@@ -28,7 +27,7 @@
       "damage":5
     }
   ],
-  "alignment":"neutral",
+  "alignment":"chaotic",
   "maxHp": 17,
   "maxXp": 20
 }

@@ -25,7 +25,7 @@ function castlePathExists(commander, target, mapData) {
 	if(currentSpace.x == target.x && currentSpace.y == target.y) { return true; }
 	
 	openSet = openSet.concat(getNeighbors(currentSpace).filter(function(s) {
-	    return ["keep", "castle"].indexOf(s.terrain.name) != -1 &&
+	    return (s.terrain.properties.indexOf("castle") != -1 || s.terrain.properties.indexOf("keep"))&&
 		openSet.indexOf(s) == -1 &&
 		closedSet.indexOf(s) == -1
 	}));

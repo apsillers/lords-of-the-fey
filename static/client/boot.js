@@ -62,7 +62,10 @@ window.addEventListener("load", function() {
                 Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })
             );
             queue.loadManifest(
-                Object.keys(Terrain.types).map(function(k){ return {id:k, src:Terrain.types[k].img }; })
+                Object.keys(Terrain.bases).map(function(k){ return {id:k, src:Terrain.bases[k].img }; })
+            );
+            queue.loadManifest(
+                Object.keys(Terrain.overlays).map(function(k){ return {id:k, src:Terrain.overlays[k].img }; })
             );
             queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
 
@@ -98,8 +101,11 @@ window.addEventListener("load", function() {
 		    }
 		}
 
-		for(k in Terrain.types) {
-		    Terrain.types[k].imgObj = queue.getResult(k);
+		for(k in Terrain.bases) {
+		    Terrain.bases[k].imgObj = queue.getResult(k);
+		}
+		for(k in Terrain.overlays) {
+		    Terrain.overlays[k].imgObj = queue.getResult(k);
 		}
 
                 world = new World("c");

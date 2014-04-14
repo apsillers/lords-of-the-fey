@@ -1,8 +1,6 @@
 /*
 
-Absolute rubbish implementation of A*
-
-Only finds paths whose cost is less than the `moveLeft` property of the unit.
+A* implementation with built-in move rules (e.g.Only finds paths whose cost is less than the `moveLeft` property of the unit.
 
 */
 
@@ -101,8 +99,7 @@ function aStar(world, unit, start, goal, prevPath) {
     function cost_to_move_here(space) {
 	var occupant = world.getUnitAt(space);
         var is_enemy_present = occupant && occupant.team != unit.team;
-	var normal_move_cost = unit.moveCost[space.terrain] || 1;
-
+	var normal_move_cost = Math.min.apply(Math, space.terrain.properties.map(function(i) { return unit.moveCost[i]; })) || 1;
 	if(space == goal && is_enemy_present) { return 0; }
 
         // test if this pace has an enemy adjacent

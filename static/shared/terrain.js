@@ -1,19 +1,43 @@
 var Terrain = {
-    types: {
-        GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", toString: function() { return this.name; } },
-        SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", toString: function() { return this.name; } },
-        DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", toString: function() { return this.name; } },
-	CASTLE: { symbol: "Ch", name: "castle", img: "/data/img/terrain/castle.png", toString: function() { return this.name; } },
-	KEEP: { symbol: "Kh", name: "keep", img: "/data/img/terrain/keep.png", toString: function() { return this.name; } },
+    bases: {
+        GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", properties: ["flat"] },
+        SWAMP: { symbol: "Sw", name: "swamp", img: "/data/img/terrain/water.png", properties: ["swamp"] },
+        DIRT: { symbol: "Re", name: "dirt", img: "/data/img/terrain/dirt.png", properties:["flat"] },
+	HUMAN_CASTLE: { symbol: "Ch", name: "human castle", img: "/data/img/terrain/castle.png", properties:["castle"] },
+	HUMAN_KEEP: { symbol: "Kh", name: "human keep", img: "/data/img/terrain/keep.png", properties:["castle", "keep"] }
+    },
+    overlays: {
+        FOREST: { symbol: "Fd", name: "Summer Forest", img: "/data/img/terrain/forest.png", properties: ["forest"] },
     },
 
-    getTerrainBySymbol: function(symbol) {
-        for(var prop in this.types) {
-            if(this.types[prop].symbol == symbol) {
-                return this.types[prop];
+    getTerrainBySymbol: function(baseSymbol, overlaySymbol) {
+	var terrainObj = { properties:[] };
+        for(var prop in this.bases) {
+            if(this.bases[prop].symbol == baseSymbol) {
+                var base = this.bases[prop];
+		terrainObj.properties = terrainObj.properties.concat(base.properties);
+		terrainObj.img = base.img;
+		terrainObj.imgObj = base.imgObj;
             }
         }
+        for(var prop in this.overlays) {
+            if(this.overlays[prop].symbol == overlaySymbol) {
+                var overlay = this.overlays[prop];
+		terrainObj.properties = terrainObj.properties.concat(overlay.properties);
+		terrainObj.overlayImg = overlay.img;
+            }
+        }
+
+	return terrainObj;
     }
+}
+
+var terrainToString = function() { return this.name; };
+for(var i in Terrain.bases) {
+    Terrain.bases[i].toString = terrainToString;
+}
+for(var i in Terrain.overlays) {
+    Terrain.overlays[i].toString = terrainToString;
 }
 
 function toMapDict(map_data) {
@@ -36,15 +60,23 @@ function toMapDict(map_data) {
             for(var tile_num = 0; tile_num < tiles.length; tile_num++) {
                 var tile = tiles[tile_num];
                 tile = tile.trim();
-                var components = tile.split(' ');
-                //console.log(components);
-                // if the tile describes only its terrain, draw it;
-                // otherwise, find the part that describes the terrain
-                if(components.length == 1) {
-                    map_dict[tile_num+","+row] = { "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[0]) };
-                } else {
-	            map_dict[tile_num+","+row] = { "start": components[0], "x":tile_num, "y":row, "terrain": Terrain.getTerrainBySymbol(components[1]) };
+		var tileObj = { x:tile_num, y:row,  }
+                var componentsBySpace = tile.split(' ');
+
+		// if the tile has a start position, add it
+                if(componentsBySpace.length == 2) {
+                    tileObj.start = componentsBySpace[0];
                 }
+
+		var componentsByCarret = componentsBySpace.pop().split("^");
+		var base = componentsByCarret[0];
+		var overlay = componentsByCarret[1];
+
+		var terrain = Terrain.getTerrainBySymbol(base, overlay);
+		tileObj.terrain = terrain;
+
+		map_dict[tile_num+","+row] = tileObj;
+
             }
             row++;
         } else {

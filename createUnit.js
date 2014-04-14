@@ -21,8 +21,8 @@ module.exports = function(data, mapData, collections, player, callback) {
 		    for(var i=0; i < commanders.length; ++i) {
 			var commander = commanders[i];
 			
-			if(mapData[commander.x+","+commander.y].terrain.name == "keep" && // check that the commander is on a keep
-			   ["keep","castle"].indexOf(mapData[data.x+","+data.y].terrain.name) != -1 && // check target is a castle
+			if(mapData[commander.x+","+commander.y].terrain.properties.indexOf("keep") != -1 && // check that the commander is on a keep
+			   mapData[data.x+","+data.y].terrain.properties.indexOf("castle") != -1 && // check target is a castle
 			   castlePathExists(commander, data, mapData) // find a castle-only path from commander to target
 			  ) { createValid = true; }
 		    }
