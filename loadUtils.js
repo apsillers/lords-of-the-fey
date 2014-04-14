@@ -1,6 +1,6 @@
 var fs = require("fs");
 var Terrain = require("./static/shared/terrain").Terrain;
-var toMpaDict = require("./static/shared/terrain").toMapDict;
+var toMapDict = require("./static/shared/terrain").toMapDict;
 
 exports.loadMap = function(filename, callback) {
     fs.readFile('static/data/maps/'+filename, { encoding: "utf8"}, function(err, data) {
