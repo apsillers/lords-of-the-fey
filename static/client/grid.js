@@ -1,6 +1,7 @@
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
     this.stage.enableMouseOver(20);
+    this.overlays = new createjs.Container();
     this.grid = {};
     this.units = {};
 }
@@ -10,6 +11,7 @@ World.prototype = {
             var coords = i.split(",");
             this.addSpace(new Space({ x:+coords[0], y:+coords[1], terrain: mapDict[i].terrain }));
         }
+	this.stage.addChild(this.overlays);
         this.stage.update();
     },
     
@@ -108,11 +110,20 @@ Space.prototype = {
     toString: function() { return this.x + "," + this.y; },
     
     setShape: function(terrain) {
-        this.shape =  new createjs.Bitmap(terrain.imgObj);
-        this.shape.owner = this;
+        this.shape = new createjs.Container();
+	this.baseShape = new createjs.Bitmap(terrain.imgObj);
+	this.shape.addChild(this.baseShape);
+	if(terrain.overlayImgObj) {
+	    var overlay = new createjs.Bitmap(terrain.overlayImgObj);
+	    overlay.x = this.x * Math.ceil(this.width * 3/4 + 1) - this.width / 2;
+	    overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - this.height/2;
+	    world.overlays.addChild(overlay);
+        }
+
+	this.baseShape.owner = this;
         this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
-        this.shape.addEventListener("click", ui.onSpaceClick);
-        this.shape.addEventListener("mouseover", ui.onSpaceHover);
+        this.baseShape.addEventListener("click", ui.onSpaceClick);
+        this.baseShape.addEventListener("rollover", ui.onSpaceHover);
     }
 }

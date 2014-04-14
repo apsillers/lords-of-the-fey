@@ -25,6 +25,7 @@ var Terrain = {
                 var overlay = this.overlays[prop];
 		terrainObj.properties = terrainObj.properties.concat(overlay.properties);
 		terrainObj.overlayImg = overlay.img;
+		terrainObj.overlayImgObj = overlay.imgObj;
             }
         }
 

@@ -5,13 +5,14 @@
   "moveCost": {
     "flat": 1,
     "swamp": 2,
-    "castle": 1
+    "castle": 1,
+    "forest": 1
   },
   "cover": {
     "flat": 0.5,
     "swamp": 0.3,
     "castle": 0.5,
-    "keep": 0.5
+    "forest": 0.7
   },
   "attacks":[
     {
