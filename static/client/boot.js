@@ -1,6 +1,6 @@
 var canvas = document.getElementById("c");
 canvas.width = 900;
-canvas.height = 500;
+canvas.height = 600;
 var world;
 var socket;
 var gameInfo = { 

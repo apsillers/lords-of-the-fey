@@ -109,8 +109,52 @@ function initListeners(socket, collections) {
 
     // create a new game
     socket.on("new game", function(data) {
-        collections.games.insert({ }, {safe: true}, function(err, item) {
+	collections.games.find({}, {"id":true}).toArray(function(err, gameList) {  
+	    gameList.sort(function(a,b) { return b.id - a.id; });
+	    if(gameList[0] == undefined) { gameList[0] = { id: 0 }; }
+	    var id = gameList[0].id+1;
+
+	    var gameData = {
+		"id" : id,
+		"map" : "test_map.map",
+		"players" : [
+		    { "team": 1, "gold": 60, "username": "hello", "race":"elves" },
+		    { "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
+		],
+		"activeTeam": 1
+	    };
 	    
+            collections.games.insert(gameData, {safe: true}, function(err, item) {
+		loadMap(gameData.map, function(err, mapData) {
+		    var startPositions = [];
+		    for(var pos in mapData) {
+			if(mapData[pos].start != undefined) {
+			    var coords = pos.split(",");
+			    startPositions[mapData[pos].start] = coords;
+			}
+		    }
+
+		    var index = 0;
+		    (function addCommander() {
+			index++;
+			if(index == startPositions.length) { console.log("wow, we made a game"); return; }
+			var typeName = index==1?"elven_archer":"grunt";
+			var coords = startPositions[index];
+			loadUnitType(typeName, function(err, typeObj) {
+			    collections.units.insert({
+				gameId: id,
+				x:coords[0],
+				y:coords[1],
+				team:index,
+				type:typeName,
+				isCommander:true,
+				hp:typeObj.maxHp,
+				moveLeft:typeObj.move
+			    }, {safe:true}, addCommander)
+			});
+		    })();
+		});
+	    });
 	});
     });
 
