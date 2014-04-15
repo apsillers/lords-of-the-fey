@@ -6,8 +6,8 @@ db.games.save({
     "id" : 1,
     "map" : "test_map.map",
     "players" : [
-	{ "team": 1, "gold": 60, "username": "hello" },
-	{ "team": 2, "gold": 40, "username": "goodbye" }
+	{ "team": 1, "gold": 60, "username": "hello", "race":"elves" },
+	{ "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
     ],
     "activeTeam": 1
 });
