@@ -8,6 +8,7 @@ var Terrain = {
     },
     overlays: {
         FOREST: { symbol: "Fd", name: "Summer Forest", img: "/data/img/terrain/forest.png", properties: ["forest"] },
+        ELVEN_VILLAGE: { symbol: "Ve", name: "Elven Village", img: "/data/img/terrain/village.png", properties: ["village"] },
     },
 
     getTerrainBySymbol: function(baseSymbol, overlaySymbol) {

@@ -6,13 +6,15 @@
     "flat": 1,
     "swamp": 2,
     "castle": 1,
-    "forest": 1
+    "forest": 1,
+    "village":1
   },
   "cover": {
     "flat": 0.5,
     "swamp": 0.2,
     "castle": 0.6,
-    "forest": 0.6
+    "forest": 0.6,
+    "village": 0.6
   },
   "attacks":[
     {

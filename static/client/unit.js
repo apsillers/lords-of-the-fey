@@ -15,6 +15,7 @@ var unitLib = {
 	unit.img = unit.imgObj.src;
 
 	unit.shape = new createjs.Container();
+	unit.shape.owner = unit;
 	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
 	
 	unit.isCommander = unitData.isCommander;

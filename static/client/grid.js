@@ -1,7 +1,7 @@
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
     this.stage.enableMouseOver(20);
-    this.overlays = new createjs.Container();
+    this.baseTerrain = new createjs.Container();
     this.grid = {};
     this.units = {};
 }
@@ -11,13 +11,15 @@ World.prototype = {
             var coords = i.split(",");
             this.addSpace(new Space({ x:+coords[0], y:+coords[1], terrain: mapDict[i].terrain }));
         }
-	this.stage.addChild(this.overlays);
+	this.stage.addChild(this.baseTerrain);
+	world.stage.setChildIndex(this.baseTerrain, 0);
         this.stage.update();
     },
     
     addSpace: function(space) {
         this.grid[space.x+","+space.y] = space;
-        this.stage.addChild(space.shape);
+        this.baseTerrain.addChild(space.shape);
+        this.stage.addChild(space.overlayShape);
     },
     
     getSpaceByCoords: function(x, y) {
@@ -113,17 +115,19 @@ Space.prototype = {
         this.shape = new createjs.Container();
 	this.baseShape = new createjs.Bitmap(terrain.imgObj);
 	this.shape.addChild(this.baseShape);
-	if(terrain.overlayImgObj) {
-	    var overlay = new createjs.Bitmap(terrain.overlayImgObj);
-	    overlay.x = this.x * Math.ceil(this.width * 3/4 + 1) - this.width / 2;
-	    overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - this.height/2;
-	    world.overlays.addChild(overlay);
-        }
 
 	this.baseShape.owner = this;
         this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
         this.baseShape.addEventListener("click", ui.onSpaceClick);
         this.baseShape.addEventListener("rollover", ui.onSpaceHover);
+
+	if(terrain.overlayImgObj) {
+	    var overlay = new createjs.Bitmap(terrain.overlayImgObj);
+	    overlay.x = this.x * Math.ceil(this.width * 3/4 + 1) - overlay.image.width / 4;
+	    overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - overlay.image.height/4;
+	    this.overlayShape = overlay;
+	    this.overlayShape.owner = this;
+        }
     }
 }
