@@ -2,6 +2,7 @@
 //  mongo < init.mongo.js
 // (or just paste it in?)
 use webnoth;
+db.dropDatabase();
 db.games.save({
     "id" : 1,
     "map" : "test_map.map",
