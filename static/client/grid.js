@@ -81,7 +81,7 @@ World.prototype = {
         ui.moveHappening = true;
 
         socket.emit("move", {
-            gameId: 1,
+            gameId: gameInfo.gameId,
             path: path.map(function(a) { return {x:a.space.x, y:a.space.y};}),
 	    attackIndex: attackIndex
         });
