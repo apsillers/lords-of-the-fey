@@ -129,5 +129,13 @@ Space.prototype = {
 	    this.overlayShape = overlay;
 	    this.overlayShape.owner = this;
         }
+    },
+
+    setVillageFlag: function(team) {
+	if(this.flag) { world.stage.removeChild(this.flag); }
+	this.flag = new createjs.Shape();
+	this.flag.graphics.beginFill(team-1?"#00F":"#F00").rect(this.shape.x, this.shape.y, 15, 10);
+	world.stage.addChild(this.flag);
+	world.stage.update();
     }
 }

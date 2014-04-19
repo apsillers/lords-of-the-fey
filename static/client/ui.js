@@ -308,6 +308,10 @@ var ui = {
             }
             
             if(!nextSpace) {
+		if(moveData.capture) {
+		    currSpace.setVillageFlag(unit.team);
+		}
+
 		world.positionUnit(unit, currSpace);
 		if(moveData.combat) { ui.animateAttack(moveData); }
                 else {

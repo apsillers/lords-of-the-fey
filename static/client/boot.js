@@ -117,6 +117,10 @@ window.addEventListener("load", function() {
                     var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
                     world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
                 }
+
+		for(var i in data.villages) {
+		    world.getSpaceByCoords(i).setVillageFlag(data.villages[i]);
+		}
             }
         });
     });
