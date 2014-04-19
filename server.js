@@ -96,7 +96,7 @@ function initListeners(socket, collections) {
             collections.games.findOne({ id:gameId }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
-                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam });
+                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages });
                 });
             });
         });
@@ -121,19 +121,24 @@ function initListeners(socket, collections) {
 		    { "team": 1, "gold": 60, "username": "hello", "race":"elves" },
 		    { "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
 		],
+		"villages": {},
 		"activeTeam": 1
 	    };
 	    
-            collections.games.insert(gameData, {safe: true}, function(err, item) {
-		loadMap(gameData.map, function(err, mapData) {
-		    var startPositions = [];
-		    for(var pos in mapData) {
-			if(mapData[pos].start != undefined) {
-			    var coords = pos.split(",");
-			    startPositions[mapData[pos].start] = coords;
-			}
+	    loadMap(gameData.map, function(err, mapData) {
+		var startPositions = [];
+		for(var pos in mapData) {
+		    if(mapData[pos].start != undefined) {
+			var coords = pos.split(",");
+			startPositions[mapData[pos].start] = coords;
 		    }
 
+		    if(mapData[pos].terrain.properties.indexOf("village") != -1) {
+			gameData.villages[pos] = 0;
+		    }
+		}
+		
+		collections.games.insert(gameData, {safe: true}, function(err, item) {    
 		    var index = 0;
 		    (function addCommander() {
 			index++;
@@ -143,8 +148,8 @@ function initListeners(socket, collections) {
 			loadUnitType(typeName, function(err, typeObj) {
 			    collections.units.insert({
 				gameId: id,
-				x:coords[0],
-				y:coords[1],
+				x:+coords[0],
+				y:+coords[1],
 				team:index,
 				type:typeName,
 				isCommander:true,
@@ -173,6 +178,7 @@ function initListeners(socket, collections) {
 
         collections.games.findOne({id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
+		console.log({ x:path[0].x, y:path[0].y, gameId:gameId })
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 		    // ensure that the logged-in user has the right to move this unit
 		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
@@ -190,31 +196,47 @@ function initListeners(socket, collections) {
                                 var endPoint = moveResult.path[moveResult.path.length-1];
                                 unit.x = endPoint.x;
                                 unit.y = endPoint.y;
+				unit.moveLeft -= moveResult.moveCost || 0;
 
-                                var emitMove = function() {
-				    io.sockets.in("game"+gameId).emit("moved", moveResult);
-                                };
-
-				// perform the attack
-				if(moveResult.attack) {
-				    var targetCoords = path[path.length-1];
-				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-				        loadUnitType(defender.type, function(err, defenderType) {
-					    // resolve combat
-					    moveResult.combat = executeAttack(unit, type, attackIndex, defender, defenderType, unitArray, mapData);
-					    // injure/kill units models
-					    var handleDefender = function() {
-						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
-						else { collections.units.save(defender, {safe: true}, emitMove); }
-					    }
-	
-					    if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
-					    else { collections.units.save(unit, {safe: true}, handleDefender); }
-				
-					});
-				    });
+				// if there is a village here and
+				// if the village is not co-team with the unit, capture it
+				if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
+				   game.villages[endPoint.x+","+endPoint.y] != unit.team) {
+					game.villages[endPoint.x+","+endPoint.y] = unit.team;
+					moveResult.capture = true;
+					console.log("about to save");
+					collections.games.save(game, {safe: true}, concludeMove);
 				} else {
+				    concludeMove();
+				}
+				
+				function concludeMove() {
+				    console.log("concluding move", arguments);
+                                    var emitMove = function() {
+					io.sockets.in("game"+gameId).emit("moved", moveResult);
+                                    };
+				    
+				    // perform the attack
+				    if(moveResult.attack) {
+					var targetCoords = path[path.length-1];
+					collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
+				            loadUnitType(defender.type, function(err, defenderType) {
+						// resolve combat
+						moveResult.combat = executeAttack(unit, type, attackIndex,
+										  defender, defenderType, unitArray, mapData);
+						// injure/kill units models
+						var handleDefender = function() {
+						    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
+						    else { collections.units.save(defender, {safe: true}, emitMove); }
+						}
+						
+						if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
+						else { collections.units.save(unit, {safe: true}, handleDefender); }
+					    });
+					});
+				    } else {
                                     collections.units.save(unit, {safe:true}, emitMove);
+				    }
 				}
                             });
                         });
@@ -235,7 +257,7 @@ function initListeners(socket, collections) {
 
 		if(socketOwnerCanAct(socket, game)) {
 		    createUnit(data, mapData, collections, player, function(createResult) {
-			socket.emit("created", createResult);
+			io.sockets.in("game"+gameId).emit("created", createResult);
 		    });
 		} else {
 		    socket.emit("created", {});
@@ -264,30 +286,39 @@ function initListeners(socket, collections) {
 			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
 		    };
 		    
-		    unitCursor.next(function updateUnitForNewTurn(err, unit) {
-			if(unit == null) { sendUpdates(); return; }
-			
-			var update = { x: unit.x, y: unit.y };
-			
-			loadUnitType(unit.type, function(err, type) {
-			    // heal unmoved units
-			    if(unit.moveLeft == type.move) {
-				unit.hp = Math.min(unit.hp+2, type.maxHp);
-				update.hp = unit.hp;
-			    }
+		    loadMap(game.map, function(err, mapData) {
+			unitCursor.next(function updateUnitForNewTurn(err, unit) {
+			    if(unit == null) { sendUpdates(); return; }
 			    
-			    // refill move points
-			    unit.moveLeft = type.move;
-			    update.moveLeft = unit.moveLeft;
+			    var update = { x: unit.x, y: unit.y };
 			    
-			    // TODO: if on a village, heal and remove poison
-			    // TODO: if poisoned, hurt
-			    // TODO: remove slow
-			    
-			    updates.push(update);
-			    
-			    collections.units.save(unit, {safe:true}, function() {
-				unitCursor.next(updateUnitForNewTurn);
+			    loadUnitType(unit.type, function(err, type) {
+				// heal unmoved units
+				if(unit.moveLeft == type.move) {
+				    unit.hp = Math.min(unit.hp+2, type.maxHp);
+				    update.hp = unit.hp;
+				}
+				
+				// refill move points
+				unit.moveLeft = type.move;
+				update.moveLeft = unit.moveLeft;
+				
+				// if on a village, heal
+				if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){
+				    unit.hp = Math.min(unit.hp+8, type.maxHp);
+				    update.hp = unit.hp;
+
+				    // TODO: remove poison
+				}
+				    
+				// TODO: if poisoned, hurt
+				// TODO: remove slow
+				
+				updates.push(update);
+				
+				collections.units.save(unit, {safe:true}, function() {
+				    unitCursor.next(updateUnitForNewTurn);
+				});
 			    });
 			});
 		    });

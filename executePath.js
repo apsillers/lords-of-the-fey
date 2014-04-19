@@ -12,7 +12,7 @@ module.exports = function executePath(path, unit, type, unitArray, mapData) {
 	if(occupant) {
 	    if(occupant.team != unit.team) {
 		if(isLastSpace && standingClear) {
-		    return { path:actualPath, revealedUnits:[], attack: true };
+		    return { path:actualPath, revealedUnits:[], attack: true, moveCost: totalMoveCost };
 		}
 		return { path:[path[0]], revealedUnits:[] };
 	    } else {
@@ -36,5 +36,5 @@ module.exports = function executePath(path, unit, type, unitArray, mapData) {
 	actualPath.push(path[i]);
     }
 
-    return { path: actualPath, revealedUnits: [] };
+    return { path: actualPath, revealedUnits: [], moveCost: totalMoveCost };
 }
