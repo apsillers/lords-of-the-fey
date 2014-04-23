@@ -170,7 +170,7 @@ var ui = {
 
 	for(pos in world.units) {
 	    var unit = world.units[pos];
-	    if(unit.isCommander) {
+	    if(unit.isCommander && unit.team == gameInfo.player.team) {
 		var foundPath = utils.castlePathExists(unit, space, world.grid);
 		if(foundPath) { break; }
 	    }
