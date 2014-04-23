@@ -228,11 +228,10 @@ var ui = {
 
 	for(var i=0; i<gameInfo.player.recruitList.length; ++i) {
 	    var unitId = gameInfo.player.recruitList[i];
-	    console.log(unitId);
 	    var unit = unitLib.protos[unitId];
-	    console.log(unit);
 	    var unitText = new createjs.Text(unit.name);
 	    var unitButton = new createjs.Shape();
+
 	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
 
 	    unitText.y = 30 + 52 * i;
@@ -345,7 +344,7 @@ var ui = {
 		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
 
 		    if(entry.damage) {			
-			unitLib.update(hittee, { hp: hittee.hp - entry.damage });
+			hittee.update({ hp: hittee.hp - entry.damage });
 		    }
 
 		    if(entry.kill) {
