@@ -85,14 +85,14 @@ window.addEventListener("load", function() {
 
 	for(var i=0; i<data.updates.length; ++i) {
 	    var update = data.updates[i];
-	    unitLib.update(world.getUnitAt(update), update);
+	    world.getUnitAt(update).update(update);
 	}
     });
 
-    socket.on("created", function(unit) {
-	if(unit.type) {
-	    var unitObj = unitLib.create(unit, unitLib.protos[unit.type]);
-            world.addUnit(unitObj, world.getSpaceByCoords(unit.x,unit.y));
+    socket.on("created", function(unitData) {
+	if(unitData.type) {
+	    var unitObj = new Unit(unitData);
+            world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
 	}
 	ui.moveHappening = false;
     });
