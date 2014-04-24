@@ -301,7 +301,7 @@ function initListeners(socket, collections) {
 			    if(unit == null) { sendUpdates(); return; }
 			    
 			    var update = { x: unit.x, y: unit.y };
-			    
+			    console.log(unit);
 			    unit = new Unit(unit);
 			    // heal unmoved units
 			    if(unit.moveLeft == unit.move && !unit.hasAttacked) {

@@ -119,6 +119,7 @@ function Unit(unitData) {
 	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
         
 	unit.drawHpBar();
+	unit.drawGem();
     
 	if(unit.isCommander) { unit.drawCrown(); }
     }
@@ -137,14 +138,48 @@ unitLib.unitProto = {
 	
 	this.healthBar = new createjs.Shape();
 	this.healthBar.graphics.beginFill(barColor).drawRect(54, 8.5 + 20 * (1 - hpRatio), 4, 20 * hpRatio);
-	this.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").setStrokeStyle(1).drawRect(53.5, 8.5, 4, 20);
+	this.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").drawRect(53.5, 8.5, 4, 20);
 	this.shape.addChild(this.healthBar);
     },
     
     drawCrown: function() {
 	var crown = new createjs.Shape();
-	crown.graphics.beginFill("gold").drawRect(5,5,15,5);
+	crown.graphics.beginFill("gold").drawRect(10,9,12,3).drawRect(10,7,3,3).drawRect(15,7,3,3).drawRect(19,7,3,3);
 	this.shape.addChild(crown);
+    },
+
+    drawGem: function() {
+	if(this.gem) { this.shape.removeChild(this.gem); }
+
+	var availability = this.calculateAvailability();
+	console.log(this, availability);
+	if(availability == -1) { return; }
+
+	var color = ["red","yellow","#0D0"][availability];
+
+	this.gem = new createjs.Shape();
+	this.gem.graphics.beginStroke("black").beginFill(color).drawRect(10.5,15.5,5,10);
+	this.shape.addChild(this.gem);
+    },
+
+    calculateAvailability: function() {
+	if(gameInfo.activeTeam != this.team) { return -1; }
+
+	if(this.moveLeft == this.move) {
+	    return 2;
+	} else if(this.moveLeft != 0) {
+	    return 1;
+	} else if(!this.hasAttacked) {
+	    var neighbors = world.getNeighbors(this);
+	    for(var i = 0; i < neighbors.length; ++i) { 
+		var adjUnit = world.getUnitAt(neighbors[i]);
+		if(adjUnit && adjUnit.team != this.team) {
+		    return 1;
+		}
+	    }
+	}
+	
+	return 0;
     },
 	    
     update: function(update) {
@@ -153,6 +188,8 @@ unitLib.unitProto = {
 	}
 	ui.updateUnitSidebar();
 	this.drawHpBar();
+	this.drawGem();
+	world.stage.update();
     },
 
     // select a defnsive attack to counter the attack `offense` offered by `offender`

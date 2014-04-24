@@ -71,6 +71,10 @@ window.addEventListener("load", function() {
                     world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
 		}
 
+		for(var unit in world.units) {
+		    world.units[unit].drawGem();
+		}
+
 		for(var i in data.villages) {
 		    world.getSpaceByCoords(i).setVillageFlag(data.villages[i]);
 		}
@@ -87,6 +91,13 @@ window.addEventListener("load", function() {
 	    var update = data.updates[i];
 	    world.getUnitAt(update).update(update);
 	}
+
+	for(var unit in world.units) {
+	    world.units[unit].drawGem();
+	    world.units[unit].hasAttacked = false;
+	}
+
+	world.stage.update();
     });
 
     socket.on("created", function(unitData) {

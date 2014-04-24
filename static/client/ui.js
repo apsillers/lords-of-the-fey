@@ -72,9 +72,11 @@ var ui = {
     },
 
     updateUnitSidebar: function() {
-	var hoveringUnit = world.getUnitAt(this.hoverSpace);
-	if(hoveringUnit) {
-	    ui.hoverUnit = hoveringUnit;
+	if(ui.hoverSpace) {
+	    var hoveringUnit = world.getUnitAt(ui.hoverSpace);
+	    if(hoveringUnit) {
+		ui.hoverUnit = hoveringUnit;
+	    }
 	}
 
 	if(ui.hoverUnit) {
@@ -197,7 +199,6 @@ var ui = {
 	    createMenuItem(0, "Recruit", function() {
 		ui.showRecruitPrompt(function(typeName) {
 		    socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
-		    console.log("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
 		    ui.moveHappening = true;
 		});
 	    });
@@ -279,12 +280,11 @@ var ui = {
 
 	var remainingMove = unit.moveLeft - (moveData.moveCost || 0);
 	if(moveData.capture || moveData.combat) { remainingMove = 0; }
-	if(moveData.combat) { unit.update({ hasAttacked: true }); }
-	unit.update({ moveLeft: remainingMove });
 
 	// TODO: reveal response.revealedUnits
 
         if(path.length < 2) {
+	    
 	    if(moveData.combat) { ui.animateAttack(moveData); }
             else { ui.moveHappening = false; }
 	    return;
@@ -320,7 +320,11 @@ var ui = {
 		}
 
 		world.positionUnit(unit, currSpace);
-		if(moveData.combat) { ui.animateAttack(moveData); }
+		unit.update({ moveLeft: remainingMove });
+
+		if(moveData.combat) {
+		    ui.animateAttack(moveData);
+		}
                 else {
 		    ui.clearPath();
 		    ui.moveHappening = false;
@@ -336,6 +340,8 @@ var ui = {
 	var offender = world.getUnitAt(moveData.combat.offender);
 	var defender = world.getUnitAt(moveData.combat.defender);
 	var record = moveData.combat.record;
+
+	offender.update({ hasAttacked: true });
 
 	var dX = (offender.shape.x - defender.shape.x) / 15;
 	var dY = (offender.shape.y - defender.shape.y) / 15;
