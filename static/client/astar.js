@@ -5,10 +5,16 @@ A* implementation with built-in move rules (e.g.Only finds paths whose cost is l
 */
 
 function aStar(world, unit, start, goal, prevPath) {
+    var attackTarget = world.getUnitAt(goal);
+
+    // if the unit has already attacked, another unit cannot be a valid destination
+    if(attackTarget && unit.hasAttacked) {
+	return false;
+    }
+
     if(prevPath) {
-	var attackTarget = world.getUnitAt(goal);
 	var prevDest = prevPath[prevPath.length-1].space;
-	
+
 	// if the previous path was a move adjacent to an enemy, and now the path is *on* that abjecent enemy, do not recompute the path
 	// this allows the player to pcik the offense location, instead of relying on the normal A* path to the enemy
 	if(!world.getUnitAt(prevDest) && // if the previous path did not end on an occupied space (i.e., was not an attack)

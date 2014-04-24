@@ -86,6 +86,7 @@ var ui = {
 	    $("#right_data_hp").css("color", hpColor);
 
             $("#right_data_xp").text(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
+            $("#right_data_move").text(ui.hoverUnit.moveLeft + "/" + ui.hoverUnit.move);
             $("#right_data_name").text(ui.hoverUnit.name);
 
 	    $("#right_data_attacks").html("");
@@ -146,11 +147,13 @@ var ui = {
 		if(!destUnit) {
 		    world.moveUnit(unit, ui.path);
 		} else {
-		    // show attack prompt
-		    ui.showAttackPrompt(unit, destUnit, function(attackSlot) {
-			if(attackSlot == -1) { return; }
-			world.moveUnit(unit, ui.path, attackSlot);
-		    });
+		    if(!unit.hasAttacked) {
+			// show attack prompt
+			ui.showAttackPrompt(unit, destUnit, function(attackSlot) {
+			    if(attackSlot == -1) { return; }
+			    world.moveUnit(unit, ui.path, attackSlot);
+			});
+		    }
 		}
             }
 	    
@@ -273,6 +276,11 @@ var ui = {
             nextSpace = world.getSpaceByCoords(path[1]),
             unit = world.units[currSpace.x+","+currSpace.y]
             start = null, stepProgress = 0, prevX = unit.shape.x, prevY = unit.shape.y, pathPos = 1;
+
+	var remainingMove = unit.moveLeft - (moveData.moveCost || 0);
+	if(moveData.capture || moveData.combat) { remainingMove = 0; }
+	if(moveData.combat) { unit.update({ hasAttacked: true }); }
+	unit.update({ moveLeft: remainingMove });
 
 	// TODO: reveal response.revealedUnits
 

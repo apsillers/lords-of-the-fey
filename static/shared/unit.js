@@ -80,32 +80,49 @@ var unitLib = {
     },
 
     serverInit: function(initCallback) {
+	var loadUnitType = require("../../loadUtils.js").loadUnitType;
+	var count = 0;
+	for(var i = 0; i < unitLib.protoList.length; ++i) {
+	    var name = unitLib.protoList[i];
+	    loadUnitType(name, function(err, typeObj) {
+		var name = unitLib.protoList[count];
+		count++;
 
+		var newProto = Object.create(unitLib.unitProto);
+		for(var prop in typeObj) {
+		    newProto[prop] = typeObj[prop];
+		}
+		unitLib.protos[name] = newProto;
+		if(count == unitLib.protoList.length) { 
+		    initCallback();
+		}
+	    });
+	}
     }
 }
 
 function Unit(unitData) {
     var proto = unitLib.protos[unitData.type];
     var unit = Object.create(proto);
-    unit.moveLeft = unitData.moveLeft;
-    unit.hp = unitData.hp;
-    unit.xp = unitData.xp;
+
+    for(var prop in unitData) {
+	unit[prop] = unitData[prop];
+    }
+
+    // client-side image business
+    if(unit.colorImgList) {
+	unit.imgObj = unit.colorImgList[unit.team];
+	unit.img = unit.imgObj.src;
+
+	unit.shape = new createjs.Container();
+	unit.shape.owner = unit;
+	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
+        
+	unit.drawHpBar();
     
-    unit.team = unitData.team;
-    unit.imgObj = unit.colorImgList[unit.team];
-    console.log(unit.team+1);
-    unit.img = unit.imgObj.src;
-    
-    unit.shape = new createjs.Container();
-    unit.shape.owner = unit;
-    unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
-    
-    unit.isCommander = unitData.isCommander;
-    
-    unit.drawHpBar();
-    
-    if(unit.isCommander) { unit.drawCrown(); }
-    
+	if(unit.isCommander) { unit.drawCrown(); }
+    }
+
     return unit;
 }
 
@@ -136,6 +153,42 @@ unitLib.unitProto = {
 	}
 	ui.updateUnitSidebar();
 	this.drawHpBar();
+    },
+
+    // select a defnsive attack to counter the attack `offense` offered by `offender`
+    // TODO: calculte odds of damage, killing, etc.
+    selectDefense: function(offender, offense) {
+	var defense = null;
+	var defenseIndex = -1;
+	for(var j=0; j < this.attacks.length; ++j){
+	    if(offense.type == this.attacks[j].type) {
+		defenseIndex = j;
+		defense = this.attacks[j];
+	    }
+	}
+	return { defense: defense, defenseIndex: defenseIndex };
+    },
+
+    getCoverOnSpace: function(space) {
+	var unit = this;
+	return Math.max.apply(Math,
+		      space.terrain.properties.map(function(i) {
+			  return unit.cover[i] || 0;
+		      })
+	       );
+    },
+
+    // returns a plain Object with only the object's own properties
+    // used for storing the database (i.e., because prototype properties
+    // are implied by the unit's type and do not need to be stored)
+    getStorableObj: function() {
+	var storableObj = {};
+	var ownProps = Object.getOwnPropertyNames(this);
+	for(var i = 0; i < ownProps.length; i++) {
+	    var prop = ownProps[i];
+	    storableObj[prop] = this[prop];
+	}
+	return storableObj;
     }
 };
 
@@ -144,3 +197,11 @@ var genId;
     var id = 0;
     genId = function() { return id++; }
 })();
+
+if(typeof module != "undefined") {
+    module.exports.unitLib = unitLib;
+    module.exports.Unit = Unit;
+} else {
+    window.unitLib = unitLib;
+    window.Unit = Unit;
+}

@@ -1,5 +1,5 @@
 // attempt to move a unit through a given path
-module.exports = function executePath(path, unit, type, unitArray, mapData) {
+module.exports = function executePath(path, unit, unitArray, mapData) {
     var actualPath = [path[0]];
     var standingClear = true;
     var totalMoveCost = 0;
@@ -26,7 +26,7 @@ module.exports = function executePath(path, unit, type, unitArray, mapData) {
 	}
 
 	// add cost to move on this sapce
-	totalMoveCost += Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return type.moveCost[i] || Infinity; }));
+	totalMoveCost += Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return unit.moveCost[i] || Infinity; }));
 
 	// if the move is too costly, abort
 	if(totalMoveCost > unit.moveLeft) {

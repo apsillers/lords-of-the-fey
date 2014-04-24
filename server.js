@@ -11,6 +11,8 @@ var createUnit = require("./createUnit");
 var loadMap = require("./loadUtils").loadMap;
 var loadUnitType = require("./loadUtils").loadUnitType;
 var initLobbyListeners = require("./lobby").initLobbyListeners;
+var Unit = require("./static/shared/unit.js").Unit;
+var unitLib = require("./static/shared/unit.js").unitLib;
 
 var mongoClient = new MongoClient(new Server('localhost', 27017));
 mongoClient.open(function(err, mongoClient) {
@@ -30,8 +32,10 @@ mongoClient.open(function(err, mongoClient) {
 
     require("./auth").initAuth(app, mongo, collections);
 
-    io.sockets.on('connection', function (socket) {
-        initListeners(socket, collections);
+    unitLib.init(function() {
+	io.sockets.on('connection', function (socket) {
+            initListeners(socket, collections);
+	});
     });
 
 });
@@ -180,6 +184,7 @@ function initListeners(socket, collections) {
             loadMap(game.map, function(err, mapData) {
 		console.log({ x:path[0].x, y:path[0].y, gameId:gameId })
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
+		    console.log("found");
 		    // ensure that the logged-in user has the right to move this unit
 		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
 		    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
@@ -187,58 +192,63 @@ function initListeners(socket, collections) {
 			return;
 		    }
 
-                    loadUnitType(unit.type, function(err, type) {
-                        collections.units.find({ gameId: gameId }, function(err, cursor) {
-                            cursor.toArray(function(err, unitArray) {
-				// make the move
-                                var moveResult = require("./executePath")(path, unit, type, unitArray, mapData);
+		    unit = new Unit(unit);
 
-                                var endPoint = moveResult.path[moveResult.path.length-1];
-                                unit.x = endPoint.x;
-                                unit.y = endPoint.y;
-				unit.moveLeft -= moveResult.moveCost || 0;
+                    collections.units.find({ gameId: gameId }, function(err, cursor) {
+                        cursor.toArray(function(err, unitArray) {
+			    // make the move
+                            var moveResult = require("./executePath")(path, unit, unitArray, mapData);
 
-				// if there is a village here and
-				// if the village is not co-team with the unit, capture it
-				if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
-				   game.villages[endPoint.x+","+endPoint.y] != unit.team) {
-					game.villages[endPoint.x+","+endPoint.y] = unit.team;
-					moveResult.capture = true;
-					console.log("about to save");
-					collections.games.save(game, {safe: true}, concludeMove);
-				} else {
-				    concludeMove();
-				}
+			    console.log("movePath found");
+
+                            var endPoint = moveResult.path[moveResult.path.length-1];
+                            unit.x = endPoint.x;
+                            unit.y = endPoint.y;
+			    unit.moveLeft -= moveResult.moveCost || 0;
+
+			    // if there is a village here and
+			    // if the village is not co-team with the unit, capture it
+			    if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
+			       game.villages[endPoint.x+","+endPoint.y] != unit.team) {
+				game.villages[endPoint.x+","+endPoint.y] = unit.team;
+				moveResult.capture = true;
+				unit.moveLeft = 0;
+				collections.games.save(game, {safe: true}, concludeMove);
+			    } else {
+				concludeMove();
+			    }
+			    
+			    function concludeMove() {
+                                var emitMove = function() {
+				    io.sockets.in("game"+gameId).emit("moved", moveResult);
+                                };
 				
-				function concludeMove() {
-				    console.log("concluding move", arguments);
-                                    var emitMove = function() {
-					io.sockets.in("game"+gameId).emit("moved", moveResult);
-                                    };
-				    
-				    // perform the attack
-				    if(moveResult.attack) {
-					var targetCoords = path[path.length-1];
-					collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-				            loadUnitType(defender.type, function(err, defenderType) {
-						// resolve combat
-						moveResult.combat = executeAttack(unit, type, attackIndex,
-										  defender, defenderType, unitArray, mapData);
-						// injure/kill units models
-						var handleDefender = function() {
-						    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
-						    else { collections.units.save(defender, {safe: true}, emitMove); }
-						}
-						
-						if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
-						else { collections.units.save(unit, {safe: true}, handleDefender); }
-					    });
-					});
-				    } else {
-                                    collections.units.save(unit, {safe:true}, emitMove);
-				    }
+				// perform the attack
+				if(moveResult.attack && !unit.hasAttacked) {
+				    var targetCoords = path[path.length-1];
+				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
+					if(defender == null) { emitMove(); }
+
+					unit.hasAttacked = true;
+					unit.moveLeft = 0;
+
+					defender = new Unit(defender);
+					
+					// resolve combat
+					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData);
+					// injure/kill units models
+					var handleDefender = function() {
+					    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
+					    else { collections.units.save(defender.getStorableObj(), {safe: true}, emitMove); }
+					}
+					
+					if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
+					else { collections.units.save(unit.getStorableObj(), {safe: true}, handleDefender); }
+				    });
+				} else {
+                                    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
 				}
-                            });
+			    }
                         });
                     });
                 });
@@ -292,33 +302,33 @@ function initListeners(socket, collections) {
 			    
 			    var update = { x: unit.x, y: unit.y };
 			    
-			    loadUnitType(unit.type, function(err, type) {
-				// heal unmoved units
-				if(unit.moveLeft == type.move) {
-				    unit.hp = Math.min(unit.hp+2, type.maxHp);
-				    update.hp = unit.hp;
-				}
+			    unit = new Unit(unit);
+			    // heal unmoved units
+			    if(unit.moveLeft == unit.move && !unit.hasAttacked) {
+				unit.hp = Math.min(unit.hp+2, unit.maxHp);
+				update.hp = unit.hp;
+			    }
 				
-				// refill move points
-				unit.moveLeft = type.move;
-				update.moveLeft = unit.moveLeft;
+			    // refill move points
+			    unit.moveLeft = unit.move;
+			    update.moveLeft = unit.moveLeft;
+			    unit.hasAttacked = false;
+	
+			    // if on a village, heal
+			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){
+				unit.hp = Math.min(unit.hp+8, unit.maxHp);
+				update.hp = unit.hp;
 				
-				// if on a village, heal
-				if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){
-				    unit.hp = Math.min(unit.hp+8, type.maxHp);
-				    update.hp = unit.hp;
-
-				    // TODO: remove poison
-				}
+				// TODO: remove poison
+			    }
 				    
-				// TODO: if poisoned, hurt
-				// TODO: remove slow
+			    // TODO: if poisoned, hurt
+			    // TODO: remove slow
 				
-				updates.push(update);
-				
-				collections.units.save(unit, {safe:true}, function() {
-				    unitCursor.next(updateUnitForNewTurn);
-				});
+			    updates.push(update);
+			    
+			    collections.units.save(unit.getStorableObj(), {safe:true}, function() {
+				unitCursor.next(updateUnitForNewTurn);
 			    });
 			});
 		    });
@@ -336,33 +346,28 @@ function initListeners(socket, collections) {
 //     "damage": Number,
 //     "kill": Boolean
 //   }, ...]
-function executeAttack(offender, offenderType, attackIndex, defender, defenderType, units, mapData) {
+function executeAttack(offender, attackIndex, defender, units, mapData) {
     var battleRecord = [];
     var swingResult;
     var defenseIndex;
 
-    var defense = null, offense = offenderType.attacks[attackIndex];
+    var offense = offender.attacks[attackIndex];
 
-    for(var j=0; j < defenderType.attacks.length; ++j){
-	if(offense.type == defenderType.attacks[j].type) {
-	    defenseIndex = j;
-	    defense = defenderType.attacks[j];
-	}
-    }
+    var defenseChoice = defender.selectDefense(offender, offense);
+    var defense = defenseChoice.defense;
+    var defenseIndex = defenseChoice.defenseIndex;
 
-    var defenderTerrain = mapData[defender.x+","+defender.y].terrain;
-    var defenderCover = Math.max.apply(Math, defenderTerrain.properties.map(function(i) { return defenderType.cover[i] || 0; }));
-    var offenderTerrain = mapData[offender.x+","+offender.y].terrain;
-    var offenderCover = Math.max.apply(Math, offenderTerrain.properties.map(function(i) { return offenderType.cover[i] || 0; }));
+    var defenderCover = defender.getCoverOnSpace(mapData[defender.x+","+defender.y]);
+    var offenderCover = offender.getCoverOnSpace(mapData[offender.x+","+offender.y]);
     for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
 	if(round < offense.number) {
-	    swingResult = attackSwing(true, offense, offender, offenderType, defender, defenderType, defenderCover, units);
+	    swingResult = attackSwing(true, offense, offender, defender, defenderCover, units);
 	    battleRecord.push(swingResult);
 	    if(swingResult.kill) { break; }
 	}
 
 	if(defense && round < defense.number) {
-	    swingResult = attackSwing(false, defense, defender, defenderType, offender, offenderType, offenderCover, units);
+	    swingResult = attackSwing(false, defense, defender, offender, offenderCover, units);
 	    battleRecord.push(swingResult);
 	    if(swingResult.kill) { break; }
 	}
@@ -373,7 +378,7 @@ function executeAttack(offender, offenderType, attackIndex, defender, defenderTy
 
 // perform one swing of an attack, by the hitter, on the hittee
 // return a swing record object
-function attackSwing(isOffense, attack, hitter, hitterType, hittee, hitteeType, hitteeCover, units) {
+function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     var swingRecord;
 
     hitteeCover = attack.magic ? Math.min(hitteeCover, .3) : hitteeCover;
