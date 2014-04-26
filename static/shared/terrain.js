@@ -31,6 +31,19 @@ var Terrain = {
         }
 
 	return terrainObj;
+    },
+
+    getNeighborCoords: function(space) {
+        var x = space.x, y = space.y;
+        
+        // -1 if odd, +1 if even
+        var offset = 1 - (x % 2) * 2;
+        return [{ x: x-1, y: y+offset },
+		{ x: x,   y: y+offset },
+		{ x: x+1, y: y+offset },
+		{ x: x-1, y: y },
+		{ x: x,   y: y-offset },
+		{ x: x+1, y: y }];
     }
 }
 

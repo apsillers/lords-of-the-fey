@@ -1,3 +1,11 @@
+function areNeighbors(space1, space2) {
+    var neighbors = require("./static/shared/terrain.js").Terrain.getNeighborCoords(space1);
+    for(var i=0; i<neighbors.length; ++i) {
+	if(space2.x == neighbors[i].x && space2.y == neighbors[i].y) { return true; }
+    }
+    return false;
+}
+
 // attempt to move a unit through a given path
 module.exports = function executePath(path, unit, unitArray, mapData) {
     var actualPath = [path[0]];
@@ -7,6 +15,8 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
     for(var i=1; i<path.length; ++i) {
 	var coords = path[i];
 	var isLastSpace = (i == path.length-1);
+
+	if(!areNeighbors(path[i], path[i-1])) { return { path:[path[0]], revealedUnits:[] }; }
 
 	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
 	if(occupant) {

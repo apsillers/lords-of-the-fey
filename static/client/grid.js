@@ -34,13 +34,8 @@ World.prototype = {
     },
     
     getNeighbors: function(space) {
-        var neighbors = [];
-        
-        var x = space.x, y = space.y;
-        
-        // -1 if odd, +1 if even
-        var offset = 1 - (x % 2) * 2;
-        var coords = [(x-1)+","+(y+offset), x+","+(y+offset), (x+1)+","+(y+offset), (x-1)+","+y, x+","+(y-offset), (x+1)+","+y];
+	var neighbors = [];
+	var coords = Terrain.getNeighborCoords(space);
         
         for(var i=0; i<coords.length; ++i) {
             var prospect = this.getSpaceByCoords(coords[i]);
