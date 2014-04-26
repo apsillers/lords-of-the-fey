@@ -341,7 +341,7 @@ var ui = {
 	var defender = world.getUnitAt(moveData.combat.defender);
 	var record = moveData.combat.record;
 
-	offender.update({ hasAttacked: true });
+	offender.update({ hasAttacked: true, moveLeft: 0 });
 
 	var dX = (offender.shape.x - defender.shape.x) / 15;
 	var dY = (offender.shape.y - defender.shape.y) / 15;
@@ -406,16 +406,26 @@ var ui = {
 	ui.attackPrompt.addChild(promptShape);
 
 	for(var i=0; i<attacker.attacks.length; ++i) {
+	    var stringifyAttack = function(attack) {
+		if(!attack) { return "-- none --"; }
+		return attack.name + ": " + attack.damage + "-" + attack.number + " (" + attack.type + ")";
+	    }
+
 	    var attack = attacker.attacks[i];
-	    var attackText = new createjs.Text(JSON.stringify(attack));
+	    var attackText = stringifyAttack(attack);
+
+	    var defense = defender.selectDefense(attacker, attack).defense;
+	    var defenseText = stringifyAttack(defense);
+
 	    var attackButton = new createjs.Shape();
 	    attackButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
 
-	    attackText.y = 30 + 52 * i;
-	    attackText.x = 20;
-	    attackText.color = "#fff";
+	    var itemText = new createjs.Text(attackText + "  |  " + defenseText);
+	    itemText.y = 30 + 52 * i;
+	    itemText.x = 20;
+	    itemText.color = "#fff";
 	    ui.attackPrompt.addChild(attackButton);
-	    ui.attackPrompt.addChild(attackText);
+	    ui.attackPrompt.addChild(itemText);
 
 	    attackButton.addEventListener("click", resolutionCallback.bind(null, i));
 	    attackButton.addEventListener("click", ui.clearModal);
