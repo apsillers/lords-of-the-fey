@@ -1,5 +1,7 @@
+var getNeighborCoords = require("./static/shared/terrain.js").Terrain.getNeighborCoords;
+
 function areNeighbors(space1, space2) {
-    var neighbors = require("./static/shared/terrain.js").Terrain.getNeighborCoords(space1);
+    var neighbors = getNeighborCoords(space1);
     for(var i=0; i<neighbors.length; ++i) {
 	if(space2.x == neighbors[i].x && space2.y == neighbors[i].y) { return true; }
     }
@@ -44,6 +46,16 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 	}
 
 	actualPath.push(path[i]);
+
+	// if any enemy is adjacent to this space, end the path now
+	var neighborSpaces = getNeighborCoords(coords);
+	var hasAdjacentEnemy = unitArray.some(function(u) {
+	    for(var i=0; i<neighborSpaces.length; ++i) {
+		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.team != unit.team) { return true; }
+	    }
+	    return false;
+	});
+	if(hasAdjacentEnemy) { totalMoveCost = unit.moveLeft; break; }
     }
 
     return { path: actualPath, revealedUnits: [], moveCost: totalMoveCost };
