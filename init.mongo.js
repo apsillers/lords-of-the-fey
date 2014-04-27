@@ -10,6 +10,9 @@ db.games.save({
 	{ "team": 1, "gold": 60, "username": "hello", "race":"elves" },
 	{ "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
     ],
+    "villages": {
+        "8,3":0,
+    },
     "activeTeam": 1
 });
 
