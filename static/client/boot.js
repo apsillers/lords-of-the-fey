@@ -109,6 +109,8 @@ window.addEventListener("load", function() {
     });
 
     socket.on("moved", ui.animateUnitMove);
+
+    socket.on("playerUpdate", ui.updatePlayer);
 });
 
 

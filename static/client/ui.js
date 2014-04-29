@@ -451,5 +451,11 @@ var ui = {
 	world.stage.removeChild(ui.modal);
 	ui.modal = undefined;
 	world.stage.update();
+    },
+
+    updatePlayer: function(data) {
+	if(data.gold != undefined) {
+	    $("#top-gold-text").text(data.gold);
+	}
     }
 }

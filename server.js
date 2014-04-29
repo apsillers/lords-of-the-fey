@@ -13,6 +13,7 @@ var loadUnitType = require("./loadUtils").loadUnitType;
 var initLobbyListeners = require("./lobby").initLobbyListeners;
 var Unit = require("./static/shared/unit.js").Unit;
 var unitLib = require("./static/shared/unit.js").unitLib;
+var socketList = [];
 
 var mongoClient = new MongoClient(new Server('localhost', 27017));
 mongoClient.open(function(err, mongoClient) {
@@ -109,6 +110,16 @@ function initListeners(socket, collections) {
     // subscribe to a game channel
     socket.on("join game", function(gameId) {
         socket.join("game"+gameId);
+	if(socket.handshake.user) {
+	    socketList.push({ gameId: gameId, username: socket.handshake.user.username, socket: socket })
+	}
+    });
+
+    socket.on("disconnect", function() {
+	var socketData = socketList.filter(function(o) {
+	    return o.socket == socket;
+	})[0];
+	socketList.splice(socketList.indexOf(socketData));
     });
 
     // create a new game
@@ -199,8 +210,6 @@ function initListeners(socket, collections) {
 			    // make the move
                             var moveResult = require("./executePath")(path, unit, unitArray, mapData);
 
-			    console.log("movePath found");
-
                             var endPoint = moveResult.path[moveResult.path.length-1];
                             unit.x = endPoint.x;
                             unit.y = endPoint.y;
@@ -287,13 +296,30 @@ function initListeners(socket, collections) {
 
 	    game.activeTeam %= (game.players.length);
 	    game.activeTeam++;
-	    collections.games.save(game, { safe: true }, function() {
+
+	    var villageCount = 0;
+	    for(var coords in game.villages) {
+		if(game.villages[coords] == game.activeTeam) {
+		    villageCount++;
+		}
+	    }
+	    game.players[game.activeTeam - 1].gold += villageCount*2;
 		
+	    collections.games.save(game, { safe: true }, function() {
+
 		// find all units owned by the newly active player
 		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
 		    var updates = [];
 		    var sendUpdates = function() {
 			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
+
+			var activePlayerSocketData = socketList.filter(function(o) {
+			    return o.gameId == gameId && o.username == game.players[game.activeTeam-1].username;
+			})[0];
+
+			if(activePlayerSocketData) {
+			    activePlayerSocketData.socket.emit("playerUpdate", { gold: game.players[game.activeTeam-1].gold });
+			}
 		    };
 		    
 		    loadMap(game.map, function(err, mapData) {
@@ -301,7 +327,6 @@ function initListeners(socket, collections) {
 			    if(unit == null) { sendUpdates(); return; }
 			    
 			    var update = { x: unit.x, y: unit.y };
-			    console.log(unit);
 			    unit = new Unit(unit);
 			    // heal unmoved units
 			    if(unit.moveLeft == unit.move && !unit.hasAttacked) {
