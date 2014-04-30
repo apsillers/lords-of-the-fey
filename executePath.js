@@ -55,7 +55,7 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 	    }
 	    return false;
 	});
-	if(hasAdjacentEnemy) { totalMoveCost = unit.moveLeft; break; }
+	if(hasAdjacentEnemy) { totalMoveCost = unit.moveLeft; }
     }
 
     return { path: actualPath, revealedUnits: [], moveCost: totalMoveCost };
