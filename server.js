@@ -119,7 +119,7 @@ function initListeners(socket, collections) {
 	var socketData = socketList.filter(function(o) {
 	    return o.socket == socket;
 	})[0];
-	socketList.splice(socketList.indexOf(socketData));
+	socketList.splice(socketList.indexOf(socketData), 1);
     });
 
     // create a new game
