@@ -133,7 +133,7 @@ function initListeners(socket, collections) {
 		"id" : id,
 		"map" : "test_map.map",
 		"players" : [
-		    { "team": 1, "gold": 60, "username": "hello", "race":"elves" },
+		    { "team": 1, "gold": 40, "username": "hello", "race":"elves" },
 		    { "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
 		],
 		"villages": {},
@@ -275,8 +275,9 @@ function initListeners(socket, collections) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
 		if(socketOwnerCanAct(socket, game)) {
-		    createUnit(data, mapData, collections, player, function(createResult) {
+		    createUnit(data, mapData, collections, game, player, function(createResult) {
 			io.sockets.in("game"+gameId).emit("created", createResult);
+			socket.emit("playerUpdate", { gold: player.gold });
 		    });
 		} else {
 		    socket.emit("created", {});

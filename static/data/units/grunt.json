@@ -1,6 +1,7 @@
 {
   "name": "Grunt",
   "img": "/data/img/units/grunt.png",
+  "cost": 16,
   "move": 4,
   "moveCost": {
     "flat": 1,

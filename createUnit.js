@@ -1,6 +1,7 @@
 var castlePathExists = require("./static/shared/castlePathExists");
+var Unit = require("./static/shared/unit.js").Unit;
 
-module.exports = function(data, mapData, collections, player, callback) {
+module.exports = function(data, mapData, collections, game, player, callback) {
     var gameId = data.gameId;
     var loadUnitType = require("./loadUtils").loadUnitType;
     var loadRace = require("./loadUtils").loadRace;
@@ -28,12 +29,18 @@ module.exports = function(data, mapData, collections, player, callback) {
 		    }
 		    
 		    if(!createValid) { callback({}); return; }
+
+		    var unit = new Unit(data);
+		    data.xp = 0;
+		    data.hp = unit.maxHp;
+		    data.team = player.team;
+		    data.moveLeft = unit.move;
+
+		    if(player.gold < unit.cost) { callback({}); return; }
+
+		    player.gold -= unit.cost;
 		    
-		    loadUnitType(data.type, function(err, type) {
-			data["xp"] = 0;
-			data["hp"] = type.maxHp;
-			data["moveLeft"] = type.move;
-			data["team"] = player.team;
+		    collections.games.save(game, { safe: true }, function() {
 			collections.units.insert(data, function(err) {
 			    if(!err) {
 				callback(data);

@@ -1,6 +1,7 @@
 {
   "name": "Scout",
   "img": "/data/img/units/scout.png",
+  "cost": 12,
   "move": 6,
   "moveCost": {
     "flat": 1,

@@ -1,6 +1,7 @@
 {
   "name": "Elven Archer",
   "img": "/data/img/units/elven_archer.png",
+  "cost": 16,
   "move": 4,
   "moveCost": {
     "flat": 1,

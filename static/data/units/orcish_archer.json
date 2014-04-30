@@ -1,6 +1,7 @@
 {
   "name": "Orcish Archer",
   "img": "/data/img/units/orcish_archer.png",
+  "cost": 14,
   "move": 4,
   "moveCost": {
     "flat": 1,
