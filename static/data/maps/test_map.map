@@ -1,10 +1,13 @@
 border_size=1
 usage=map
 
-Ch          , Ch          , Ch          , Ch          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          
-1 Ch          , Kh        , Ch      , Re          , Re          , Re          , Re          , Gg         , Gg         , Gg          , Gg         , Gg          
-Gg          , Sw          , Ch          , Sw          , Gg          , Gg          , Sw          , Gg          , Gg          , Gg          , Sw          , Sw          
-Sw          , Sw          , Gg          , Sw          , Gg          , Sw          , Sw          , Gg          , Gg^Ve          , Gg          , Ch          , Gg          
-Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Sw          , Sw          , Ch          
-Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , 2 Ch          , Kh          , Ch          
-Gg          , Gg          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Ch          , Ch          , Ch          
+Ch          , Ch          , Ch          , Ch          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Ch          , Kh         , Ch         , Gg
+1 Ch          , Kh        , Ch      , Re          , Re          , Re          , Re          , Gg         , Gg         , Gg          , Gg         , Gg          , Gg          , Gg^Fd,          Gg         , Ch         , Gg
+Gg          , Sw          , Ch          , Sw          , Gg          , Gg          , Sw          , Gg          , Gg          , Gg          , Sw          , Sw          , Gg          , Gg^Fd         , Gg         , Gg         , Gg
+Sw          , Sw          , Gg          , Sw          , Gg          , Sw          , Sw          , Gg          , Gg^Ve          , Gg          , Ch          , Gg          , Gg          , Gg^Fd          , Sw         , Gg         , Gg
+Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Sw          , Sw          , Ch          , Gg          , Gg          , Sw         , Gg         , Gg
+Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , 2 Ch          , Kh          , Ch          , Gg,          Gg         , Gg         , Gg         , Gg
+Gg          , Gg          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Ch          , Ch          , Ch          , Gg          , Gg         , Gg         , Gg         , Gg
+Gg          , Gg          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg         , Gg         , Gg         , Gg
+Gg          , Gg          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Gg          , Gg          , Sw          , Gg          , Gg         , Gg         , Gg         , Gg
+Gg          , Gg          , Gg          , Gg          , Gg          , Gg^Fd          , Gg^Fd          , Gg          , Gg          , Ch          , Ch          , Gg          , Gg          , Gg         , Gg         , Gg         , Gg

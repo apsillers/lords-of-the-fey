@@ -152,7 +152,6 @@ unitLib.unitProto = {
 	if(this.gem) { this.shape.removeChild(this.gem); }
 
 	var availability = this.calculateAvailability();
-	console.log(this, availability);
 	if(availability == -1) { return; }
 
 	var color = ["red","yellow","#0D0"][availability];

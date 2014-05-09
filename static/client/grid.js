@@ -1,6 +1,7 @@
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
     this.stage.enableMouseOver(20);
+    this.mapContainer = new createjs.Container();
     this.baseTerrain = new createjs.Container();
     this.grid = {};
     this.units = {};
@@ -11,15 +12,24 @@ World.prototype = {
             var coords = i.split(",");
             this.addSpace(new Space({ x:+coords[0], y:+coords[1], terrain: mapDict[i].terrain }));
         }
-	this.stage.addChild(this.baseTerrain);
-	world.stage.setChildIndex(this.baseTerrain, 0);
-        this.stage.update();
+	this.mapContainer.addChild(this.baseTerrain);
+	this.mapContainer.setChildIndex(this.baseTerrain, 0);
+        this.stage.addChild(this.mapContainer);
+	this.resizeCanvasToWindow();
+	this.stage.update();
+    },
+
+    resizeCanvasToWindow: function() {
+	this.stage.canvas.height = $(window).height() - $("#top-bar").height() - 6;
+	this.stage.canvas.width = $(window).width() - $("#right-column").width() - 21;
+	$("#top-bar").width($(window).width() - 3);
+	this.stage.update();
     },
     
     addSpace: function(space) {
         this.grid[space.x+","+space.y] = space;
         this.baseTerrain.addChild(space.shape);
-        this.stage.addChild(space.overlayShape);
+        this.mapContainer.addChild(space.overlayShape);
     },
     
     getSpaceByCoords: function(x, y) {
@@ -52,7 +62,7 @@ World.prototype = {
         unit.y = space.y;
         this.units[unit.x+","+unit.y] = unit;
         
-        world.stage.addChild(unit.shape);
+        world.mapContainer.addChild(unit.shape);
         world.stage.update();
     },
 
@@ -68,7 +78,7 @@ World.prototype = {
     removeUnit: function(unit) {
 	delete this.units[unit.x+","+unit.y];
         
-        world.stage.removeChild(unit.shape);
+        world.mapContainer.removeChild(unit.shape);
         world.stage.update();
     },
     
@@ -127,10 +137,10 @@ Space.prototype = {
     },
 
     setVillageFlag: function(team) {
-	if(this.flag) { world.stage.removeChild(this.flag); }
+	if(this.flag) { world.mapContainer.removeChild(this.flag); }
 	this.flag = new createjs.Shape();
 	this.flag.graphics.beginFill(team-1?"#00F":"#F00").rect(this.shape.x, this.shape.y, 15, 10);
-	world.stage.addChild(this.flag);
+	world.mapContainer.addChild(this.flag);
 	world.stage.update();
     }
 }

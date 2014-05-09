@@ -64,6 +64,8 @@ window.addEventListener("load", function() {
 		world = new World("c");
 		world.initGrid(toMapDict(queue.getResult("map")));
 		world.stage.canvas.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+		window.addEventListener("resize", function() { world.resizeCanvasToWindow(); });
+		scroll.addScroll();
 
 		for(var i=0; i<data.units.length; i++) {
                     var unitData = data.units[i];

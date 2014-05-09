@@ -3,6 +3,10 @@
     margin: 0;
   }
 
+  canvas {
+      background-color: black;
+  }
+
   div.top-status {
     float: left;
     width: 60px;
