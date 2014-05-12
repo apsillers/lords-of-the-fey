@@ -205,6 +205,18 @@ unitLib.unitProto = {
 	return { defense: defense, defenseIndex: defenseIndex };
     },
 
+    // return a new attack object that shows how some attack would apply to this unit
+    applyAttack: function(attack) {
+	if(!attack) { return attack; }
+
+	var result = {};
+	for(var prop in attack) {
+	    result[prop] = attack[prop];
+	}
+	result.damage = Math.round(result.damage * (1 - this.resistances[result.damageType]));
+	return result;
+    },
+
     getCoverOnSpace: function(space) {
 	var unit = this;
 	return Math.max.apply(Math,

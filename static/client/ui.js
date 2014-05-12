@@ -412,9 +412,11 @@ var ui = {
 	    }
 
 	    var attack = attacker.attacks[i];
+	    attack = defender.applyAttack(attack);
 	    var attackText = stringifyAttack(attack);
 
 	    var defense = defender.selectDefense(attacker, attack).defense;
+	    defense = attacker.applyAttack(defense);
 	    var defenseText = stringifyAttack(defense);
 
 	    var attackButton = new createjs.Shape();

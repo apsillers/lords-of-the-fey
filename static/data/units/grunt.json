@@ -21,10 +21,19 @@
     {
       "name":"Sword",
       "type":"melee",
+      "damageType":"blade",
       "number":2,
       "damage":9
     }
   ],
+  "resistances": {
+    "arcane": 0.0,
+    "blade":  0.0,
+    "cold":   0.0,
+    "fire":   0.0,
+    "impact": 0.0,
+    "pierce": 0.0
+  },
   "alignment":"chaotic",
   "maxHp": 25,
   "maxXp": 28

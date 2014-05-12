@@ -12,9 +12,10 @@ function executeAttack(offender, attackIndex, defender, units, mapData) {
     var defenseIndex;
 
     var offense = offender.attacks[attackIndex];
+    offense = defender.applyAttack(offense);
 
     var defenseChoice = defender.selectDefense(offender, offense);
-    var defense = defenseChoice.defense;
+    var defense = defender.applyAttack(defenseChoice.defense);
     var defenseIndex = defenseChoice.defenseIndex;
 
     var defenderCover = defender.getCoverOnSpace(mapData[defender.x+","+defender.y]);
