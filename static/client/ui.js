@@ -11,6 +11,7 @@ var ui = {
     hoverUnit: null,
 
     onSpaceHover: function(e) {
+	
 	if(ui.showingMenu && ui.modal) { return; }
 
 	var space = e.target.owner;
@@ -20,7 +21,7 @@ var ui = {
             ui.pathTarget = space;
 
             ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget, ui.path);
-	    world.stage.removeChild(ui.pathShape);
+	    world.mapContainer.removeChild(ui.pathShape);
 
 	    if(ui.path) {
 		var attackTarget = world.getUnitAt(ui.path[ui.path.length-1].space);
@@ -63,7 +64,7 @@ var ui = {
 
 		ui.pathShape.addChild(pip);
             }
-            world.stage.addChild(ui.pathShape);
+            world.mapContainer.addChild(ui.pathShape);
             world.stage.update();
 	}
 
@@ -140,7 +141,7 @@ var ui = {
 		ui.pathSource = space;
             }
 	} else {
-            world.stage.removeChild(ui.pathShape);
+            world.mapContainer.removeChild(ui.pathShape);
             
             if(ui.path && space != ui.pathSource) {
 		var unit = world.getUnitAt(ui.pathSource);

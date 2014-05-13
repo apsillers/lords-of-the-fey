@@ -1,7 +1,3 @@
-window.onerror = function(a,b,c) {
-    alert([a,b,c].join(" "));
-}
-
 /*
 
 A* implementation with built-in move rules (e.g.Only finds paths whose cost is less than the `moveLeft` property of the unit.
