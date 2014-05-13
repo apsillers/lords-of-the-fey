@@ -3,19 +3,23 @@
   "img": "/data/img/units/grunt.png",
   "cost": 16,
   "move": 4,
-  "moveCost": {
-    "flat": 1,
-    "swamp": 2,
-    "castle": 1,
-    "forest": 1,
-    "village":1
-  },
-  "cover": {
-    "flat": 0.5,
-    "swamp": 0.2,
-    "castle": 0.6,
-    "forest": 0.6,
-    "village": 0.6
+  "terrain": {
+    "flat": { "move":1, "cover":0.5 },
+    "swamp": { "move":1, "cover":0.2 },
+    "castle": { "move":1, "cover":0.6 },
+    "forest": { "move":1, "cover":0.6 },
+    "village": { "move":1, "cover":0.6 },
+    "deep_water": { "move":1, "cover":0.5 },
+    "shallow_water": { "move":1, "cover":0.5 },
+    "reef":{ "move":1, "cover":0.5 },
+    "sand":{ "move":1, "cover":0.5 },
+    "hills": { "move":1, "cover":0.5 },
+    "mountains":{ "move":1, "cover":0.5 },
+    "cave":{ "move":1, "cover":0.5 },
+    "frozen": { "move":1, "cover":0.5 },
+    "unwalkable":{ "move":-1, "cover":0 },
+    "fungus":{ "move":1, "cover":0.5 },
+    "impassable": { "move":-1, "cover":0 }
   },
   "attacks":[
     {

@@ -38,7 +38,8 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 	}
 
 	// add cost to move on this sapce
-	totalMoveCost += Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return unit.moveCost[i] || Infinity; }));
+	totalMoveCost += unit.getMoveCostForSpace(mapData[coords.x+","+coords.y]);
+	// Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return unit.terrain[i].cost || Infinity; }));
 
 	// if the move is too costly, abort
 	if(totalMoveCost > unit.moveLeft) {

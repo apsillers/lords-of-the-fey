@@ -221,9 +221,19 @@ unitLib.unitProto = {
 	var unit = this;
 	return Math.max.apply(Math,
 		      space.terrain.properties.map(function(i) {
-			  return unit.cover[i] || 0;
+			  return unit.terrain[i].cover || 0;
 		      })
 	       );
+    },
+
+    getMoveCostForSpace: function(space) {
+	var unit = this;
+        var terrain = space.terrain || space;
+	var costs = terrain.properties.map(function(i) {
+	                if(unit.terrain[i].move == -1) { return Infinity; }
+			return unit.terrain[i].move || Infinity;
+		    });
+	return Math.min.apply(Math, costs);
     },
 
     // returns a plain Object with only the object's own properties
