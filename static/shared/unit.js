@@ -253,6 +253,7 @@ unitLib.unitProto = {
 	}
 	ui.updateUnitSidebar();
 	this.drawHpBar();
+	this.drawXpBar();
 	this.drawGem();
 	world.stage.update();
     },

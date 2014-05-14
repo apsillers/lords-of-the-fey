@@ -34,7 +34,19 @@ function executeAttack(offender, attackIndex, defender, units, mapData) {
 	}
     }
 
-    return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex };
+    function awardXp(thisUnit, enemy) {
+	if(thisUnit.hp > 0) {
+	    if(enemy.hp > 0) {
+		thisUnit.xp += enemy.level || 1;
+	    } else {
+		thisUnit.xp += (enemy.level * 8) || 4;
+	    }
+	}
+    }
+    awardXp(offender, defender);
+    awardXp(defender, offender);
+
+    return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex, xp: {offense: offender.xp, defense: defender.xp } };
 }
 
 // perform one swing of an attack, by the hitter, on the hittee

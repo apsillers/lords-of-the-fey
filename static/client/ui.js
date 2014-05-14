@@ -1,3 +1,5 @@
+window.onerror = function(a,b,c) { alert([a,b,c].join(" ")); };
+
 var ui = {
     moveHappening: false,
     hasTurn: false,
@@ -380,6 +382,12 @@ var ui = {
 	    setTimeout(attackStep(entry, i, false), i*1000);
 	    setTimeout(attackStep({ offense: entry.offense }, i, true), i*1000+500);
 	}
+
+	// after combat, update unit xp totals
+	setTimeout(function() {
+	    offender.update({ "xp": moveData.combat.xp.offense});
+	    defender.update({ "xp": moveData.combat.xp.defense});
+	}, (record.length-1) * 1000 + 500);
     },
 
     clearPath: function() {
