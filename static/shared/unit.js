@@ -172,6 +172,7 @@ function Unit(unitData, isCreation) {
 	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
         
 	unit.drawHpBar();
+	unit.drawXpBar();
 	unit.drawGem();
     
 	if(unit.isCommander) { unit.drawCrown(); }
@@ -193,6 +194,18 @@ unitLib.unitProto = {
 	this.healthBar.graphics.beginFill(barColor).drawRect(54, 8.5 + 20 * (1 - hpRatio), 4, 20 * hpRatio);
 	this.healthBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").drawRect(53.5, 8.5, 4, 20);
 	this.shape.addChild(this.healthBar);
+    },
+
+    drawXpBar: function() {
+	if(this.xpBar) { this.shape.removeChild(this.xpBar); }
+	
+	var xpRatio = this.xp / this.maxXp;
+	var barColor = "#AAF"; //["#D00", "#DD0"][Math.floor(hpRatio * 3)] || "#0D0";
+	
+	this.xpBar = new createjs.Shape();
+	this.xpBar.graphics.beginFill(barColor).drawRect(59, 8.5 + 20 * (1 - xpRatio), 4, 20 * xpRatio);
+	this.xpBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").drawRect(58.5, 8.5, 4, 20);
+	this.shape.addChild(this.xpBar);
     },
     
     drawCrown: function() {
