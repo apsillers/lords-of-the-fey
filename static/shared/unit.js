@@ -101,12 +101,65 @@ var unitLib = {
     }
 }
 
-function Unit(unitData) {
+function Unit(unitData, isCreation) {
     var proto = unitLib.protos[unitData.type];
     var unit = Object.create(proto);
 
     for(var prop in unitData) {
 	unit[prop] = unitData[prop];
+    }
+
+    // if this is creation time, set random attributes
+    if(isCreation) {
+	unit.attributes = [];
+
+	if(unit.fixedAttributes) {
+	    unit.attributes.concat(unit.fixedAttributes);
+	}
+
+	if(!("attributePool" in unit)) {
+	    var attributePool = ["quick", "strong", "resilient", "intelligent"];
+	} else {
+	    var attributePool = unit.attributePool.slice();
+	}
+
+	for(var i = 0; i < unit.attributeCount && attributePool.length > 0; ++i) {
+	    var randomAttribute = attributePool.splice(Math.floor(Math.random()*attributePool.length), 1)[0];
+	    unit.attributes.push(randomAttribute);
+	}
+
+	if(unit.attributes) {
+	    for(var i = 0; i < unit.attributes.length; ++i) {
+		console.log(unit.attributes[i]);
+		({
+		    "resilient": function() { unit.mapHp += 4 },
+		    "intelligent": function() { unit.maxXp = Math.round(unit.maxXp * 0.8); },
+		    "quick": function() { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; },
+		    "strong": function() {
+			var newAttacks = [];
+			for(var i=0; i < unit.attacks.length; ++i) {
+			    var attack = unit.attacks[i];
+			    var newAttack = {};
+			    for(var prop in attack) {
+				newAttack[prop] = attack[prop];
+			    }
+			    if(attack.type = "melee") {
+				newAttack.damage += 1;
+			    }
+			    newAttacks.push(newAttack);
+			}
+			unit.attacks = newAttacks;
+		    }
+		})[unit.attributes[i]]();
+	    }
+	}
+    }
+
+    // if this is creation time, set initial stats
+    if(isCreation) {
+	unit.xp = 0;
+	unit.hp = unit.maxHp;
+	unit.moveLeft = unit.move;
     }
 
     // client-side image business

@@ -30,11 +30,10 @@ module.exports = function(data, mapData, collections, game, player, callback) {
 		    
 		    if(!createValid) { callback({}); return; }
 
-		    var unit = new Unit(data);
-		    data.xp = 0;
-		    data.hp = unit.maxHp;
 		    data.team = player.team;
-		    data.moveLeft = unit.move;
+		    var unit = new Unit(data, true);
+
+		    data = unit.getStorableObj();
 
 		    if(player.gold < unit.cost) { callback({}); return; }
 

@@ -92,6 +92,8 @@ var ui = {
             $("#right_data_move").text(ui.hoverUnit.moveLeft + "/" + ui.hoverUnit.move);
             $("#right_data_name").text(ui.hoverUnit.name);
 
+            $("#right_data_attributes").text((ui.hoverUnit.attributes||[]).join(", "));
+
 	    $("#right_data_attacks").html("");
 	    for(var i=0; i<ui.hoverUnit.attacks.length; ++i) {
 		var attackNameElm = $("<div style='font-weight: bold;'>");

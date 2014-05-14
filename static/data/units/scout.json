@@ -21,6 +21,8 @@
     "fungus":{ "move":1, "cover":0.5 },
     "impassable": { "move":-1, "cover":0 }
   },
+  "attriubtePool":["dextrous", "quick", "strong", "resilient", "intelligent"],
+  "attributeCount":2,
   "attacks":[
     {
       "name":"Sword",
