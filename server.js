@@ -195,7 +195,7 @@ function initListeners(socket, collections) {
         collections.games.findOne({id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
-		    console.log("found");
+
 		    // ensure that the logged-in user has the right to move this unit
 		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
 		    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
@@ -244,7 +244,7 @@ function initListeners(socket, collections) {
 					defender = new Unit(defender);
 					
 					// resolve combat
-					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData);
+					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game.players);
 					// injure/kill units models
 					var handleDefender = function() {
 					    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }

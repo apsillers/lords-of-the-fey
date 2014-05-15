@@ -3,6 +3,7 @@
   "img": "/data/img/units/scout.png",
   "cost": 12,
   "move": 6,
+  "level": 1,
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":3, "cover":0.3 },
@@ -21,7 +22,7 @@
     "fungus":{ "move":1, "cover":0.5 },
     "impassable": { "move":-1, "cover":0 }
   },
-  "attriubtePool":["dextrous", "quick", "strong", "resilient", "intelligent"],
+  "attriubtePool":["dextrous"],
   "attributeCount":2,
   "attacks":[
     {

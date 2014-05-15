@@ -6,7 +6,7 @@
 //     "damage": Number,
 //     "kill": Boolean
 //   }, ...]
-function executeAttack(offender, attackIndex, defender, units, mapData) {
+function executeAttack(offender, attackIndex, defender, units, mapData, players) {
     var battleRecord = [];
     var swingResult;
     var defenseIndex;
@@ -40,6 +40,12 @@ function executeAttack(offender, attackIndex, defender, units, mapData) {
 		thisUnit.xp += enemy.level || 1;
 	    } else {
 		thisUnit.xp += (enemy.level * 8) || 4;
+	    }
+
+	    if(thisUnit.xp >= thisUnit.maxXp) {
+		if(!thisUnit.advancesTo || thisUnit.advancesTo.length < 2) {
+		    thisUnit.type = thisUnit.leveUp(0);
+		}
 	    }
 	}
     }

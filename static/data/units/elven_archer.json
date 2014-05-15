@@ -3,6 +3,7 @@
   "img": "/data/img/units/elven_archer.png",
   "cost": 16,
   "move": 4,
+  "level": 1,
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":2, "cover":0.3 },
@@ -21,7 +22,7 @@
     "fungus":{ "move":1, "cover":0.5 },
     "impassable": { "move":-1, "cover":0 }
   },
-  "attributePool": ["dextrous", "quick", "strong", "resilient", "intelligent"],
+  "attributePool": ["dextrous"],
   "attributeCount": 2,
   "attacks":[
     {

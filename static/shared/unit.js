@@ -117,46 +117,46 @@ function Unit(unitData, isCreation) {
 	    unit.attributes.concat(unit.fixedAttributes);
 	}
 
-	if(!("attributePool" in unit)) {
-	    var attributePool = ["quick", "strong", "resilient", "intelligent"];
-	} else {
-	    var attributePool = unit.attributePool.slice();
+	var attributePool = ["quick", "strong", "resilient", "intelligent"];
+	if("attributePool" in unit) {
+	    attributePool.concat(unit.attributePool);
 	}
 
-	for(var i = 0; i < unit.attributeCount && attributePool.length > 0; ++i) {
+	if(!("attributeCount" in unit)) {
+	    var attributeCount = 2;
+	} else {
+	    var attributeCount = unit.attributeCount;
+	}
+
+	for(var i = 0; i < attributeCount && attributePool.length > 0; ++i) {
 	    var randomAttribute = attributePool.splice(Math.floor(Math.random()*attributePool.length), 1)[0];
 	    unit.attributes.push(randomAttribute);
 	}
 
-	if(unit.attributes) {
-	    for(var i = 0; i < unit.attributes.length; ++i) {
-		console.log(unit.attributes[i]);
-		({
-		    "resilient": function() { unit.mapHp += 4 },
-		    "intelligent": function() { unit.maxXp = Math.round(unit.maxXp * 0.8); },
-		    "quick": function() { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; },
-		    "strong": function() {
-			var newAttacks = [];
-			for(var i=0; i < unit.attacks.length; ++i) {
-			    var attack = unit.attacks[i];
-			    var newAttack = {};
-			    for(var prop in attack) {
-				newAttack[prop] = attack[prop];
-			    }
-			    if(attack.type = "melee") {
-				newAttack.damage += 1;
-			    }
-			    newAttacks.push(newAttack);
+	for(var i = 0; i < unit.attributes.length; ++i) {
+	    ({
+		"resilient": function() { unit.maxHp += 4 + unit.level },
+		"intelligent": function() { unit.maxXp = Math.round(unit.maxXp * 0.8); },
+		"quick": function() { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; },
+		"strong": function() {
+		    var newAttacks = [];
+		    for(var i=0; i < unit.attacks.length; ++i) {
+			var attack = unit.attacks[i];
+			var newAttack = {};
+			for(var prop in attack) {
+			    newAttack[prop] = attack[prop];
 			}
-			unit.attacks = newAttacks;
+			if(attack.type = "melee") {
+			    newAttack.damage += 1;
+			}
+			newAttacks.push(newAttack);
 		    }
-		})[unit.attributes[i]]();
-	    }
+		    unit.attacks = newAttacks;
+		}
+	    })[unit.attributes[i]]();
 	}
-    }
 
-    // if this is creation time, set initial stats
-    if(isCreation) {
+	// if this is creation time, set initial stats
 	unit.xp = 0;
 	unit.hp = unit.maxHp;
 	unit.moveLeft = unit.move;
@@ -183,6 +183,10 @@ function Unit(unitData, isCreation) {
 
 unitLib.unitProto = {
     constructor: Unit,
+
+    levelUp: function(pathChoice) {
+
+    },
 
     drawHpBar: function() {
 	if(this.healthBar) { this.shape.removeChild(this.healthBar); }
