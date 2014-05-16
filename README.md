@@ -1,7 +1,7 @@
 webnoth
 =======
 
-A fantasy-themed online turn-based game
+A multiplayer fantasy-themed turn-based strategy game that you can play in your browser, using rules based on [Battle for Wesnoth](http://www.wesnoth.org).
 
 The server requires:
 
@@ -20,3 +20,5 @@ To run the server, do:
     node server.js
 
 This will run a local server on port 8080. If you navigate to `http://127.0.0.1:8080/` in your browser, you can log in as either `hello` or `goodbye`, both with the password "`world`".
+
+To learn more, check out [the project wiki](https://github.com/apsillers/webnoth/wiki).
