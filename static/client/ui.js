@@ -1,5 +1,3 @@
-window.onerror = function(a,b,c) { alert([a,b,c].join(" ")); };
-
 var ui = {
     moveHappening: false,
     hasTurn: false,

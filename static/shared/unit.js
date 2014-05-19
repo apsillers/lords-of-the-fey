@@ -1,6 +1,6 @@
 var unitLib = {
     
-    protoList: ["grunt", "scout", "elven_archer", "orcish_archer"],
+    protoList: ["grunt", "scout", "elven_archer", "orcish_archer", "warrior"],
     protos: {},
 
     init: function(initCallback) {
@@ -101,7 +101,47 @@ var unitLib = {
     }
 }
 
-function Unit(unitData, isCreation) {
+unitLib.abilityDict = {
+    "resilient": {
+	onCreate: function(unit) { unit.maxHp += 4 + unit.level; }
+    },
+    "intelligent": {
+	onCreate: function(unit) { unit.maxXp = Math.round(unit.maxXp * 0.8); }
+    },
+    "quick": {
+	onCreate: function(unit) { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; }
+    },
+    "strong": {
+	onCreate: function(unit) {
+	    var newAttacks = [];
+	    for(var i=0; i < unit.attacks.length; ++i) {
+		var attack = unit.attacks[i];
+		var newAttack = Object.create(attack);
+		if(attack.type == "melee") {
+		    newAttack.damage += 1;
+		}
+		newAttacks.push(newAttack);
+	    }
+	    unit.attacks = newAttacks;
+	}
+    },
+    "dextrous": {
+	onCreate: function(unit) {
+	    var newAttacks = [];
+	    for(var i=0; i < unit.attacks.length; ++i) {
+		var attack = unit.attacks[i];
+		var newAttack = Object.create(attack);
+		if(attack.type == "ranged") {
+		    newAttack.damage += 1;
+		}
+		newAttacks.push(newAttack);
+	    }
+	    unit.attacks = newAttacks;
+	}
+    }
+}
+
+function Unit(unitData, isCreation, isLevelUp) {
     var proto = unitLib.protos[unitData.type];
     var unit = Object.create(proto);
 
@@ -134,32 +174,41 @@ function Unit(unitData, isCreation) {
 	}
 
 	for(var i = 0; i < unit.attributes.length; ++i) {
-	    ({
-		"resilient": function() { unit.maxHp += 4 + unit.level },
-		"intelligent": function() { unit.maxXp = Math.round(unit.maxXp * 0.8); },
-		"quick": function() { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; },
-		"strong": function() {
-		    var newAttacks = [];
-		    for(var i=0; i < unit.attacks.length; ++i) {
-			var attack = unit.attacks[i];
-			var newAttack = {};
-			for(var prop in attack) {
-			    newAttack[prop] = attack[prop];
-			}
-			if(attack.type = "melee") {
-			    newAttack.damage += 1;
-			}
-			newAttacks.push(newAttack);
-		    }
-		    unit.attacks = newAttacks;
-		}
-	    })[unit.attributes[i]]();
+	    ((unitLib.abilityDict[unit.attributes[i]] || {}).onCreate || function(){})(unit);
 	}
 
+    }
+
+    if(isCreation) {
 	// if this is creation time, set initial stats
 	unit.xp = 0;
 	unit.hp = unit.maxHp;
 	unit.moveLeft = unit.move;
+    }
+
+    if(isLevelUp) {
+	if(unit.fixedAttributes) {
+	    // add any fixed attributes that unit doesn't already have
+	    for(var i = 0; i < unit.fixedAttributes.length; ++i) {
+		if(unit.attributes.indexOf(unit.fixedAttributes[i]) == -1) {
+		    unit.attributes.push(unit.fixedAttributes[i]);
+		}
+	    }
+	}
+
+	// delete old properties that might be augmented by attributes
+	// we will recompute them for the new unit type values
+	delete unit.attacks;
+	delete unit.move;
+	delete unit.maxXp;
+	delete unit.maxHp;
+
+	for(var i = 0; i < unit.attributes.length; ++i) {
+	    ((unitLib.abilityDict[unit.attributes[i]] || {}).onCreate || function(){})(unit);
+	}
+
+	// if we're leveling up, refill HP, mod XP
+	unit.hp = unit.maxHp;
     }
 
     // client-side image business
@@ -185,7 +234,15 @@ unitLib.unitProto = {
     constructor: Unit,
 
     levelUp: function(pathChoice) {
+        if(this.advancesTo) {
+	    var newType = this.advancesTo[pathChoice];
+	    this.type = newType;
+	}
 
+	this.xp = this.xp - this.maxXp;
+
+	var newUnit = new Unit(this.getStorableObj(), false, true);
+	return newUnit;
     },
 
     drawHpBar: function() {
@@ -255,6 +312,14 @@ unitLib.unitProto = {
 	for(prop in update) {
 	    this[prop] = update[prop];
 	}
+
+	if(this.xp >= this.maxXp) {
+	    if(!this.advancesTo || this.advancesTo.length < 2) {
+		world.removeUnit(this);
+		world.addUnit(this.levelUp(0), world.getSpaceByCoords(this));
+	    }
+	}
+
 	ui.updateUnitSidebar();
 	this.drawHpBar();
 	this.drawXpBar();

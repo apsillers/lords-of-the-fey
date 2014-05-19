@@ -42,17 +42,31 @@ function executeAttack(offender, attackIndex, defender, units, mapData, players)
 		thisUnit.xp += (enemy.level * 8) || 4;
 	    }
 
+	    var xpBeforeLevel = thisUnit.xp;
+
 	    if(thisUnit.xp >= thisUnit.maxXp) {
 		if(!thisUnit.advancesTo || thisUnit.advancesTo.length < 2) {
-		    thisUnit.type = thisUnit.leveUp(0);
+		    var leveledUnit = thisUnit.levelUp(0);
+		} else if(thisUnit.advancesTo && thisUnit.advancesTo,length > 1) {
+		    // user must choose advancement path
 		}
-	    }
-	}
-    }
-    awardXp(offender, defender);
-    awardXp(defender, offender);
 
-    return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex, xp: {offense: offender.xp, defense: defender.xp } };
+		// modify unit with new properties after level-up
+		var leveledOwnProps = leveledUnit.getStorableObj();
+		console.log(leveledOwnProps);
+	        for(var prop in leveledOwnProps) {
+		    thisUnit[prop] = leveledOwnProps[prop]; 
+		} 
+	    }
+
+	    return xpBeforeLevel;
+	}
+	return thisUnit.xp;
+    }
+    var offenseXp = awardXp(offender, defender);
+    var defenseXp = awardXp(defender, offender);
+
+    return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex, xp: {offense: offenseXp, defense: defenseXp } };
 }
 
 // perform one swing of an attack, by the hitter, on the hittee

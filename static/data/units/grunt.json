@@ -4,7 +4,7 @@
   "cost": 16,
   "move": 4,
   "level": 1,
-  "advancesTo":"warrior",
+  "advancesTo":["warrior"],
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":1, "cover":0.2 },
@@ -43,5 +43,5 @@
   },
   "alignment":"chaotic",
   "maxHp": 25,
-  "maxXp": 28
+  "maxXp": 1
 }

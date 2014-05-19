@@ -3,6 +3,7 @@
   "img": "/data/img/units/warrior.png",
   "cost": 24,
   "move": 4,
+  "level": 2,
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":1, "cover":0.2 },
