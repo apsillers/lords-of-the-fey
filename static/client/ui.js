@@ -42,7 +42,7 @@ var ui = {
 		// draw the cover for the final space: the real final space if not an attack, otherwise the second-to-last
 		if(i == ui.path.length-(attackTarget?2:1)) {
 		    var unit = world.getUnitAt(ui.pathSource);
-		    var coverValue = unit.getCoverOnSpace(space);
+		    var coverValue = unit.getCoverOnSpace(s);
 		    var coverText = 100 * coverValue + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
@@ -53,7 +53,7 @@ var ui = {
 		// draw cover for attack target
 		if(i == ui.path.length-1 && attackTarget) {
 		    var unit = attackTarget;
-		    var coverValue = unit.getCoverOnSpace(space);
+		    var coverValue = unit.getCoverOnSpace(s);
 		    var coverText = 100 * coverValue + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
