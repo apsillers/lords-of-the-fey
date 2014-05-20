@@ -116,7 +116,10 @@ unitLib.abilityDict = {
 	    var newAttacks = [];
 	    for(var i=0; i < unit.attacks.length; ++i) {
 		var attack = unit.attacks[i];
-		var newAttack = Object.create(attack);
+		var newAttack = {};
+		for(var prop in attack) {
+		    newAttack[prop] = attack[prop];
+		}
 		if(attack.type == "melee") {
 		    newAttack.damage += 1;
 		}
@@ -130,7 +133,10 @@ unitLib.abilityDict = {
 	    var newAttacks = [];
 	    for(var i=0; i < unit.attacks.length; ++i) {
 		var attack = unit.attacks[i];
-		var newAttack = Object.create(attack);
+		var newAttack = {};
+		for(var prop in attack) {
+		    newAttack[prop] = attack[prop];
+		}
 		if(attack.type == "ranged") {
 		    newAttack.damage += 1;
 		}
