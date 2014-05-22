@@ -139,7 +139,7 @@ Space.prototype = {
     setVillageFlag: function(team) {
 	if(this.flag) { world.mapContainer.removeChild(this.flag); }
 	this.flag = new createjs.Shape();
-	this.flag.graphics.beginFill(team-1?"#00F":"#F00").rect(this.shape.x, this.shape.y, 15, 10);
+	this.flag.graphics.beginFill(["rgba(0,0,0,0)","#F00","#00F","#F0F"][team]).rect(this.shape.x, this.shape.y, 15, 10);
 	world.mapContainer.addChild(this.flag);
 	world.stage.update();
     }
