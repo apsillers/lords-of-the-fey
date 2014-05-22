@@ -24,6 +24,9 @@ window.addEventListener("load", function() {
 	gameInfo.activeTeam = data.activeTeam;
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
 
+	gameInfo.timeOfDay = data.timeOfDay;
+	$("#right_time_of_day").text(gameInfo.timeOfDay)
+
 	$("#top-gold-text").text(gameInfo.player.gold);
 	$("#top-active-team-text").text(gameInfo.activeTeam);
 
@@ -88,6 +91,10 @@ window.addEventListener("load", function() {
 	gameInfo.activeTeam = data.activeTeam;
 	$("#top-active-team-text").text(gameInfo.activeTeam);
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+
+	gameInfo.timeOfDay = data.timeOfDay;
+	$("#right_time_of_day").text(gameInfo.timeOfDay)
+	// TODO: show time of day
 
 	for(var i=0; i<data.updates.length; ++i) {
 	    var update = data.updates[i];

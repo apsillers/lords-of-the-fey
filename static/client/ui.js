@@ -420,12 +420,15 @@ var ui = {
 		return attack.name + ": " + attack.damage + "-" + attack.number + " (" + attack.type + ")";
 	    }
 
+	    var attackerCover = attacker.getCoverOnSpace(world.getSpaceByCoords(attacker));
+	    var defenderCover = defender.getCoverOnSpace(world.getSpaceByCoords(defender));
+
 	    var attack = attacker.attacks[i];
-	    attack = defender.applyAttack(attack);
+	    attack = defender.applyAttack(attack, attacker, gameInfo.timeOfDay);
 	    var attackText = stringifyAttack(attack);
 
-	    var defense = defender.selectDefense(attacker, attack).defense;
-	    defense = attacker.applyAttack(defense);
+	    var defense = defender.selectDefense(attacker, attack, gameInfo.timeOfDay, attackerCover, defenderCover).defense;
+	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay);
 	    var defenseText = stringifyAttack(defense);
 
 	    var attackButton = new createjs.Shape();

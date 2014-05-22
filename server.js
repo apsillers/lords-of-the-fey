@@ -35,6 +35,7 @@ mongoClient.open(function(err, mongoClient) {
     require("./auth").initAuth(app, mongo, collections);
 
     unitLib.init(function() {
+	console.log(unitLib.protos);
 	io.sockets.on('connection', function (socket) {
             initListeners(socket, collections);
 	});
@@ -102,7 +103,7 @@ function initListeners(socket, collections) {
             collections.games.findOne({ id:gameId }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
-                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages });
+                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay });
                 });
             });
         });
@@ -133,6 +134,7 @@ function initListeners(socket, collections) {
 	    var gameData = {
 		"id" : id,
 		"map" : "test_map.map",
+		"timeOfDay" : "morning",
 		"players" : [
 		    { "team": 1, "gold": 40, "username": "hello", "race":"elves" },
 		    { "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
@@ -205,6 +207,8 @@ function initListeners(socket, collections) {
 
 		    unit = new Unit(unit);
 
+		    console.log(unit.type, unit.name);
+
                     collections.units.find({ gameId: gameId }, function(err, cursor) {
                         cursor.toArray(function(err, unitArray) {
 			    // make the move
@@ -244,7 +248,7 @@ function initListeners(socket, collections) {
 					defender = new Unit(defender);
 					
 					// resolve combat
-					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game.players);
+					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game);
 					// injure/kill units models
 					var handleDefender = function() {
 					    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
@@ -287,7 +291,6 @@ function initListeners(socket, collections) {
     });
 
     socket.on("endTurn", function(data) {
-	console.log("ending turn");
 	var gameId = data.gameId;
 
         collections.games.findOne({id:gameId}, function(err, game) {
@@ -305,14 +308,19 @@ function initListeners(socket, collections) {
 		}
 	    }
 	    game.players[game.activeTeam - 1].gold += villageCount*2;
-		
+
+	    if(game.activeTeam == 1) {
+		var times = ["morning", "afternoon", "dusk", "first watch", "second watch", "dawn"];
+		game.timeOfDay = times[(times.indexOf(game.timeOfDay) + 1) % times.length];
+	    }
+
 	    collections.games.save(game, { safe: true }, function() {
 
 		// find all units owned by the newly active player
 		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
 		    var updates = [];
 		    var sendUpdates = function() {
-			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates });
+			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates, timeOfDay: game.timeOfDay });
 
 			var activePlayerSocketData = socketList.filter(function(o) {
 			    return o.gameId == gameId && o.username == game.players[game.activeTeam-1].username;

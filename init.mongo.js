@@ -6,6 +6,7 @@ db.dropDatabase();
 db.games.save({
     "id" : 1,
     "map" : "test_map.map",
+    "timeOfDay": "morning",
     "players" : [
 	{ "team": 1, "gold": 900, "username": "hello", "race":"elves" },
 	{ "team": 2, "gold": 900, "username": "goodbye", "race":"orcs" }

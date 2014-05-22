@@ -6,20 +6,24 @@
 //     "damage": Number,
 //     "kill": Boolean
 //   }, ...]
-function executeAttack(offender, attackIndex, defender, units, mapData, players) {
+function executeAttack(offender, attackIndex, defender, units, mapData, game) {
     var battleRecord = [];
     var swingResult;
     var defenseIndex;
 
-    var offense = offender.attacks[attackIndex];
-    offense = defender.applyAttack(offense);
-
-    var defenseChoice = defender.selectDefense(offender, offense);
-    var defense = defender.applyAttack(defenseChoice.defense);
-    var defenseIndex = defenseChoice.defenseIndex;
-
     var defenderCover = defender.getCoverOnSpace(mapData[defender.x+","+defender.y]);
     var offenderCover = offender.getCoverOnSpace(mapData[offender.x+","+offender.y]);
+
+    var offense = offender.attacks[attackIndex];
+    offense = defender.applyAttack(offense, offender, game.timeOfDay);
+
+    var defenseChoice = defender.selectDefense(offender, offense, game.timeOfDay, offenderCover, defenderCover);
+    var defense = defender.applyAttack(defenseChoice.defense, defender, game.timeOfDay);
+    var defenseIndex = defenseChoice.defenseIndex;
+
+    console.log(offender.name, offense);
+    console.log(defender.name, defense);
+
     for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
 	if(round < offense.number) {
 	    swingResult = attackSwing(true, offense, offender, defender, defenderCover, units);
