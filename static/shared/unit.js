@@ -82,10 +82,9 @@ var unitLib = {
     serverInit: function(initCallback) {
 	var loadUnitType = require("../../loadUtils.js").loadUnitType;
 	var count = 0;
-	for(var i = 0; i < unitLib.protoList.length; ++i) {
-	    var name = unitLib.protoList[i];
+	(function loadType() {
+	    var name = unitLib.protoList[count];
 	    loadUnitType(name, function(err, typeObj) {
-		var name = unitLib.protoList[count];
 		count++;
 
 		var newProto = Object.create(unitLib.unitProto);
@@ -95,9 +94,11 @@ var unitLib = {
 		unitLib.protos[name] = newProto;
 		if(count == unitLib.protoList.length) { 
 		    initCallback();
+		} else {
+		    loadType();
 		}
 	    });
-	}
+	})();
     }
 }
 
@@ -348,15 +349,32 @@ unitLib.unitProto = {
     },
 
     // return a new attack object that shows how some attack would apply to this unit
-    applyAttack: function(attack) {
+    applyAttack: function(attack, attacker, timeOfDay) {
 	if(!attack) { return attack; }
 
 	var result = {};
 	for(var prop in attack) {
 	    result[prop] = attack[prop];
 	}
-	result.damage = Math.round(result.damage * (1 - this.resistances[result.damageType]));
+	result.damage = result.damage * (1 - this.resistances[result.damageType]);
+
+	result.damage = Math.round(result.damage * attacker.getDaytimeMultiplier(timeOfDay));
+
 	return result;
+    },
+
+    getDaytimeMultiplier: function(timeOfDay) {
+	if(this.alignment == "neutral") { return 1; }
+
+	if(timeOfDay == "morning" || timeOfDay == "afternoon") {
+	    return 1 + (this.alignment=="lawful"?1:-1) * 0.25;
+	}
+
+	if(timeOfDay == "first watch" || timeOfDay == "second watch") {
+	    return 1 + (this.alignment=="chaotic"?1:-1) * 0.25;
+	}
+
+	return 1;
     },
 
     getCoverOnSpace: function(space) {
