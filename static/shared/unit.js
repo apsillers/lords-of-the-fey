@@ -166,7 +166,7 @@ function Unit(unitData, isCreation, isLevelUp) {
 
 	var attributePool = ["quick", "strong", "resilient", "intelligent"];
 	if("attributePool" in unit) {
-	    attributePool.concat(unit.attributePool);
+	    attributePool.push.apply(attributePool, unit.attributePool);
 	}
 
 	if(!("attributeCount" in unit)) {
