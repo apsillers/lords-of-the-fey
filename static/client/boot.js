@@ -25,7 +25,8 @@ window.addEventListener("load", function() {
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
 
 	gameInfo.timeOfDay = data.timeOfDay;
-	$("#right_time_of_day").text(gameInfo.timeOfDay)
+	$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
+	$("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
 
 	$("#top-gold-text").text(gameInfo.player.gold);
 	$("#top-active-team-text").text(gameInfo.activeTeam);
@@ -94,7 +95,8 @@ window.addEventListener("load", function() {
 
 	gameInfo.timeOfDay = data.timeOfDay;
 	$("#right_time_of_day").text(gameInfo.timeOfDay)
-	// TODO: show time of day
+	$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
+	$("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
 
 	for(var i=0; i<data.updates.length; ++i) {
 	    var update = data.updates[i];
