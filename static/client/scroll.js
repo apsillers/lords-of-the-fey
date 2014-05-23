@@ -5,17 +5,20 @@ var scroll = {
     scrollPeriod: 50,
     scrollDist: 3,
     scrollFunc: function() {
+	scroll.applyScroll(scroll.scrollX, scroll.scrollY);
+	if(scroll.scrollX == 0 && scroll.scrollY == 0) { clearInterval(scroll.scrollInterval); scroll.scrollInterval = null; }
+    },
+    applyScroll: function(dx,dy) {
         var stage = world.stage;
-	if((scroll.scrollX < 0 && world.mapContainer.x < 0) ||
-	   (scroll.scrollX > 0 && world.mapContainer.x > -world.mapContainer.getBounds().width + stage.canvas.width)) {
-	    world.mapContainer.x -= scroll.scrollX;
+	if((dx < 0 && world.mapContainer.x < 0) ||
+	   (dx > 0 && world.mapContainer.x > -world.mapContainer.getBounds().width + stage.canvas.width)) {
+	    world.mapContainer.x -= dx;
 	}
-	if((scroll.scrollY < 0 && world.mapContainer.y < 0) ||
-	   (scroll.scrollY > 0 && world.mapContainer.y > -world.mapContainer.getBounds().height + stage.canvas.height)) {
-	    world.mapContainer.y -= scroll.scrollY;
+	if((dy < 0 && world.mapContainer.y < 0) ||
+	   (dy > 0 && world.mapContainer.y > -world.mapContainer.getBounds().height + stage.canvas.height)) {
+	    world.mapContainer.y -= dy;
 	}
 	world.stage.update();
-	if(scroll.scrollX == 0 && scroll.scrollY == 0) { clearInterval(scroll.scrollInterval); scroll.scrollInterval = null; }
     },
     addScroll: function() {
         var stage = world.stage;

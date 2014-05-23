@@ -226,6 +226,9 @@ function Unit(unitData, isCreation, isLevelUp) {
 	unit.shape = new createjs.Container();
 	unit.shape.owner = unit;
 	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
+
+	// forward click to underlying space
+	unit.shape.addEventListener("click", Space.passthroughFunc);
         
 	unit.drawHpBar();
 	unit.drawXpBar();

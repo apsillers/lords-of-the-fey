@@ -33,6 +33,8 @@ var ui = {
 		var pip = new createjs.Container();
 		pip.x = s.shape.x + 17;
 		pip.y = s.shape.y + 16;
+		pip.owner = s;
+		pip.addEventListener("click", Space.passthroughFunc);
 		var bar = new createjs.Shape();
 		bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 38);
 		bar.regX = 0;

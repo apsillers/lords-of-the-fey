@@ -1,10 +1,28 @@
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
     this.stage.enableMouseOver(20);
+    createjs.Touch.enable(this.stage);
     this.mapContainer = new createjs.Container();
     this.baseTerrain = new createjs.Container();
     this.grid = {};
     this.units = {};
+
+
+    this.stage.addEventListener("pressmove", function(e) {
+	if(e.primary) {
+	    if(world.scrollPointerX) {
+		scroll.applyScroll(world.scrollPointerX - e.stageX, world.scrollPointerY - e.stageY);
+	    }
+	    world.scrollPointerX = e.stageX;
+	    world.scrollPointerY = e.stageY;
+	}
+    });
+
+    this.stage.addEventListener("pressup", function(e) {
+	    delete world.scrollPointerX;
+	    delete world.scrollPointerY;
+    });
+
 }
 World.prototype = {
     initGrid: function(mapDict) {
@@ -110,6 +128,11 @@ function Space(options) {
 }
 Space.WIDTH = 70;
 Space.HEIGHT = 70;
+Space.passthroughFunc = function(e) {
+    if(!e.target.owner) { e.target = e.target.parent; }
+    e.target = world.getSpaceByCoords(e.target.owner).shape;
+    e.target.dispatchEvent(e);
+};
 Space.prototype = {
     width: Space.WIDTH,
     height: Space.HEIGHT,
@@ -122,9 +145,20 @@ Space.prototype = {
 	this.shape.addChild(this.baseShape);
 
 	this.baseShape.owner = this;
+	this.shape.owner = this;
         this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
-        this.baseShape.addEventListener("click", ui.onSpaceClick);
+
+        this.shape.addEventListener("click", function(e) { 
+	    if((e.target instanceof createjs.Bitmap)) { e.target = e.target.parent; }
+
+	    if(!ui.pathSource || ui.hoverSpace == e.target.owner) {
+		ui.onSpaceClick(e);
+	    }
+
+	    ui.onSpaceHover(e);
+	});
+
         this.baseShape.addEventListener("rollover", ui.onSpaceHover);
 
 	if(terrain.overlayImgObj) {
@@ -133,6 +167,7 @@ Space.prototype = {
 	    overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - overlay.image.height/4;
 	    this.overlayShape = overlay;
 	    this.overlayShape.owner = this;
+	    this.overlayShape.addEventListener("click", Space.passthroughFunc);
         }
     },
 
