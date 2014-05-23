@@ -31,6 +31,13 @@ module.exports = function(data, mapData, collections, game, player, callback) {
 		    if(!createValid) { callback({}); return; }
 
 		    data.team = player.team;
+		    
+		    var sanatizedData = {};
+		    sanatizedData.x = data.x;
+		    sanatizedData.y = data.y;
+		    sanatizedData.team = data.team;
+		    sanatizedData.type = data.type;
+
 		    var unit = new Unit(data, true);
 
 		    data = unit.getStorableObj();
