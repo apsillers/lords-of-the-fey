@@ -8,7 +8,7 @@ The server requires:
  * [MongoDB](https://www.mongodb.org/)
  * [Node.js](http://nodejs.org/) (and npm, but that is bundled with Node > 0.6.3)
 
-The browser client only requires a modern browser that supports the [canvas API](http://caniuse.com/canvas). The browser should also use a mouse for input; touch interfaces are currently not well supported, but they might work.
+The browser client only requires a modern browser that supports the [canvas API](http://caniuse.com/canvas). Both touch and mouse input are supported (but mouse input is given development priority).
 
 To set up a test environment, clone the repository and do:
 
