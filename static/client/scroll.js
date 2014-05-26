@@ -10,14 +10,8 @@ var scroll = {
     },
     applyScroll: function(dx,dy) {
         var stage = world.stage;
-	if((dx < 0 && world.mapContainer.x < 0) ||
-	   (dx > 0 && world.mapContainer.x > -world.mapContainer.getBounds().width + stage.canvas.width)) {
-	    world.mapContainer.x -= dx;
-	}
-	if((dy < 0 && world.mapContainer.y < 0) ||
-	   (dy > 0 && world.mapContainer.y > -world.mapContainer.getBounds().height + stage.canvas.height)) {
-	    world.mapContainer.y -= dy;
-	}
+	world.mapContainer.x = Math.max(Math.min(world.mapContainer.x - dx, 0), -world.mapContainer.getBounds().width + stage.canvas.width);
+	world.mapContainer.y = Math.max(Math.min(world.mapContainer.y - dy, 0), -world.mapContainer.getBounds().height + stage.canvas.height);
 	world.stage.update();
     },
     addScroll: function() {
