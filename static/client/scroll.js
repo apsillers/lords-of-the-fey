@@ -10,7 +10,7 @@ var scroll = {
     },
     applyScroll: function(dx,dy) {
         var stage = world.stage;
-	world.mapContainer.x = Math.max(Math.min(world.mapContainer.x - dx, 0), -world.mapContainer.getBounds().width + stage.canvas.width);
+	world.mapContainer.x = Math.min(0, Math.max(world.mapContainer.x - dx, -world.mapContainer.getBounds().width + stage.canvas.width));
 	world.mapContainer.y = Math.max(Math.min(world.mapContainer.y - dy, 0), -world.mapContainer.getBounds().height + stage.canvas.height);
 	world.stage.update();
     },
