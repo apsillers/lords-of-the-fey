@@ -229,6 +229,7 @@ function Unit(unitData, isCreation, isLevelUp) {
 
 	// forward click to underlying space
 	unit.shape.addEventListener("click", Space.passthroughFunc);
+	unit.shape.addEventListener("rollover", Space.passthroughFunc);
         
 	unit.drawHpBar();
 	unit.drawXpBar();

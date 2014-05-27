@@ -7,11 +7,13 @@ function World(canvasName) {
     this.grid = {};
     this.units = {};
 
-
     this.stage.addEventListener("pressmove", function(e) {
 	if(e.primary) {
 	    if(world.scrollPointerX) {
-		scroll.applyScroll(world.scrollPointerX - e.stageX, world.scrollPointerY - e.stageY);
+		if(Math.abs(world.scrollPointerX - e.stageX) > 10 || Math.abs(world.scrollPointerY - e.stageY) > 10) {
+		    scroll.applyScroll(world.scrollPointerX - e.stageX, world.scrollPointerY - e.stageY);
+		    clearTimeout(world.noMoveTimeout);
+		}
 	    }
 	    world.scrollPointerX = e.stageX;
 	    world.scrollPointerY = e.stageY;
@@ -19,8 +21,10 @@ function World(canvasName) {
     });
 
     this.stage.addEventListener("pressup", function(e) {
-	    delete world.scrollPointerX;
-	    delete world.scrollPointerY;
+	clearTimeout(world.noMoveTimeout);
+
+	delete world.scrollPointerX;
+	delete world.scrollPointerY;
     });
 
 }
@@ -149,6 +153,14 @@ Space.prototype = {
         this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
 
+        this.shape.addEventListener("mousedown", function(e) { 
+	    if((e.target instanceof createjs.Bitmap)) { e.target = e.target.parent; }
+
+	    world.noMoveTimeout = setTimeout(function() {
+		ui.onContextMenu(e.target.owner, { x: e.stageX, y: e.stageY });
+	    }, 1000);
+	});
+
         this.shape.addEventListener("click", function(e) { 
 	    if((e.target instanceof createjs.Bitmap)) { e.target = e.target.parent; }
 
@@ -168,6 +180,7 @@ Space.prototype = {
 	    this.overlayShape = overlay;
 	    this.overlayShape.owner = this;
 	    this.overlayShape.addEventListener("click", Space.passthroughFunc);
+	    this.overlayShape.addEventListener("rollover", Space.passthroughFunc);
         }
     },
 
