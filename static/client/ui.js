@@ -35,6 +35,7 @@ var ui = {
 		pip.y = s.shape.y + 16;
 		pip.owner = s;
 		pip.addEventListener("click", Space.passthroughFunc);
+		pip.addEventListener("rollover", Space.passthroughFunc);
 		var bar = new createjs.Shape();
 		bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 38);
 		bar.regX = 0;
@@ -203,8 +204,10 @@ var ui = {
 	if(foundPath) {
 	    createMenuItem(0, "Recruit", function() {
 		ui.showRecruitPrompt(function(typeName) {
-		    socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
-		    ui.moveHappening = true;
+		    if(typeName) {
+			socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
+		    	ui.moveHappening = true;
+		    }
 		});
 	    });
 	}
@@ -226,7 +229,7 @@ var ui = {
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
-	var promptHeight = 52 * gameInfo.player.recruitList.length + 50;
+	var promptHeight = 54 * gameInfo.player.recruitList.length + 52;
 	ui.recruitPrompt = new createjs.Container();
 	ui.recruitPrompt.x = (canvas.width - promptWidth) / 2;
 	ui.recruitPrompt.y = (canvas.height - promptHeight) / 2;
@@ -239,15 +242,21 @@ var ui = {
 	    var unitId = gameInfo.player.recruitList[i];
 	    var unit = unitLib.protos[unitId];
 	    var unitText = new createjs.Text(unit.name);
+	    var unitImg = new createjs.Bitmap(unit.imgObj);
 	    var unitButton = new createjs.Shape();
 
-	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
+	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 54 * i, promptWidth - 20, 54);
 
-	    unitText.y = 30 + 52 * i;
-	    unitText.x = 20;
+	    unitText.y = 30 + 54 * i;
+	    unitText.x = 100;
 	    unitText.color = "#fff";
+	    
+	    unitImg.y = 1.5 + 54 * i;
+	    unitImg.x = 20.5;
+
 	    ui.recruitPrompt.addChild(unitButton);
 	    ui.recruitPrompt.addChild(unitText);
+	    ui.recruitPrompt.addChild(unitImg);
 
 	    unitButton.addEventListener("click", resolutionCallback.bind(null, unitId));
 	    unitButton.addEventListener("click", ui.clearModal);
@@ -255,15 +264,15 @@ var ui = {
 
 	var cancelText = new createjs.Text("Cancel");
 	var cancelButton = new createjs.Shape();
-	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 52 * i, 60, 30);
+	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 54 * i, 60, 30);
 	
-	cancelText.y = 15 + 52 * i;
+	cancelText.y = 16 + 54 * i;
 	cancelText.x = promptWidth - 60;
 	cancelText.color = "#fff";
 	ui.recruitPrompt.addChild(cancelButton);
 	ui.recruitPrompt.addChild(cancelText);
 	
-	cancelButton.addEventListener("click", resolutionCallback.bind(null, -1));
+	cancelButton.addEventListener("click", resolutionCallback.bind(null, false));
 	cancelButton.addEventListener("click", ui.clearModal);
 	
 	ui.modal.addChild(ui.recruitPrompt);

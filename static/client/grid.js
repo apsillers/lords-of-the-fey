@@ -171,7 +171,7 @@ Space.prototype = {
 	    ui.onSpaceHover(e);
 	});
 
-        this.baseShape.addEventListener("rollover", ui.onSpaceHover);
+        this.shape.addEventListener("rollover", ui.onSpaceHover);
 
 	if(terrain.overlayImgObj) {
 	    var overlay = new createjs.Bitmap(terrain.overlayImgObj);
@@ -181,6 +181,7 @@ Space.prototype = {
 	    this.overlayShape.owner = this;
 	    this.overlayShape.addEventListener("click", Space.passthroughFunc);
 	    this.overlayShape.addEventListener("rollover", Space.passthroughFunc);
+	    this.overlayShape.addEventListener("rollover", function(e) { console.log(e); });
         }
     },
 
