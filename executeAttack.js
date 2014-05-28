@@ -78,7 +78,7 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
 function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     var swingRecord;
 
-    hitteeCover = attack.magic ? Math.min(hitteeCover, .3) : hitteeCover;
+    hitteeCover = attack.properties.indexOf("magical") != -1 ? Math.min(hitteeCover, .3) : hitteeCover;
 
     if(Math.random() > hitteeCover) {
 	hittee.hp -= attack.damage;
