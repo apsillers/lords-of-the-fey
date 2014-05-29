@@ -49,7 +49,7 @@
         <!-- right status column -->
         <div id="right-column">
 
-	<img id="right_time_of_day">
+	<img id="right_time_of_day" style="clear: both;">
 
         <div style="float:left; background-color:#222222; margin-right: 2px;" class="tilesize">
           <img id="right_data_image" style="display:block; margin:auto;"/>
@@ -74,6 +74,20 @@
         <!-- right status column end -->
 
         <canvas id="c"></canvas>
+
+	<div id="recruit-prompt" style="display:none; background-color:#DDD;">
+	  <div id="recruit-list" style="overflow: auto; float:left; width: 250px;"></div>
+	  <div id="recruit-stats" style="background-color: #AAA; width: 100px; padding: 0 10px; float: right;">
+	    <img id="recruit-stats-img"><br/>
+	    HP: <span id="recruit-stats-hp"></span><br/>
+	    XP: <span id="recruit-stats-xp"></span><br/>
+	    Move: <span id="recruit-stats-move"></span><br/><br/>
+	    <div id="recruit-stats-attacks"></div><br/>
+	  </div>
+	  <div style="clear: both;"></div>
+	  <div id="recruit-cancel"></div>
+	</div>
+
         <script src="../shared/terrain.js"></script>
         <script src="boot.js"></script>
         <script src="ui.js"></script>

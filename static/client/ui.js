@@ -229,52 +229,64 @@ var ui = {
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
-	var promptHeight = 54 * gameInfo.player.recruitList.length + 52;
-	ui.recruitPrompt = new createjs.Container();
-	ui.recruitPrompt.x = (canvas.width - promptWidth) / 2;
-	ui.recruitPrompt.y = (canvas.height - promptHeight) / 2;
+	var promptHeight = 300;
 
-	var promptShape = new createjs.Shape();
-	promptShape.graphics.beginFill("rgb(0,0,128)").drawRect(0, 0, promptWidth, promptHeight);
-	ui.recruitPrompt.addChild(promptShape);
+	var recruitPromptDOM = $("#recruit-prompt");
+	var recruitListDOM = $("#recruit-list");
+	var recruitStatsDOM = $("#recruit-stats");
+
+	recruitPromptDOM.width(promptWidth);
+	recruitPromptDOM.height(promptHeight);
+	recruitPromptDOM.show();
+
+	ui.recruitPrompt = new createjs.DOMElement(recruitPromptDOM.get(0));
+	ui.recruitPrompt.x = (canvas.width - promptWidth) / 2;
+	ui.recruitPrompt.y = -canvas.height + ((canvas.height - promptHeight) / 2);
+
+	recruitListDOM.html("");
 
 	for(var i=0; i<gameInfo.player.recruitList.length; ++i) {
 	    var unitId = gameInfo.player.recruitList[i];
 	    var unit = unitLib.protos[unitId];
-	    var unitText = new createjs.Text(unit.name);
-	    var unitImg = new createjs.Bitmap(unit.imgObj);
-	    var unitButton = new createjs.Shape();
 
-	    unitButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 54 * i, promptWidth - 20, 54);
-
-	    unitText.y = 30 + 54 * i;
-	    unitText.x = 100;
-	    unitText.color = "#fff";
+	    var listItem = $("<div class='recruit-item'>");
 	    
-	    unitImg.y = 1.5 + 54 * i;
-	    unitImg.x = 20.5;
+	    listItem.append(unit.imgObj);
 
-	    ui.recruitPrompt.addChild(unitButton);
-	    ui.recruitPrompt.addChild(unitText);
-	    ui.recruitPrompt.addChild(unitImg);
+	    var unitText = $("<span>");
+	    unitText.text(unit.name);
+	    unitText.css({top: "-40px", position: "relative"});
 
-	    unitButton.addEventListener("click", resolutionCallback.bind(null, unitId));
-	    unitButton.addEventListener("click", ui.clearModal);
+	    listItem.append(unitText);
+	    recruitListDOM.append(listItem);
+
+	    listItem.on("click", function(unit) {
+		$("#recruit-stats-img").prop("src", unit.img);
+		$("#recruit-stats-hp").text(unit.maxHp);
+		$("#recruit-stats-xp").text(unit.maxXp);
+		$("#recruit-stats-move").text(unit.move);
+
+		$("#recruit-stats-attacks").html("");
+		for(var i=0; i<unit.attacks.length; ++i) {
+		    var attackNameElm = $("<div style='font-weight: bold;'>");
+		    var attackTypeElm = $("<div>");
+		    var attack = unit.attacks[i];
+		    attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
+		    attackTypeElm.text(attack.type);
+		    $("#recruit-stats-attacks").append(attackNameElm);
+		    $("#recruit-stats-attacks").append(attackTypeElm);
+		}
+	    }.bind(null, unit));
+
+	    listItem.on("dblclick", resolutionCallback.bind(null, unitId));
+	    listItem.on("dblclick", ui.clearModal);
 	}
 
-	var cancelText = new createjs.Text("Cancel");
-	var cancelButton = new createjs.Shape();
-	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 54 * i, 60, 30);
-	
-	cancelText.y = 16 + 54 * i;
-	cancelText.x = promptWidth - 60;
-	cancelText.color = "#fff";
-	ui.recruitPrompt.addChild(cancelButton);
-	ui.recruitPrompt.addChild(cancelText);
-	
-	cancelButton.addEventListener("click", resolutionCallback.bind(null, false));
-	cancelButton.addEventListener("click", ui.clearModal);
-	
+	var cancelButton = $("<button>Cancel</button>");
+	cancelButton.on("click", resolutionCallback.bind(null, false));
+	cancelButton.on("click", ui.clearModal);
+	$("#recruit-cancel").html("").append(cancelButton);
+
 	ui.modal.addChild(ui.recruitPrompt);
 	world.stage.update();
     },
@@ -474,6 +486,14 @@ var ui = {
 
     clearModal: function() {
 	world.stage.removeChild(ui.modal);
+
+	// hide DOM menus
+	for(var i=0; i<ui.modal.children.length;++i) {
+	    if(ui.modal.children[i] instanceof createjs.DOMElement) {
+		$(ui.modal.children[i].htmlElement).hide();
+	    }
+	}
+
 	ui.modal = undefined;
 	world.stage.update();
     },

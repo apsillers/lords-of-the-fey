@@ -42,16 +42,9 @@
       width: 200px;
   }
 
-  .upper-tile {
-
-  }
-
-  .unit {
-    position: absolute;
-  }
-
-  #cursor {
-    position: absolute;
+  div.recruit-item {
+      margin-bottom: 2px;
+      background-color: #CCC;
   }
 
   .translucent {
@@ -65,6 +58,4 @@
     width: 72px;
   }
 
-  #battlefield {
-
-  }
+  
