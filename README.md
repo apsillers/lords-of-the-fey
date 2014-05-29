@@ -1,7 +1,7 @@
 Lords of the Fey
 =======
 
-A multiplayer fantasy-themed turn-based strategy game that you can play in your browser, using rules based on [Battle for Wesnoth](http://www.wesnoth.org).
+A multiplayer fantasy-themed turn-based strategy game that you can play in your browser. The game's rules and artwork are based on [Battle for Wesnoth](http://www.wesnoth.org).
 
 The server requires:
 
