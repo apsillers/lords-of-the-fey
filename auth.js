@@ -1,8 +1,13 @@
-exports.socketOwnerCanAct = function(socket, game) {
+exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     var user = socket.handshake.user;
     if(!user) { return false; }
     var player = game.players.filter(function(p) { return p.username == user.username })[0];    
     if(!player) { return false; }
+
+    // if the player must resolve a branching level-up
+    // and this is not an attempt to resolve that
+    if(player.advancingUnit && !allowAdvancement) { return false; }
+
     return player.team == game.activeTeam;
 }
 

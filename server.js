@@ -35,7 +35,6 @@ mongoClient.open(function(err, mongoClient) {
     require("./auth").initAuth(app, mongo, collections);
 
     unitLib.init(function() {
-	console.log(unitLib.protos);
 	io.sockets.on('connection', function (socket) {
             initListeners(socket, collections);
 	});
@@ -249,14 +248,17 @@ function initListeners(socket, collections) {
 					
 					// resolve combat
 					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game);
-					// injure/kill units models
-					var handleDefender = function() {
-					    if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
-					    else { collections.units.save(defender.getStorableObj(), {safe: true}, emitMove); }
-					}
+
+					collections.games.save(game, { safe: true }, function() {
+					    // injure/kill units models
+					    var handleDefender = function() {
+						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
+						else { collections.units.save(defender.getStorableObj(), {safe: true}, emitMove); }
+					    }
 					
-					if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
-					else { collections.units.save(unit.getStorableObj(), {safe: true}, handleDefender); }
+					    if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
+					    else { collections.units.save(unit.getStorableObj(), {safe: true}, handleDefender); }
+					});
 				    });
 				} else {
                                     collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
@@ -289,6 +291,42 @@ function initListeners(socket, collections) {
 	    });
 	});
     });
+
+    socket.on("levelup", function(data) {
+        var gameId = data.gameId;
+        var choiceNum = data.choiceNum;
+	var user = socket.handshake.user;
+
+        collections.games.findOne({id:gameId}, function(err, game) {
+	    // ensure that the logged-in user has the right to act
+	    if(!socketOwnerCanAct(socket, game, true)) {
+		return;
+	    }
+
+	    var player = game.players.filter(function(p) { return p.username == user.username })[0];
+	    if(!player || !player.advancingUnit) { return; }
+
+	    var coords = player.advancingUnit.split(",").map(function(i) { return parseInt(i); });
+            collections.units.findOne({ x:coords[0], y:coords[1], gameId:gameId }, function(err, unit) {
+		unit = new Unit(unit);
+		var leveledUnit = unit.levelUp(choiceNum);
+
+		var leveledOwnProps = leveledUnit.getStorableObj();
+	        for(var prop in leveledOwnProps) {
+		    unit[prop] = leveledOwnProps[prop]; 
+		}
+
+		delete player.advancingUnit;
+
+		collections.games.save(game, { safe: true }, function() {
+		    collections.units.save(unit.getStorableObj(), { safe: true }, function() {
+			io.sockets.in("game"+gameId).emit("leveledup", { x: coords[0], y: coords[1], choiceNum: choiceNum });
+		    });
+		});
+	    });
+	});
+    });
+	    
 
     socket.on("endTurn", function(data) {
 	var gameId = data.gameId;

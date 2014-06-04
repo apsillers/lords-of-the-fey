@@ -38,7 +38,7 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
 	}
     }
 
-    function awardXp(thisUnit, enemy) {
+    function awardXp(thisUnit, enemy, isOffender) {
 	if(thisUnit.hp > 0) {
 	    if(enemy.hp > 0) {
 		thisUnit.xp += enemy.level || 1;
@@ -51,24 +51,33 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
 	    if(thisUnit.xp >= thisUnit.maxXp) {
 		if(!thisUnit.advancesTo || thisUnit.advancesTo.length < 2) {
 		    var leveledUnit = thisUnit.levelUp(0);
-		} else if(thisUnit.advancesTo && thisUnit.advancesTo,length > 1) {
-		    // user must choose advancement path
+		} else if(thisUnit.advancesTo && thisUnit.advancesTo.length > 1) {
+		    if(isOffender) {
+			// if offender, user must choose advancement path
+			// so mark this player as requiring a choice; client should show prompt
+			var owner = game.players.filter(function(p) { return p.team == thisUnit.team; })[0];
+			owner.advancingUnit = thisUnit.x + "," + thisUnit.y;
+		    } else {
+			// defending unit level-up does not offer a choice to player
+			var leveledUnit = thisUnit.levelUp(0);
+		    };
 		}
 
-		// modify unit with new properties after level-up
-		var leveledOwnProps = leveledUnit.getStorableObj();
-		console.log(leveledOwnProps);
-	        for(var prop in leveledOwnProps) {
-		    thisUnit[prop] = leveledOwnProps[prop]; 
-		} 
+		if(leveledUnit) {
+		    // modify unit with new properties after level-up
+		    var leveledOwnProps = leveledUnit.getStorableObj();
+	            for(var prop in leveledOwnProps) {
+			thisUnit[prop] = leveledOwnProps[prop]; 
+		    } 
+		}
 	    }
 
 	    return xpBeforeLevel;
 	}
 	return thisUnit.xp;
     }
-    var offenseXp = awardXp(offender, defender);
-    var defenseXp = awardXp(defender, offender);
+    var offenseXp = awardXp(offender, defender, true);
+    var defenseXp = awardXp(defender, offender, false);
 
     return { record: battleRecord, offender: {x: offender.x, y: offender.y}, defender: {x: defender.x, y: defender.y}, offenseIndex: attackIndex, defenseIndex: defenseIndex, xp: {offense: offenseXp, defense: defenseXp } };
 }
@@ -78,7 +87,9 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
 function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     var swingRecord;
 
-    hitteeCover = attack.properties.indexOf("magical") != -1 ? Math.min(hitteeCover, .3) : hitteeCover;
+    if(attack.properties) {
+	hitteeCover = attack.properties.indexOf("magical") != -1 ? Math.min(hitteeCover, .3) : hitteeCover;
+    }
 
     if(Math.random() > hitteeCover) {
 	hittee.hp -= attack.damage;

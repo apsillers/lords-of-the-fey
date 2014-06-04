@@ -4,7 +4,7 @@
   "cost": 16,
   "move": 4,
   "level": 1,
-  "advancesTo":["warrior"],
+  "advancesTo":["warrior", "orcish_archer"],
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":1, "cover":0.2 },

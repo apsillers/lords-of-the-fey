@@ -244,15 +244,20 @@ function Unit(unitData, isCreation, isLevelUp) {
 unitLib.unitProto = {
     constructor: Unit,
 
-    levelUp: function(pathChoice) {
-        if(this.advancesTo) {
-	    var newType = this.advancesTo[pathChoice];
-	    this.type = newType;
+    levelUp: function(pathChoice, preview) {
+	// only reduce XP if this a real level-up, not a level-up preview for a prompt
+	if(!preview) {
+	    this.xp = this.xp - this.maxXp;
 	}
 
-	this.xp = this.xp - this.maxXp;
+	var ownProps = this.getStorableObj();
 
-	var newUnit = new Unit(this.getStorableObj(), false, true);
+        if(this.advancesTo) {
+	    var newType = this.advancesTo[pathChoice];
+	    ownProps.type = newType;
+	}
+
+	var newUnit = new Unit(ownProps, false, true);
 	return newUnit;
     },
 
@@ -328,6 +333,19 @@ unitLib.unitProto = {
 	    if(!this.advancesTo || this.advancesTo.length < 2) {
 		world.removeUnit(this);
 		world.addUnit(this.levelUp(0), world.getSpaceByCoords(this));
+	    } else {
+		if(gameInfo.activeTeam == this.team) {
+		    // show level-up prompt to active attacking player
+		    if(gameInfo.player.team == gameInfo.activeTeam) {
+			var thisUnit = this;
+			ui.showAdvancementPromptFor(this, function(choiceNum) {
+			    socket.emit("levelup", { gameId: gameInfo.gameId, choiceNum: choiceNum });
+			});
+		    }
+		} else {
+		    world.removeUnit(this);
+		    world.addUnit(this.levelUp(0), world.getSpaceByCoords(this));
+		}
 	    }
 	}
 

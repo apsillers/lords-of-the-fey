@@ -114,8 +114,15 @@ World.prototype = {
         });
     },
     
-    getUnitAt: function(space) {
-        return this.units[space.x+","+space.y];
+    getUnitAt: function(x, y) {
+        if(y == undefined) {
+            if(typeof x == "object" && x.x != undefined && x.y != undefined) {
+                return this.units[x.x+","+x.y]
+            }
+            return this.units[x];
+        }
+        
+        return this.units[x+","+y];
     }
 }
 
@@ -181,7 +188,6 @@ Space.prototype = {
 	    this.overlayShape.owner = this;
 	    this.overlayShape.addEventListener("click", Space.passthroughFunc);
 	    this.overlayShape.addEventListener("rollover", Space.passthroughFunc);
-	    this.overlayShape.addEventListener("rollover", function(e) { console.log(e); });
         }
     },
 

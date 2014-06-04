@@ -84,8 +84,22 @@ window.addEventListener("load", function() {
 		for(var i in data.villages) {
 		    world.getSpaceByCoords(i).setVillageFlag(data.villages[i]);
 		}
+
+		if(gameInfo.player.advancingUnit) {
+		    var thisUnit = world.getUnitAt(gameInfo.player.advancingUnit);
+		    ui.showAdvancementPromptFor(thisUnit, function(choiceNum) {
+			socket.emit("levelup", { gameId: gameInfo.gameId, choiceNum: choiceNum });
+		    });
+		}
             }
 	});
+    });
+
+    socket.on("leveledup", function(data) {
+	var thisUnit = world.getUnitAt(data);
+	world.removeUnit(thisUnit);
+	world.addUnit(thisUnit.levelUp(data.choiceNum), world.getSpaceByCoords(data));
+	delete gameInfo.player.advancingUnit;
     });
 
     socket.on("newTurn", function(data) {

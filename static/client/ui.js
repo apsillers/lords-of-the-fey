@@ -484,6 +484,74 @@ var ui = {
 	ui.modal.addChild(ui.attackPrompt);
     },
 
+    showAdvancementPromptFor: function(levelingUnit, resolutionCallback) {
+	var canvas = world.stage.canvas;
+
+	ui.modal = new createjs.Container();
+	var modalWall = new createjs.Shape();
+	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
+	ui.modal.addChild(modalWall);
+	world.stage.addChild(ui.modal);
+
+	var promptWidth = 400;
+	var promptHeight = 300;
+
+	var recruitPromptDOM = $("#recruit-prompt");
+	var recruitListDOM = $("#recruit-list");
+	var recruitStatsDOM = $("#recruit-stats");
+
+	recruitPromptDOM.width(promptWidth);
+	recruitPromptDOM.height(promptHeight);
+	recruitPromptDOM.show();
+
+	ui.recruitPrompt = new createjs.DOMElement(recruitPromptDOM.get(0));
+	ui.recruitPrompt.x = (canvas.width - promptWidth) / 2;
+	ui.recruitPrompt.y = -canvas.height + ((canvas.height - promptHeight) / 2);
+
+	recruitListDOM.html("");
+
+	for(var i=0; i<levelingUnit.advancesTo.length; ++i) {
+	    var unit = levelingUnit.levelUp(i, true);
+
+	    var listItem = $("<div class='recruit-item'>");
+	    
+	    listItem.append(unit.imgObj);
+
+	    var unitText = $("<span>");
+	    unitText.text(unit.name);
+	    unitText.css({top: "-40px", position: "relative"});
+
+	    listItem.append(unitText);
+	    recruitListDOM.append(listItem);
+
+	    listItem.on("click", function(unit) {
+		$("#recruit-stats-img").prop("src", unit.img);
+		$("#recruit-stats-hp").text(unit.maxHp);
+		$("#recruit-stats-xp").text(unit.maxXp);
+		$("#recruit-stats-move").text(unit.move);
+
+		$("#recruit-stats-attacks").html("");
+		for(var i=0; i<unit.attacks.length; ++i) {
+		    var attackNameElm = $("<div style='font-weight: bold;'>");
+		    var attackTypeElm = $("<div>");
+		    var attack = unit.attacks[i];
+		    attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
+		    attackTypeElm.text(attack.type);
+		    $("#recruit-stats-attacks").append(attackNameElm);
+		    $("#recruit-stats-attacks").append(attackTypeElm);
+		}
+	    }.bind(null, unit));
+
+	    listItem.on("dblclick", resolutionCallback.bind(null, i));
+	    listItem.on("dblclick", ui.clearModal);
+	}
+
+	$("#recruit-cancel").html("");
+
+	ui.modal.addChild(ui.recruitPrompt);
+	world.stage.update();	
+    },
+
     clearModal: function() {
 	world.stage.removeChild(ui.modal);
 
