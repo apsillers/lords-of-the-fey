@@ -47,30 +47,20 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
 	    }
 
 	    var xpBeforeLevel = thisUnit.xp;
+	    var owner = game.players.filter(function(p) { return p.team == thisUnit.team; })[0];
 
-	    if(thisUnit.xp >= thisUnit.maxXp) {
-		if(!thisUnit.advancesTo || thisUnit.advancesTo.length < 2) {
-		    var leveledUnit = thisUnit.levelUp(0);
-		} else if(thisUnit.advancesTo && thisUnit.advancesTo.length > 1) {
-		    if(isOffender) {
-			// if offender, user must choose advancement path
-			// so mark this player as requiring a choice; client should show prompt
-			var owner = game.players.filter(function(p) { return p.team == thisUnit.team; })[0];
-			owner.advancingUnit = thisUnit.x + "," + thisUnit.y;
-		    } else {
-			// defending unit level-up does not offer a choice to player
-			var leveledUnit = thisUnit.levelUp(0);
-		    };
-		}
+	    var originalUnit = thisUnit;
+	    while(thisUnit.xp >= thisUnit.maxXp) {
+		var oldXp = thisUnit.xp;
 
-		if(leveledUnit) {
-		    // modify unit with new properties after level-up
-		    var leveledOwnProps = leveledUnit.getStorableObj();
-	            for(var prop in leveledOwnProps) {
-			thisUnit[prop] = leveledOwnProps[prop]; 
-		    } 
-		}
+		thisUnit = require("./levelUp").getLevelUp(thisUnit, owner, isOffender);
+
+		// if the XP is above leveling threshold but did not decrease, we hit a branching prompt
+		if(oldXp == thisUnit.xp) { break; }
 	    }
+
+	    // we must apply the new leveled-up properties to the original Unit object passed into the function
+	    require("./levelUp").applyNewProperties(originalUnit, thisUnit);
 
 	    return xpBeforeLevel;
 	}

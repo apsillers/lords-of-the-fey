@@ -309,14 +309,23 @@ function initListeners(socket, collections) {
 	    var coords = player.advancingUnit.split(",").map(function(i) { return parseInt(i); });
             collections.units.findOne({ x:coords[0], y:coords[1], gameId:gameId }, function(err, unit) {
 		unit = new Unit(unit);
-		var leveledUnit = unit.levelUp(choiceNum);
 
-		var leveledOwnProps = leveledUnit.getStorableObj();
-	        for(var prop in leveledOwnProps) {
-		    unit[prop] = leveledOwnProps[prop]; 
-		}
+		choiceNum = Math.round(choiceNum);
+		if(choiceNum >= unit.advancesTo.length || choiceNum < 0) { choiceNum = 0; }
+
+		var unit = unit.levelUp(choiceNum);
 
 		delete player.advancingUnit;
+
+		// continue leveling up with unspent over-max XP
+		while(unit.xp >= unit.maxXp) {
+		    console.log("advanced unit after choice", unit);
+		    var oldXp = unit.xp;
+		    unit = require("./levelUp").getLevelUp(unit, player, true);
+		    
+		    // if the XP is above leveling threshold but did not decrease, we hit a branching prompt
+		    if(oldXp == unit.xp) { break; }
+		}		
 
 		collections.games.save(game, { safe: true }, function() {
 		    collections.units.save(unit.getStorableObj(), { safe: true }, function() {

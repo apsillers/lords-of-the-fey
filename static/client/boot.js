@@ -97,9 +97,15 @@ window.addEventListener("load", function() {
 
     socket.on("leveledup", function(data) {
 	var thisUnit = world.getUnitAt(data);
+	var newUnit = thisUnit.levelUp(data.choiceNum);
+
 	world.removeUnit(thisUnit);
-	world.addUnit(thisUnit.levelUp(data.choiceNum), world.getSpaceByCoords(data));
+	world.addUnit(newUnit, world.getSpaceByCoords(data));
 	delete gameInfo.player.advancingUnit;
+
+	// trigger another level-up or prompt
+	var newUnit = newUnit.update({ xp: newUnit.xp });
+
     });
 
     socket.on("newTurn", function(data) {

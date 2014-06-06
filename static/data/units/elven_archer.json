@@ -4,6 +4,8 @@
   "cost": 16,
   "move": 4,
   "level": 1,
+  "maxHp": 17,
+  "maxXp": 9,
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":2, "cover":0.3 },
@@ -48,7 +50,5 @@
     "impact": 0.0,
     "pierce": 0.0
   },
-  "alignment":"neutral",
-  "maxHp": 17,
-  "maxXp": 20
+  "alignment":"neutral"
 }

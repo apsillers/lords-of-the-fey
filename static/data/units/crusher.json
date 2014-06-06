@@ -1,12 +1,11 @@
 {
-  "name": "Warrior",
+  "name": "Crusher",
   "img": "/data/img/units/warrior.png",
-  "cost": 24,
+  "cost": 34,
   "move": 4,
-  "level": 2,
-  "maxHp": 32,
-  "maxXp": 10,
-  "advancesTo": ["crusher"],
+  "level": 3,
+  "maxHp": 40,
+  "maxXp": 34,
   "terrain": {
     "flat": { "move":1, "cover":0.5 },
     "swamp": { "move":1, "cover":0.2 },
@@ -32,7 +31,7 @@
       "type":"melee",
       "damageType":"blade",
       "number":2,
-      "damage":11
+      "damage":13
     }
   ],
   "resistances": {

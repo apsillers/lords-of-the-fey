@@ -1,6 +1,6 @@
 var unitLib = {
     
-    protoList: ["grunt", "scout", "elven_archer", "orcish_archer", "warrior"],
+    protoList: ["grunt", "scout", "elven_archer", "orcish_archer", "warrior", "crusher"],
     protos: {},
 
     init: function(initCallback) {
@@ -184,9 +184,6 @@ function Unit(unitData, isCreation, isLevelUp) {
 	    ((unitLib.abilityDict[unit.attributes[i]] || {}).onCreate || function(){})(unit);
 	}
 
-    }
-
-    if(isCreation) {
 	// if this is creation time, set initial stats
 	unit.xp = 0;
 	unit.hp = unit.maxHp;
@@ -210,11 +207,19 @@ function Unit(unitData, isCreation, isLevelUp) {
 	delete unit.maxXp;
 	delete unit.maxHp;
 
+	unit.attributes = unit.attributes || [];
+
+	// re-apply attributes for new level, new attacks
 	for(var i = 0; i < unit.attributes.length; ++i) {
 	    ((unitLib.abilityDict[unit.attributes[i]] || {}).onCreate || function(){})(unit);
 	}
 
-	// if we're leveling up, refill HP, mod XP
+	// if this unit has AMLA'd, add 8 HP per bonus level
+	if(unit.hasOwnProperty("level")) {
+	    unit.maxHp += (unit.level - proto.level) * 8
+	}
+
+	// if we're leveling up, refill HP
 	unit.hp = unit.maxHp;
     }
 
@@ -255,7 +260,12 @@ unitLib.unitProto = {
         if(this.advancesTo) {
 	    var newType = this.advancesTo[pathChoice];
 	    ownProps.type = newType;
+	} else {
+	    // after maximum level advancement (AMLA)
+	    ownProps.level = this.level + 1;
 	}
+
+	// console.log("level up", this, ownProps, newType);
 
 	var newUnit = new Unit(ownProps, false, true);
 	return newUnit;
@@ -329,30 +339,34 @@ unitLib.unitProto = {
 	    this[prop] = update[prop];
 	}
 
-	if(this.xp >= this.maxXp) {
-	    if(!this.advancesTo || this.advancesTo.length < 2) {
-		world.removeUnit(this);
-		world.addUnit(this.levelUp(0), world.getSpaceByCoords(this));
+	var thisUnit = this;
+	while(thisUnit.xp >= thisUnit.maxXp) {
+	    if(!thisUnit.advancesTo || thisUnit.advancesTo.length < 2) {
+		world.removeUnit(thisUnit);
+		thisUnit = thisUnit.levelUp(0);
+		world.addUnit(thisUnit, world.getSpaceByCoords(thisUnit));
 	    } else {
-		if(gameInfo.activeTeam == this.team) {
+		if(gameInfo.activeTeam == thisUnit.team) {
 		    // show level-up prompt to active attacking player
 		    if(gameInfo.player.team == gameInfo.activeTeam) {
-			var thisUnit = this;
-			ui.showAdvancementPromptFor(this, function(choiceNum) {
+			ui.showAdvancementPromptFor(thisUnit, function(choiceNum) {
 			    socket.emit("levelup", { gameId: gameInfo.gameId, choiceNum: choiceNum });
 			});
 		    }
+		    break;
 		} else {
-		    world.removeUnit(this);
-		    world.addUnit(this.levelUp(0), world.getSpaceByCoords(this));
+		    // defender with a branching level-up does not get to choose
+		    world.removeUnit(thisUnit);
+		    thisUnit = thisUnit.levelUp(0);
+		    world.addUnit(thisUnit, world.getSpaceByCoords(thisUnit));
 		}
 	    }
 	}
 
 	ui.updateUnitSidebar();
-	this.drawHpBar();
-	this.drawXpBar();
-	this.drawGem();
+	thisUnit.drawHpBar();
+	thisUnit.drawXpBar();
+	thisUnit.drawGem();
 	world.stage.update();
     },
 
