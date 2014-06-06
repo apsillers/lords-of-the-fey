@@ -85,7 +85,7 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
 	hittee.hp -= attack.damage;
 	swingRecord = { event: "hit", offense: isOffense, damage: attack.damage };
 	
-	if(hittee.hp < 0) {
+	if(hittee.hp <= 0) {
 	    swingRecord.kill = true;
 	}
     } else {
