@@ -9,9 +9,12 @@ var scroll = {
 	if(scroll.scrollX == 0 && scroll.scrollY == 0) { clearInterval(scroll.scrollInterval); scroll.scrollInterval = null; }
     },
     applyScroll: function(dx,dy) {
+	var mapWidth = world.mapContainer.getBounds().width;
+	var mapHeight = world.mapContainer.getBounds().height;
+
         var stage = world.stage;
-	world.mapContainer.x = Math.min(0, Math.max(world.mapContainer.x - dx, -world.mapContainer.getBounds().width + stage.canvas.width));
-	world.mapContainer.y = Math.max(Math.min(world.mapContainer.y - dy, 0), -world.mapContainer.getBounds().height + stage.canvas.height);
+	world.mapContainer.x = Math.min(0, Math.max(world.mapContainer.x - dx, stage.canvas.width - mapWidth));
+	world.mapContainer.y = Math.max(Math.min(world.mapContainer.y - dy, 0), stage.canvas.height - mapHeight);
 	world.stage.update();
     },
     addScroll: function() {

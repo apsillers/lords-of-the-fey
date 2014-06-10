@@ -19,8 +19,8 @@
   }
 
   div#right-column {
-      width:200px;
-      height: 400px;
+      width:125px;
+      height: 450px;
       background-color:#999999; 
       border: thin black solid;
       border-left: none;
@@ -38,8 +38,8 @@
   #end-turn-button {
       position: absolute;
       bottom: 0;
-      font-size: 15pt;
-      width: 200px;
+      font-size: 13pt;
+      width: 125px;
   }
 
   div.recruit-item {

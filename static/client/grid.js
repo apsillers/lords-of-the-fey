@@ -30,15 +30,24 @@ function World(canvasName) {
 }
 World.prototype = {
     initGrid: function(mapDict) {
+	this.maxX = 0;
+	this.maxY = 0;
+
         for(var i in mapDict) {
             var coords = i.split(",");
             this.addSpace(new Space({ x:+coords[0], y:+coords[1], terrain: mapDict[i].terrain }));
+
+	    this.maxX = Math.max(this.maxX, +coords[0]);
+	    this.maxY = Math.max(this.maxY, +coords[1]);
         }
+
 	this.mapContainer.addChild(this.baseTerrain);
 	this.mapContainer.setChildIndex(this.baseTerrain, 0);
         this.stage.addChild(this.mapContainer);
 	this.resizeCanvasToWindow();
 	this.stage.update();
+
+	minimap.init(mapDict);
     },
 
     resizeCanvasToWindow: function() {
@@ -132,7 +141,7 @@ function Space(options) {
     this.shape = options.shape;
     this.terrain = options.terrain;
     this.unit = null;
-    
+
     if(!options.shape) {
         this.setShape(options.terrain);
     }
