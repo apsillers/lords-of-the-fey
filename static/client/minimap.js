@@ -52,6 +52,8 @@ var minimap = {
     },
 
     onClick: function(e) {
+	world.stage.removeChild(ui.contextMenu);
+
 	var cornerX = e.stageX - this.box.width / 2;
 	var cornerY = e.stageY - this.box.height / 2;
 

@@ -14,6 +14,8 @@ var scroll = {
 	this.scrollTo(world.mapContainer.x - dx, world.mapContainer.y - dy);		 
     },
     scrollTo: function(x, y) {
+	if(world.stage.children.indexOf(ui.contextMenu) != -1) { return; }
+
         var stage = world.stage;
 
 	var mapWidth = Space.WIDTH + ((Space.WIDTH * 3/4 + 0.6) * (world.maxX));
