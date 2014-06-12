@@ -252,11 +252,11 @@ function initListeners(socket, collections) {
 					collections.games.save(game, { safe: true }, function() {
 					    // injure/kill units models
 					    var handleDefender = function() {
-						if(defender.hp < 0) { collections.units.remove({ _id: defender._id }, emitMove); }
+						if(defender.hp <= 0) { collections.units.remove({ _id: defender._id }, emitMove); }
 						else { collections.units.save(defender.getStorableObj(), {safe: true}, emitMove); }
 					    }
 					
-					    if(unit.hp < 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
+					    if(unit.hp <= 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
 					    else { collections.units.save(unit.getStorableObj(), {safe: true}, handleDefender); }
 					});
 				    });
