@@ -317,7 +317,6 @@ var ui = {
 	// TODO: reveal response.revealedUnits
 
         if(path.length < 2) {
-	    
 	    if(moveData.combat) { ui.animateAttack(moveData); }
             else { ui.moveHappening = false; }
 	    return;
@@ -372,6 +371,10 @@ var ui = {
     animateAttack: function(moveData) {
 	var offender = world.getUnitAt(moveData.combat.offender);
 	var defender = world.getUnitAt(moveData.combat.defender);
+
+	var offense = offender.attacks[moveData.combat.offenseIndex];
+	var defense = defender.attacks[moveData.combat.defenseIndex];
+
 	var record = moveData.combat.record;
 
 	offender.update({ hasAttacked: true, moveLeft: 0 });
@@ -379,36 +382,64 @@ var ui = {
 	var dX = (offender.shape.x - defender.shape.x) / 15;
 	var dY = (offender.shape.y - defender.shape.y) / 15;
 
-	for(var i = 0; i < record.length; ++i) {
-	    var entry = record[i];
+	var attackStep = function(entry, i, retreat) {
+	    return function() {
+		var actor = entry.offense ? offender : defender;
+		var hittee = entry.offense ? defender : offender;
 
-	    var attackStep = function(entry, i, retreat) {
-		return function() {
-		    var actor = entry.offense ? offender : defender;
-		    var hittee = entry.offense ? defender : offender;
+		var attack = entry.offense?offense:defense;
 
+		if(attack.type == "melee") {
 		    actor.shape.x += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dX;
 		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
+		    world.stage.update();
+		} else if(attack.type == "ranged" && !retreat) {
+		    var projectile = new createjs.Shape();
+		    projectile.graphics.beginFill("black").drawRect(0,0,7,7);
+		    projectile.x = actor.shape.x + Space.WIDTH / 2;
+		    projectile.y = actor.shape.y + Space.HEIGHT / 2;
+		    for(var j=0; j<15; j++) {
+			setTimeout(function() {
+			    projectile.x += (entry.offense ? -1 : 1) * dX;
+			    projectile.y += (entry.offense ? -1 : 1) * dY;
+			    world.stage.update();
+			}, 500/15*j);
+		    }
+		    setTimeout(function() {
+			world.mapContainer.removeChild(projectile);
+			world.stage.update();
+		    }, 500)
+		    world.mapContainer.addChild(projectile);
+		    world.stage.update();
+		}
 
+		// show damage at appropriate time for melee and ranged attacks
+		if((attack.type == "ranged" && retreat) || (attack.type == "melee" && !retreat)) {
 		    if(entry.damage) {			
 			hittee.update({ hp: hittee.hp - entry.damage });
 		    }
-
+		    
 		    if(entry.kill) {
 			world.removeUnit(hittee);
 		    }
 		    
-		    if(i == record.length - 1 && retreat) {
+		    if(i == record.length - 1) {
+			console.log(i, record.length - 1);
 			ui.clearPath();
 			ui.moveHappening = false;
 		    }
-
-		    world.stage.update();
 		}
-	    };
+
+		world.stage.update();
+	    }
+	};
+
+
+	for(var i = 0; i < record.length; ++i) {
+	    var entry = record[i];
 
 	    setTimeout(attackStep(entry, i, false), i*1000);
-	    setTimeout(attackStep({ offense: entry.offense }, i, true), i*1000+500);
+	    setTimeout(attackStep(entry, i, true), i*1000+500);
 	}
 
 	// after combat, update unit xp totals
