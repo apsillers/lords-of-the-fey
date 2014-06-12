@@ -1,7 +1,7 @@
 var minimap = {
     init: function(mapDict) {
-	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);  //world.mapContainer.getBounds().width;
-	var mapHeight = Space.HEIGHT * (world.maxY + 1); //world.mapContainer.getBounds().height;
+	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
+	var mapHeight = Space.HEIGHT * (world.maxY + 1);
 
 	world.minimap = new createjs.Stage("minimap");
 
@@ -24,7 +24,6 @@ var minimap = {
 	world.minimap.update();
     },
     gridCoordsToMiniPixels: function(x,y) {
-	console.log("x" in x, x.y);
 	if("x" in x) {
 	    var inputCoords = x;
 	    var x = inputCoords.x;

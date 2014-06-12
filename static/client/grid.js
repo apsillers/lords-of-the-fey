@@ -88,13 +88,20 @@ World.prototype = {
     addUnit: function(unit, space) {
         unit.shape.x = space.shape.x - 1;
         unit.shape.y = space.shape.y - 1;
-        
+
         unit.x = space.x;
         unit.y = space.y;
         this.units[unit.x+","+unit.y] = unit;
         
         world.mapContainer.addChild(unit.shape);
         world.stage.update();
+
+	// add unit to minimap
+	var miniPixels = minimap.gridCoordsToMiniPixels(space);
+	unit.minishape.x = miniPixels.x;
+	unit.minishape.y = miniPixels.y;
+	world.minimap.addChild(unit.minishape);
+	world.minimap.update();
     },
 
     positionUnit: function(unit, spaceCoords) {
@@ -104,6 +111,11 @@ World.prototype = {
 	unit.y = spaceCoords.y;
 
 	world.units[unit.x+","+unit.y] = unit;
+
+	var miniPixels = minimap.gridCoordsToMiniPixels(spaceCoords);
+	unit.minishape.x = miniPixels.x;
+	unit.minishape.y = miniPixels.y;
+	world.minimap.update();
     },
 
     removeUnit: function(unit) {
@@ -111,6 +123,9 @@ World.prototype = {
         
         world.mapContainer.removeChild(unit.shape);
         world.stage.update();
+
+	world.minimap.removeChild(unit.minishape);
+	world.minimap.update();
     },
     
     moveUnit: function(unit, path, attackIndex) {
