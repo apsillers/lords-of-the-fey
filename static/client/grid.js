@@ -55,6 +55,8 @@ World.prototype = {
 	this.stage.canvas.width = $(window).width() - $("#right-column").width() - 21;
 	$("#top-bar").width($(window).width() - 3);
 	this.stage.update();
+
+	if(this.minimap) { minimap.drawViewBox(); }
     },
     
     addSpace: function(space) {

@@ -1,8 +1,5 @@
 var minimap = {
     init: function(mapDict) {
-	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
-	var mapHeight = Space.HEIGHT * (world.maxY + 1);
-
 	world.minimap = new createjs.Stage("minimap");
 
 	this.spaceWidth = world.minimap.canvas.width / (world.maxX + 1);
@@ -21,8 +18,37 @@ var minimap = {
 	    minispace.graphics.beginFill(color).drawRect(0, 0, this.spaceWidth, this.spaceHeight);
 	    world.minimap.addChild(minispace);
         }
+
+	this.drawViewBox();
+	
 	world.minimap.update();
     },
+
+    drawViewBox: function() {
+	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
+	var mapHeight = Space.HEIGHT * (world.maxY + 1);
+
+	if(this.box) { world.minimap.removeChild(this.box); }
+
+	this.box = new createjs.Shape();
+	this.box.graphics.beginStroke("#FFF").drawRect(0,0, 
+					      world.stage.canvas.width / mapWidth * world.minimap.canvas.width,
+					      world.stage.canvas.height / mapHeight * world.minimap.canvas.height);
+	world.minimap.addChild(this.box);
+
+	this.positionViewBox();
+    },
+
+    positionViewBox: function() {
+	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
+	var mapHeight = Space.HEIGHT * (world.maxY + 1);
+
+	this.box.x = -world.mapContainer.x / mapWidth * world.minimap.canvas.width;
+	this.box.y = -world.mapContainer.y / mapHeight * world.minimap.canvas.height;
+
+	world.minimap.update();
+    },
+
     gridCoordsToMiniPixels: function(x,y) {
 	if("x" in x) {
 	    var inputCoords = x;
