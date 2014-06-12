@@ -41,6 +41,9 @@ World.prototype = {
 	    this.maxY = Math.max(this.maxY, +coords[1]);
         }
 
+	this.mapWidth = Space.WIDTH + ((Space.WIDTH * 3/4 + 0.6) * (this.maxX));
+	this.mapHeight = Space.HEIGHT * (this.maxY + 1.5);
+
 	this.mapContainer.addChild(this.baseTerrain);
 	this.mapContainer.setChildIndex(this.baseTerrain, 0);
         this.stage.addChild(this.mapContainer);
@@ -103,6 +106,8 @@ World.prototype = {
 	unit.minishape.x = miniPixels.x;
 	unit.minishape.y = miniPixels.y;
 	world.minimap.addChild(unit.minishape);
+	// insert minimap unit under the minimap view box frame
+	world.minimap.setChildIndex(unit.minishape, world.minimap.children.length - 2);
 	world.minimap.update();
     },
 
@@ -183,7 +188,7 @@ Space.prototype = {
 
 	this.baseShape.owner = this;
 	this.shape.owner = this;
-        this.shape.x = this.x * Math.ceil(this.width * 3/4 + 1);
+        this.shape.x = this.x * Math.ceil(this.width * 3/4);
         this.shape.y = this.y * (this.height) + (this.x%2?0:this.height/2);
 
         this.shape.addEventListener("mousedown", function(e) { 

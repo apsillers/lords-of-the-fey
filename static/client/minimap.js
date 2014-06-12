@@ -2,8 +2,11 @@ var minimap = {
     init: function(mapDict) {
 	world.minimap = new createjs.Stage("minimap");
 
-	this.spaceWidth = world.minimap.canvas.width / (world.maxX + 1);
-	this.spaceHeight = world.minimap.canvas.height / (world.maxY + 1.5);
+	this.width = world.minimap.canvas.width;
+	this.height = world.minimap.canvas.height;
+
+	this.spaceWidth = this.width / (world.maxX + 1);
+	this.spaceHeight = this.height / (world.maxY + 1.5);
 
 	for(var i in mapDict) {
 	    var space = world.getSpaceByCoords(i);
@@ -21,32 +24,38 @@ var minimap = {
 
 	this.drawViewBox();
 	
+	world.minimap.on("click", this.onClick, this);
+
 	world.minimap.update();
     },
 
     drawViewBox: function() {
-	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
-	var mapHeight = Space.HEIGHT * (world.maxY + 1);
-
 	if(this.box) { world.minimap.removeChild(this.box); }
 
 	this.box = new createjs.Shape();
-	this.box.graphics.beginStroke("#FFF").drawRect(0,0, 
-					      world.stage.canvas.width / mapWidth * world.minimap.canvas.width,
-					      world.stage.canvas.height / mapHeight * world.minimap.canvas.height);
+	this.box.width = world.stage.canvas.width / world.mapWidth * this.width;
+	this.box.height = world.stage.canvas.height / world.mapHeight * this.height;
+	this.box.graphics.beginStroke("#FFF").setStrokeStyle(2).drawRect(0, 0, this.box.width, this.box.height);
+					      
 	world.minimap.addChild(this.box);
 
 	this.positionViewBox();
     },
 
     positionViewBox: function() {
-	var mapWidth = Space.WIDTH + (Space.WIDTH * 3/4 * world.maxX);
-	var mapHeight = Space.HEIGHT * (world.maxY + 1);
+	this.box.x = -world.mapContainer.x / world.mapWidth * this.width;
+	this.box.y = -world.mapContainer.y / world.mapHeight * this.height;
 
-	this.box.x = -world.mapContainer.x / mapWidth * world.minimap.canvas.width;
-	this.box.y = -world.mapContainer.y / mapHeight * world.minimap.canvas.height;
+	world.minimap.setChildIndex(minimap.box, world.minimap.children.length - 1);
 
 	world.minimap.update();
+    },
+
+    onClick: function(e) {
+	var cornerX = e.stageX - this.box.width / 2;
+	var cornerY = e.stageY - this.box.height / 2;
+
+	scroll.scrollTo(-world.mapWidth * cornerX / this.width, -world.mapHeight * cornerY / this.height);
     },
 
     gridCoordsToMiniPixels: function(x,y) {

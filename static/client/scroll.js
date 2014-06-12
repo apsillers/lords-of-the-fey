@@ -6,19 +6,21 @@ var scroll = {
     scrollDist: 3,
     scrollFunc: function() {
 	scroll.applyScroll(scroll.scrollX, scroll.scrollY);
-	if(scroll.scrollX == 0 && scroll.scrollY == 0) { clearInterval(scroll.scrollInterval); scroll.scrollInterval = null; }
+	if(!world.stage.mouseInBounds || (scroll.scrollX == 0 && scroll.scrollY == 0)) {
+	    clearInterval(scroll.scrollInterval); scroll.scrollInterval = null;
+	}
     },
     applyScroll: function(dx,dy) {
-	var mapWidth = world.mapContainer.getBounds().width;
-	var mapHeight = world.mapContainer.getBounds().height;
-        var stage = world.stage;
-
-	this.scrollTo(Math.min(0, Math.max(world.mapContainer.x - dx, stage.canvas.width - mapWidth)),
-		 Math.max(Math.min(world.mapContainer.y - dy, 0), stage.canvas.height - mapHeight));
+	this.scrollTo(world.mapContainer.x - dx, world.mapContainer.y - dy);		 
     },
     scrollTo: function(x, y) {
-	world.mapContainer.x = x;
-	world.mapContainer.y = y;
+        var stage = world.stage;
+
+	var mapWidth = Space.WIDTH + ((Space.WIDTH * 3/4 + 0.6) * (world.maxX));
+	var mapHeight = Space.HEIGHT * (world.maxY + 1.5);
+
+	world.mapContainer.x = Math.min(0, Math.max(x, stage.canvas.width - mapWidth));
+	world.mapContainer.y = Math.max(Math.min(y, 0), stage.canvas.height - mapHeight);
 	world.stage.update();
 
 	minimap.positionViewBox();
