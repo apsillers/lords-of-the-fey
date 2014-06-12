@@ -219,13 +219,20 @@ var ui = {
 
     },
 
+    resizeModalWallToCanvas: function() {
+	if(!ui.modalWall) { return; }
+
+	ui.modalWall.graphics = new createjs.Graphics();
+	ui.modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
+    },
+
     showRecruitPrompt: function(resolutionCallback) {
 	var canvas = world.stage.canvas;
 
 	ui.modal = new createjs.Container();
-	var modalWall = new createjs.Shape();
-	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
-	ui.modal.addChild(modalWall);
+	ui.modalWall = new createjs.Shape();
+	ui.resizeModalWallToCanvas();
+	ui.modal.addChild(ui.modalWall);
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
@@ -422,9 +429,9 @@ var ui = {
 	var canvas = world.stage.canvas;
 
 	ui.modal = new createjs.Container();
-	var modalWall = new createjs.Shape();
-	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
-	ui.modal.addChild(modalWall);
+	ui.modalWall = new createjs.Shape();
+	ui.resizeModalWallToCanvas();
+	ui.modal.addChild(ui.modalWall);
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 300;
@@ -488,9 +495,9 @@ var ui = {
 	var canvas = world.stage.canvas;
 
 	ui.modal = new createjs.Container();
-	var modalWall = new createjs.Shape();
-	modalWall.graphics.beginFill("rgba(128,128,128,0.5)").drawRect(0, 0, canvas.width, canvas.height);
-	ui.modal.addChild(modalWall);
+	ui.modalWall = new createjs.Shape();
+	ui.resizeModalWallToCanvas();
+	ui.modal.addChild(ui.modalWall);
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
