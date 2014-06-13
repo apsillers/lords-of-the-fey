@@ -37,8 +37,9 @@ module.exports = function(data, mapData, collections, game, player, callback) {
 		    sanatizedData.y = data.y;
 		    sanatizedData.team = data.team;
 		    sanatizedData.type = data.type;
+		    sanatizedData.gameId = gameId;
 
-		    var unit = new Unit(data, true);
+		    var unit = new Unit(sanatizedData, true);
 
 		    data = unit.getStorableObj();
 
