@@ -225,10 +225,22 @@ Space.prototype = {
     },
 
     setVillageFlag: function(team) {
+	var color = ["rgba(0,0,0,0)","#F00","#00F","#F0F"][team];
+
 	if(this.flag) { world.mapContainer.removeChild(this.flag); }
 	this.flag = new createjs.Shape();
-	this.flag.graphics.beginFill(["rgba(0,0,0,0)","#F00","#00F","#F0F"][team]).rect(this.shape.x, this.shape.y, 15, 10);
+	this.flag.graphics.beginFill(color).rect(this.shape.x, this.shape.y, 15, 10);
 	world.mapContainer.addChild(this.flag);
 	world.stage.update();
+
+	if(this.miniflag) { world.minimap.removeChild(this.miniflag); }
+	this.miniflag = new createjs.Shape();
+	this.miniflag.graphics.beginFill(color).drawRect(0, 0, minimap.spaceWidth, minimap.spaceHeight);
+	var miniPixels = minimap.gridCoordsToMiniPixels(this);
+	this.miniflag.x = miniPixels.x;
+	this.miniflag.y = miniPixels.y;
+	world.minimap.addChild(this.miniflag);
+	world.minimap.setChildIndex(this.miniflag, world.minimap.children.length - 2);
+	world.minimap.update();
     }
 }
