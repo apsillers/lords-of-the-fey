@@ -2,7 +2,8 @@ var express = require('express')
   , app = express()
   , server = app.listen(8080);
 var MongoClient = require('mongodb').MongoClient
-  , Server = require('mongodb').Server;
+  , Server = require('mongodb').Server
+, ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 var io = require('socket.io').listen(server);
 var passport = require("passport");
@@ -33,6 +34,7 @@ mongoClient.open(function(err, mongoClient) {
     });
 
     require("./auth").initAuth(app, mongo, collections);
+    require("./createGame").initLobby(app, collections);
 
     unitLib.init(function() {
 	io.sockets.on('connection', function (socket) {
@@ -99,7 +101,7 @@ function initListeners(socket, collections) {
 	var user = socket.handshake.user;
 
         collections.units.find({ gameId:gameId }, function(err, cursor) {
-            collections.games.findOne({ id:gameId }, function(err, game) {
+            collections.games.findOne({ _id:ObjectID(gameId) }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
                     socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay });
@@ -125,59 +127,7 @@ function initListeners(socket, collections) {
 
     // create a new game
     socket.on("new game", function(data) {
-	collections.games.find({}, {"id":true}).toArray(function(err, gameList) {  
-	    gameList.sort(function(a,b) { return b.id - a.id; });
-	    if(gameList[0] == undefined) { gameList[0] = { id: 0 }; }
-	    var id = gameList[0].id+1;
 
-	    var gameData = {
-		"id" : id,
-		"map" : "test_map.map",
-		"timeOfDay" : "morning",
-		"players" : [
-		    { "team": 1, "gold": 40, "username": "hello", "race":"elves" },
-		    { "team": 2, "gold": 40, "username": "goodbye", "race":"orcs" }
-		],
-		"villages": {},
-		"activeTeam": 1
-	    };
-	    
-	    loadMap(gameData.map, function(err, mapData) {
-		var startPositions = [];
-		for(var pos in mapData) {
-		    if(mapData[pos].start != undefined) {
-			var coords = pos.split(",");
-			startPositions[mapData[pos].start] = coords;
-		    }
-
-		    if(mapData[pos].terrain.properties.indexOf("village") != -1) {
-			gameData.villages[pos] = 0;
-		    }
-		}
-		
-		collections.games.insert(gameData, {safe: true}, function(err, item) {    
-		    var index = 0;
-		    (function addCommander() {
-			index++;
-			if(index == startPositions.length) { console.log("wow, we made a game"); return; }
-			var typeName = index==1?"elven_archer":"grunt";
-			var coords = startPositions[index];
-			loadUnitType(typeName, function(err, typeObj) {
-			    collections.units.insert({
-				gameId: id,
-				x:+coords[0],
-				y:+coords[1],
-				team:index,
-				type:typeName,
-				isCommander:true,
-				hp:typeObj.maxHp,
-				moveLeft:typeObj.move
-			    }, {safe:true}, addCommander)
-			});
-		    })();
-		});
-	    });
-	});
     });
 
     // create a new game
@@ -193,7 +143,7 @@ function initListeners(socket, collections) {
 	var attackIndex = data.attackIndex;
 	var user = socket.handshake.user;
 
-        collections.games.findOne({id:gameId}, function(err, game) {
+        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 
@@ -276,7 +226,7 @@ function initListeners(socket, collections) {
 	var gameId = data.gameId;
 	var user = socket.handshake.user;
 
-        collections.games.findOne({id:gameId}, function(err, game) {
+        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
@@ -297,7 +247,7 @@ function initListeners(socket, collections) {
         var choiceNum = data.choiceNum;
 	var user = socket.handshake.user;
 
-        collections.games.findOne({id:gameId}, function(err, game) {
+        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
 	    // ensure that the logged-in user has the right to act
 	    if(!socketOwnerCanAct(socket, game, true)) {
 		return;
@@ -340,7 +290,7 @@ function initListeners(socket, collections) {
     socket.on("endTurn", function(data) {
 	var gameId = data.gameId;
 
-        collections.games.findOne({id:gameId}, function(err, game) {
+        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
 	    if(!socketOwnerCanAct(socket, game)) {
 		return;
 	    }

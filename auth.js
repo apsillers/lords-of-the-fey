@@ -36,7 +36,6 @@ exports.initAuth = function(app, mongo, collections) {
 		 res.redirect('/');
 	     });
 
-
     app.post('/signup', function(req, res) {
 	var username = req.body.username;
 	var password = req.body.password;

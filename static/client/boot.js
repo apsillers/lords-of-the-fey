@@ -4,7 +4,7 @@ canvas.height = 600;
 var world;
 var socket;
 var gameInfo = { 
-    gameId: location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:1
+    gameId: +location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:location.search.match(/game=([^&]*)/)[1]
 };
 var raceList = ["elves", "orcs"];
 var raceDict = {};
