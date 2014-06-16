@@ -1,5 +1,6 @@
 var ui = {
     moveHappening: false,
+    moveAnimating: false,
     hasTurn: false,
     showingMenu: false,
 
@@ -9,6 +10,8 @@ var ui = {
     path: null,
     hoverSpace: null,
     hoverUnit: null,
+
+    animationFactor: 1,
 
     onSpaceHover: function(e) {
 	
@@ -305,6 +308,7 @@ var ui = {
     },
 
     animateUnitMove: function(moveData) {
+	ui.moveAnimating = true;
         var path = moveData.path;
         var currSpace = world.getSpaceByCoords(path[0]),
             nextSpace = world.getSpaceByCoords(path[1]),
@@ -318,7 +322,11 @@ var ui = {
 
         if(path.length < 2) {
 	    if(moveData.combat) { ui.animateAttack(moveData); }
-            else { ui.moveHappening = false; }
+            else {
+		ui.moveHappening = false;
+		ui.moveAnimating = false;
+	    	(actionQueue.shift()||function(){})();
+	    }
 	    return;
 	}
 
@@ -327,7 +335,7 @@ var ui = {
             
             var diffX = nextSpace.shape.x - currSpace.shape.x,
                 diffY = nextSpace.shape.y - currSpace.shape.y;
-            var fraction = (timestamp - start) / 600;
+            var fraction = (timestamp - start) / (600 * ui.animationFactor);
             stepProgress += fraction;
             stepProgress = Math.min(1, stepProgress);
             
@@ -360,6 +368,8 @@ var ui = {
                 else {
 		    ui.clearPath();
 		    ui.moveHappening = false;
+		    ui.moveAnimating = false;
+		    (actionQueue.shift()||function(){})();
 		}
             } else {
                 start = timestamp;
@@ -369,6 +379,8 @@ var ui = {
     },
 
     animateAttack: function(moveData) {
+	ui.moveAnimating = true;
+
 	var offender = world.getUnitAt(moveData.combat.offender);
 	var defender = world.getUnitAt(moveData.combat.defender);
 
@@ -403,12 +415,12 @@ var ui = {
 			    projectile.x += (entry.offense ? -1 : 1) * dX;
 			    projectile.y += (entry.offense ? -1 : 1) * dY;
 			    world.stage.update();
-			}, 500/15*j);
+			}, (500/15*j) * ui.animationFactor);
 		    }
 		    setTimeout(function() {
 			world.mapContainer.removeChild(projectile);
 			world.stage.update();
-		    }, 500)
+		    }, 500 * ui.animationFactor)
 		    world.mapContainer.addChild(projectile);
 		    world.stage.update();
 		}
@@ -422,31 +434,32 @@ var ui = {
 		    if(entry.kill) {
 			world.removeUnit(hittee);
 		    }
-		    
-		    if(i == record.length - 1) {
-			console.log(i, record.length - 1);
-			ui.clearPath();
-			ui.moveHappening = false;
-		    }
+		}
+
+		// if this is the final step of the final round, animation is done
+		if(i == record.length - 1 && retreat) {
+		    ui.clearPath();
+		    ui.moveHappening = false;
+		    ui.moveAnimating = false;
+		    (actionQueue.shift()||function(){})();
 		}
 
 		world.stage.update();
 	    }
 	};
 
-
 	for(var i = 0; i < record.length; ++i) {
 	    var entry = record[i];
 
-	    setTimeout(attackStep(entry, i, false), i*1000);
-	    setTimeout(attackStep(entry, i, true), i*1000+500);
+	    setTimeout(attackStep(entry, i, false), (i*1000)*ui.animationFactor);
+	    setTimeout(attackStep(entry, i, true), (i*1000+500)*ui.animationFactor);
 	}
 
 	// after combat, update unit xp totals
 	setTimeout(function() {
 	    offender.update({ "xp": moveData.combat.xp.offense});
 	    defender.update({ "xp": moveData.combat.xp.defense});
-	}, (record.length-1) * 1000 + 500);
+	}, ((record.length-1) * 1000 + 500) * ui.animationFactor);
     },
 
     clearPath: function() {

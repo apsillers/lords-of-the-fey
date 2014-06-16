@@ -8,6 +8,7 @@ var gameInfo = {
 };
 var raceList = ["elves", "orcs"];
 var raceDict = {};
+var actionQueue = [];
 
 /**************************/
 window.addEventListener("load", function() {
@@ -96,52 +97,74 @@ window.addEventListener("load", function() {
     });
 
     socket.on("leveledup", function(data) {
-	var thisUnit = world.getUnitAt(data);
-	var newUnit = thisUnit.levelUp(data.choiceNum);
+	actionQueue.push(function() {
+	    var thisUnit = world.getUnitAt(data);
+	    var newUnit = thisUnit.levelUp(data.choiceNum);
+	    
+	    world.removeUnit(thisUnit);
+	    world.addUnit(newUnit, world.getSpaceByCoords(data));
+	    delete gameInfo.player.advancingUnit;
+	    
+	    // trigger another level-up or prompt
+	    var newUnit = newUnit.update({ xp: newUnit.xp });
+	});
 
-	world.removeUnit(thisUnit);
-	world.addUnit(newUnit, world.getSpaceByCoords(data));
-	delete gameInfo.player.advancingUnit;
-
-	// trigger another level-up or prompt
-	var newUnit = newUnit.update({ xp: newUnit.xp });
-
+	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
     });
 
     socket.on("newTurn", function(data) {
-	gameInfo.activeTeam = data.activeTeam;
-	$("#top-active-team-text").text(gameInfo.activeTeam);
-	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+	actionQueue.push(function() {
+	    gameInfo.activeTeam = data.activeTeam;
+	    $("#top-active-team-text").text(gameInfo.activeTeam);
+	    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
 
-	gameInfo.timeOfDay = data.timeOfDay;
-	$("#right_time_of_day").text(gameInfo.timeOfDay)
-	$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
-	$("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
+	    gameInfo.timeOfDay = data.timeOfDay;
+	    $("#right_time_of_day").text(gameInfo.timeOfDay)
+	    $("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
+	    $("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
 
-	for(var i=0; i<data.updates.length; ++i) {
-	    var update = data.updates[i];
-	    world.getUnitAt(update).update(update);
-	}
+	    for(var i=0; i<data.updates.length; ++i) {
+		var update = data.updates[i];
+		world.getUnitAt(update).update(update);
+	    }
 
-	for(var unit in world.units) {
-	    world.units[unit].drawGem();
-	    world.units[unit].hasAttacked = false;
-	}
+	    for(var unit in world.units) {
+		world.units[unit].drawGem();
+		world.units[unit].hasAttacked = false;
+	    }
 
-	world.stage.update();
+	    world.stage.update();
+	});
+
+	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
     });
 
     socket.on("created", function(unitData) {
-	if(unitData.type) {
-	    var unitObj = new Unit(unitData);
-            world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
-	}
-	ui.moveHappening = false;
+	actionQueue.push(function() {
+	    if(unitData.type) {
+		var unitObj = new Unit(unitData);
+		world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
+	    }
+	    ui.moveHappening = false;
+	    (actionQueue.shift()||function(){})();
+	});
+
+	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
     });
 
-    socket.on("moved", ui.animateUnitMove);
+    socket.on("moved", function(data) {
+	actionQueue.push(function() {
+	    ui.animateUnitMove(data);
+	});
 
-    socket.on("playerUpdate", ui.updatePlayer);
+	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
+    });
+
+    socket.on("playerUpdate", function(data) {
+	actionQueue.push(function() {
+	    ui.updatePlayer(data);
+	});
+
+	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
+    });
 });
-
-
