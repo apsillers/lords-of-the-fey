@@ -330,6 +330,9 @@ var ui = {
 	    return;
 	}
 
+	// animate above other units while moving
+	world.mapContainer.setChildIndex(unit.shape, world.mapContainer.children.length - 1);
+
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
             
