@@ -8,7 +8,6 @@ var gameInfo = {
 };
 var raceList = ["elves", "orcs"];
 var raceDict = {};
-var actionQueue = [];
 
 /**************************/
 window.addEventListener("load", function() {
@@ -97,7 +96,7 @@ window.addEventListener("load", function() {
     });
 
     socket.on("leveledup", function(data) {
-	actionQueue.push(function() {
+	actionQueue.addAction(function() {
 	    var thisUnit = world.getUnitAt(data);
 	    var newUnit = thisUnit.levelUp(data.choiceNum);
 	    
@@ -107,13 +106,13 @@ window.addEventListener("load", function() {
 	    
 	    // trigger another level-up or prompt
 	    var newUnit = newUnit.update({ xp: newUnit.xp });
-	});
 
-	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
+	    ui.finishAnimation();
+	});
     });
 
     socket.on("newTurn", function(data) {
-	actionQueue.push(function() {
+	actionQueue.addAction(function() {
 	    gameInfo.activeTeam = data.activeTeam;
 	    $("#top-active-team-text").text(gameInfo.activeTeam);
 	    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
@@ -134,37 +133,43 @@ window.addEventListener("load", function() {
 	    }
 
 	    world.stage.update();
-	});
 
-	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
+	    ui.finishAnimation();
+	});
     });
 
     socket.on("created", function(unitData) {
-	actionQueue.push(function() {
+	actionQueue.addAction(function() {
 	    if(unitData.type) {
 		var unitObj = new Unit(unitData);
 		world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
 	    }
-	    ui.moveHappening = false;
-	    (actionQueue.shift()||function(){})();
+	    ui.finishAnimation();
 	});
-
-	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
     });
 
     socket.on("moved", function(data) {
-	actionQueue.push(function() {
+	actionQueue.addAction(function() {
 	    ui.animateUnitMove(data);
 	});
-
-	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
     });
 
     socket.on("playerUpdate", function(data) {
-	actionQueue.push(function() {
+	actionQueue.addAction(function() {
 	    ui.updatePlayer(data);
 	});
 
-	if(!ui.moveAnimating) { (actionQueue.shift()||function(){})(); }
+	
     });
 });
+
+var actionQueue = {
+    queue: [],
+    addAction: function(func) {
+	this.queue.push(func);
+	if(!ui.moveAnimating) { this.doNext(); }
+    },
+    doNext: function() {
+	if(!ui.moveAnimating) { (this.queue.shift()||function(){})(); }
+    }
+}

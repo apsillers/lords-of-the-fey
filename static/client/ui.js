@@ -323,9 +323,7 @@ var ui = {
         if(path.length < 2) {
 	    if(moveData.combat) { ui.animateAttack(moveData); }
             else {
-		ui.moveHappening = false;
-		ui.moveAnimating = false;
-	    	(actionQueue.shift()||function(){})();
+		ui.finishAnimation();
 	    }
 	    return;
 	}
@@ -370,9 +368,7 @@ var ui = {
 		}
                 else {
 		    ui.clearPath();
-		    ui.moveHappening = false;
-		    ui.moveAnimating = false;
-		    (actionQueue.shift()||function(){})();
+		    ui.finishAnimation();
 		}
             } else {
                 start = timestamp;
@@ -442,9 +438,7 @@ var ui = {
 		// if this is the final step of the final round, animation is done
 		if(i == record.length - 1 && retreat) {
 		    ui.clearPath();
-		    ui.moveHappening = false;
-		    ui.moveAnimating = false;
-		    (actionQueue.shift()||function(){})();
+		    ui.finishAnimation();
 		}
 
 		world.stage.update();
@@ -624,5 +618,11 @@ var ui = {
 	if(data.gold != undefined) {
 	    $("#top-gold-text").text(data.gold);
 	}
+    },
+
+    finishAnimation: function() {
+	ui.moveHappening = false;
+	ui.moveAnimating = false;
+	actionQueue.doNext();	
     }
 }
