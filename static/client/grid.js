@@ -225,7 +225,7 @@ Space.prototype = {
     },
 
     setVillageFlag: function(team) {
-	var color = ["rgba(0,0,0,0)","#F00","#00F","#F0F"][team];
+	var color = ["rgba(0,0,0,0)","#F00","#00F","#F0F", "#444"][team];
 
 	if(this.flag) { world.mapContainer.removeChild(this.flag); }
 	this.flag = new createjs.Shape();

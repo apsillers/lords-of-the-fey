@@ -236,7 +236,7 @@ function Unit(unitData, isCreation, isLevelUp) {
 	unit.shape.addEventListener("click", Space.passthroughFunc);
 	unit.shape.addEventListener("rollover", Space.passthroughFunc);
 
-	var teamColors = [0, "#F00", "#00F", "#F0F"];
+	var teamColors = [0, "#F00", "#00F", "#F0F", "#444"];
 
 	unit.minishape = new createjs.Shape();
 	unit.minishape.graphics.beginFill(teamColors[unit.team]).drawRect(0, 0, minimap.spaceWidth, minimap.spaceHeight);
