@@ -49,7 +49,7 @@ var unitLib = {
 		    colorCanvas.width = img.width;
 		    colorCanvas.height = img.height;
 		    colorContext = colorCanvas.getContext("2d");
-		    var teamColors = [[0,255,255], [255,255,0], [255,255,255], [32,32,32]]
+		    var teamColors = [[255,255,0],[0,255,255], [255,255,255], [0,255,0]]
 
 		    for(var j=0; j<teamColors.length; ++j) {
 			colorContext.drawImage(img, 0, 0);
