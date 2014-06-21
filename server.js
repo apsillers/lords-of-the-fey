@@ -92,7 +92,7 @@ io.set('authorization', passportSocketIo.authorize({
 
 // initialize all socket.io listeners on a socket
 function initListeners(socket, collections) {
-    initLobbyListeners(socket, collections);
+    initLobbyListeners(io.sockets, socket, collections);
 
     // request for all game data
     socket.on("alldata", function(data) {

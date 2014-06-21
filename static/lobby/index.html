@@ -5,11 +5,20 @@
     <title>Lobby</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="../client/jquery-2.0.3.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/css/play.css" />
+    <link rel="stylesheet" type="text/css" href="/css/lobby.css" />
   </head>
   <body>
-    <script>
 
-    </script>
+    <div id="lobby-menu">
+      <input type="button" value="Create Game" id="create-game">
+    </div>
+
+    <div id="lobby-below-menu">
+      <div id="player-list"></div>
+
+      <div id="room-list"></div>
+    </div>
+
+    <script src="lobby.js"></script>
   </body>
 </html>

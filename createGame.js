@@ -8,11 +8,23 @@ exports.initLobby = function(app, collections) {
 	    { username:"goodbye", race: "orcs" }
 	];
 	var mapName = "test_map.map";
-	createNewGame(collections, players, mapName, function(id) {
+	require("./createGame").createNewGame(collections, players, mapName, function(id) {
 	    res.redirect("/client/grid.html?game=" + id);
 	})
     });
 }
+
+exports.getStartPositions = function(mapData) {
+    var startPositions = [];
+    for(var pos in mapData) {
+	if(mapData[pos].start != undefined) {
+	    var coords = pos.split(",");
+	    startPositions[mapData[pos].start] = coords;
+	}
+    }
+    
+    return startPositions;
+};
 
 function createNewGame(collections, playerList, map, resolutionCallback) {
     // TODO: ensure that the player creating the game is on the playerList
@@ -29,20 +41,14 @@ function createNewGame(collections, playerList, map, resolutionCallback) {
 	playerList[i].team = i+1;
 	if(!("gold" in playerList[i])) { playerList[i].gold = 100; }
     }
-    
+
     loadMap(map, function(err, mapData) {
-	if(err) { resolutionCallback(false); return; }
+	if(err) { resolutionCallback(false); return; }    
 
-	var startPositions = [];
-	for(var pos in mapData) {
-	    if(mapData[pos].start != undefined) {
-		var coords = pos.split(",");
-		startPositions[mapData[pos].start] = coords;
-	    }
+	var startPositions = require("./createGame").getStartPositions(mapData);
 
-	    if(mapData[pos].terrain.properties.indexOf("village") != -1) {
-		gameData.villages[pos] = 0;
-	    }
+    	if(mapData[pos].terrain.properties.indexOf("village") != -1) {
+	    gameData.villages[pos] = 0;
 	}
 
 	if(playerList.length > startPositions.length - 1) { resolutionCallback(false); return; }
