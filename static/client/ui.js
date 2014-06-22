@@ -184,7 +184,8 @@ var ui = {
 
 	for(pos in world.units) {
 	    var unit = world.units[pos];
-	    if(unit.isCommander && unit.team == gameInfo.player.team) {
+	    var isKeep = world.getSpaceByCoords(pos).terrain.properties.indexOf("keep") != -1;
+	    if(isKeep && unit.isCommander && unit.team == gameInfo.player.team) {
 		var foundPath = utils.castlePathExists(unit, space, world.grid);
 		if(foundPath) { break; }
 	    }
