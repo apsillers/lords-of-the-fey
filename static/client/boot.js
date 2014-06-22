@@ -99,13 +99,13 @@ window.addEventListener("load", function() {
 	actionQueue.addAction(function() {
 	    var thisUnit = world.getUnitAt(data);
 	    var newUnit = thisUnit.levelUp(data.choiceNum);
-	    
+
 	    world.removeUnit(thisUnit);
 	    world.addUnit(newUnit, world.getSpaceByCoords(data));
 	    delete gameInfo.player.advancingUnit;
 	    
 	    // trigger another level-up or prompt
-	    var newUnit = newUnit.update({ xp: newUnit.xp });
+	    newUnit.update({ xp: newUnit.xp });
 
 	    ui.finishAnimation();
 	});

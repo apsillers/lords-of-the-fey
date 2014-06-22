@@ -438,6 +438,9 @@ var ui = {
 
 		// if this is the final step of the final round, animation is done
 		if(i == record.length - 1 && retreat) {
+		    offender.update({ "xp": moveData.combat.xp.offense});
+		    defender.update({ "xp": moveData.combat.xp.defense});
+
 		    ui.clearPath();
 		    ui.finishAnimation();
 		}
@@ -452,12 +455,6 @@ var ui = {
 	    setTimeout(attackStep(entry, i, false), (i*1000)*ui.animationFactor);
 	    setTimeout(attackStep(entry, i, true), (i*1000+500)*ui.animationFactor);
 	}
-
-	// after combat, update unit xp totals
-	setTimeout(function() {
-	    offender.update({ "xp": moveData.combat.xp.offense});
-	    defender.update({ "xp": moveData.combat.xp.defense});
-	}, ((record.length-1) * 1000 + 500) * ui.animationFactor);
     },
 
     clearPath: function() {
