@@ -201,13 +201,38 @@ function initListeners(socket, collections) {
 
 					collections.games.save(game, { safe: true }, function() {
 					    // injure/kill units models
+					    var updateUnitDamage = function(unit, callback) {
+						if(unit.hp <= 0) {
+						    collections.units.remove({ _id: unit._id }, function() {
+							if(unit.isCommander) {
+							    collections.units.findOne({
+								gameId: unit.gameId,
+								isCommander: true,
+								team: unit.team
+							    }, function(err, commander) {
+								if(!commander) {
+								    console.log("COMMANDER DEATH");
+								    checkForVictory(game, collections, function(victoryResult) {
+									callback();
+									console.log("VICTORY: ", victoryResult);
+								    });
+								} else {
+								    callback();
+								}
+							    });
+							} else {
+							    callback();
+							}
+						    });
+						}
+						else { collections.units.save(unit.getStorableObj(), {safe: true}, callback); }
+					    }
+
 					    var handleDefender = function() {
-						if(defender.hp <= 0) { collections.units.remove({ _id: defender._id }, emitMove); }
-						else { collections.units.save(defender.getStorableObj(), {safe: true}, emitMove); }
+						updateUnitDamage(defender, emitMove);
 					    }
 					
-					    if(unit.hp <= 0) { collections.units.remove({ _id: unit._id}, handleDefender); }
-					    else { collections.units.save(unit.getStorableObj(), {safe: true}, handleDefender); }
+					    updateUnitDamage(unit, handleDefender);
 					});
 				    });
 				} else {
@@ -220,6 +245,42 @@ function initListeners(socket, collections) {
             });
         });
     });
+
+    function checkForVictory(game, collections, callback) {
+	var result = { victory: false };
+	var teamsWithCommanders = {};
+	collections.units.find({ gameId: game._id.toString(), isCommander: true }, function(err, cursor) {
+	    cursor.next(function indexCommanderTeam(err, commander) {
+		if(!commander) { produceResult(); return; }
+		teamsWithCommanders[commander.team] = true;
+		cursor.next(indexCommanderTeam);
+	    });
+
+	    function produceResult() {
+		var winningAlliance = null;
+		var survivingTeamList = Object.getOwnPropertyNames(teamsWithCommanders);
+		console.log(survivingTeamList);
+		for(var i=0; i < survivingTeamList.length; ++i) {
+		    var team = survivingTeamList[i];
+		    var thisAlliance = game.players[team-1].alliance;
+		    if(winningAlliance == null) { winningAlliance = thisAlliance }
+		    if(thisAlliance != winningAlliance) {
+			winningAlliance = null;
+			break;
+		    }
+		}
+
+		if(winningAlliance !== null) {
+		    result.victory = true;
+		    result.alliance = winningAlliance;
+		}
+
+		callback(result);
+	    }
+	});
+	
+	
+    }
 
     // create a new unit
     socket.on("create", function(data) {

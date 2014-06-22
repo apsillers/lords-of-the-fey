@@ -26,7 +26,8 @@ exports.getStartPositions = function(mapData) {
     return startPositions;
 };
 
-function createNewGame(collections, playerList, map, resolutionCallback) {
+
+exports.createNewGame = function(collections, playerList, map, resolutionCallback) {
     // TODO: ensure that the player creating the game is on the playerList
 
     var gameData = {
@@ -39,6 +40,7 @@ function createNewGame(collections, playerList, map, resolutionCallback) {
 
     for(var i=0; i<playerList.length; ++i) {
 	playerList[i].team = i+1;
+	playerList[i].alliance = i+1;
 	if(!("gold" in playerList[i])) { playerList[i].gold = 100; }
     }
 
@@ -47,8 +49,10 @@ function createNewGame(collections, playerList, map, resolutionCallback) {
 
 	var startPositions = require("./createGame").getStartPositions(mapData);
 
-    	if(mapData[pos].terrain.properties.indexOf("village") != -1) {
-	    gameData.villages[pos] = 0;
+	for(var pos in mapData) {
+    	    if(mapData[pos].terrain.properties.indexOf("village") != -1) {
+		gameData.villages[pos] = 0;
+	    }
 	}
 
 	if(playerList.length > startPositions.length - 1) { resolutionCallback(false); return; }
