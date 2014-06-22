@@ -1,13 +1,13 @@
 {
-  "name": "Orcish Archer",
-  "img": "/data/img/units/orcish_archer.png",
-  "cost": 14,
-  "maxHp": 32,
+  "name": "Orcish Crossbowman",
+  "img": "/data/img/units/orcish_crossbowman.png",
+  "cost": 26,
+  "maxHp": 43,
   "move": 5,
-  "maxXp": 30,
-  "level": 1,
+  "maxXp": 80,
+  "level": 2,
   "alignment":"chaotic",
-  "advancesTo": ["orcish_crossbowman"],
+  "advancesTo": ["orcish_slurbow"],
   "terrain": {
     "castle":        { "move": 1, "cover":0.6 },
     "cave":          { "move": 2, "cover":0.4 },
@@ -29,24 +29,24 @@
   "attributeCount": 2,
   "attacks":[
     {
-      "name":"Dagger",
+      "name":"Short Sword",
       "type":"melee",
       "damageType":"blade",
-      "damage":3,
-      "number":2
-    },
-    {
-      "name":"Bow",
-      "type":"ranged",
-      "damageType":"pierce",
-      "damage":6,
+      "damage":4,
       "number":3
     },
     {
-      "name":"Bow",
+      "name":"Crossbow",
+      "type":"ranged",
+      "damageType":"pierce",
+      "damage":8,
+      "number":3
+    },
+    {
+      "name":"Crossbow",
       "type":"ranged",
       "damageType":"fire",
-      "damage":7,
+      "damage":10,
       "number":2
     }
   ],
