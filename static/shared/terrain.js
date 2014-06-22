@@ -25,6 +25,14 @@ var Terrain = {
         for(var prop in this.overlays) {
             if(this.overlays[prop].symbol == overlaySymbol) {
                 var overlay = this.overlays[prop];
+		
+		// overlays that confer terrain properties eliminate the "flat" terrain type from the base terrain
+		// e.g., green grass overlayed with forest is "forest"-type only, not "forest" and "flat"
+		if(overlay.properties.length > 0) {
+		    var flatIndex = terrainObj.properties.indexOf("flat");
+		    if(flatIndex != -1) { terrainObj.properties.splice(flatIndex, 1); }
+		}
+
 		terrainObj.properties = terrainObj.properties.concat(overlay.properties);
 		terrainObj.overlayImg = overlay.img;
 		terrainObj.overlayImgObj = overlay.imgObj;
