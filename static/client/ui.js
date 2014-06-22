@@ -425,9 +425,23 @@ var ui = {
 		    world.stage.update();
 		}
 
+		if(!retreat) {
+		    hittee.damageNumber = new createjs.Text(entry.damage);
+		    hittee.shape.addChild(hittee.damageNumber);
+		    hittee.damageNumber.x = 30;
+		    hittee.damageNumber.y = -10;
+		    hittee.damageNumber.color = "#E00";
+		    hittee.damageNumber.font = "bold 12pt sans serif";
+		} else {
+		    if(hittee.damageNumber) {
+			hittee.shape.removeChild(hittee.damageNumber);
+			hittee.damageNumber = null;
+		    }
+		}
+
 		// show damage at appropriate time for melee and ranged attacks
 		if((attack.type == "ranged" && retreat) || (attack.type == "melee" && !retreat)) {
-		    if(entry.damage) {			
+		    if(entry.damage) {
 			hittee.update({ hp: hittee.hp - entry.damage });
 		    }
 		    
