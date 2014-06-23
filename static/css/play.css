@@ -47,6 +47,10 @@ div.recruit-item {
     background-color: #CCC;
 }
 
+div.recruit-item.selected {
+    background-color: #CCF;
+}
+
 .translucent {
     filter:alpha(opacity=60); 
     -moz-opacity: 0.6; 

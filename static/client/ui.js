@@ -289,8 +289,18 @@ var ui = {
 		}
 	    }.bind(null, unit));
 
-	    listItem.on("dblclick", resolutionCallback.bind(null, unitId));
-	    listItem.on("dblclick", ui.clearModal);
+	    var selectedItem;
+
+	    listItem.on("click", function(unitId) {
+		$(".recruit-item").removeClass("selected");
+		if(this == selectedItem) {
+		    resolutionCallback(unitId);
+		    ui.clearModal();
+		} else {
+		    selectedItem = this;
+		    $(this).addClass("selected");
+		}
+	    }.bind(listItem, unitId));
 	}
 
 	var cancelButton = $("<button>Cancel</button>");
@@ -602,8 +612,18 @@ var ui = {
 		}
 	    }.bind(null, unit));
 
-	    listItem.on("dblclick", resolutionCallback.bind(null, i));
-	    listItem.on("dblclick", ui.clearModal);
+	    var selectedItem;
+
+	    listItem.on("click", function(i) {
+		$(".recruit-item").removeClass("selected");
+		if(this == selectedItem) {
+		    resolutionCallback(i);
+		    ui.clearModal();
+		} else {
+		    selectedItem = this;
+		    $(this).addClass("selected");
+		}
+	    }.bind(listItem, i));
 	}
 
 	$("#recruit-cancel").html("");
