@@ -118,10 +118,8 @@ unitLib.abilityDict = {
 	    var newAttacks = [];
 	    for(var i=0; i < unit.attacks.length; ++i) {
 		var attack = unit.attacks[i];
-		var newAttack = {};
-		for(var prop in attack) {
-		    newAttack[prop] = attack[prop];
-		}
+		var newAttack = Object.create(attack);
+
 		if(attack.type == "melee") {
 		    newAttack.damage += 1;
 		}
@@ -135,10 +133,8 @@ unitLib.abilityDict = {
 	    var newAttacks = [];
 	    for(var i=0; i < unit.attacks.length; ++i) {
 		var attack = unit.attacks[i];
-		var newAttack = {};
-		for(var prop in attack) {
-		    newAttack[prop] = attack[prop];
-		}
+		var newAttack = Object.create(attack);
+
 		if(attack.type == "ranged") {
 		    newAttack.damage += 1;
 		}
@@ -155,6 +151,20 @@ function Unit(unitData, isCreation, isLevelUp) {
 
     for(var prop in unitData) {
 	unit[prop] = unitData[prop];
+    }
+
+    // if unit data has attacks, it only specifies how this unit's attacks differ from the prototype unit
+    // so we use each the prototype's attacks as a prototype for each of this unit's attacks
+    if(unitData.attacks) {
+	var prototypedAttackList = [];
+	for(var i=0; i<unit.attacks.length; ++i) {
+	    var prototypedAttack = Object.create(proto.attacks[i]);
+	    for(var ownAttackProp in unit.attacks[i]) {
+		prototypedAttack[ownAttackProp] = unit.attacks[i][ownAttackProp];
+	    }
+	    prototypedAttackList.push(prototypedAttack);
+	}
+	unit.attacks = prototypedAttackList;
     }
 
     // if this is creation time, set random attributes
