@@ -3,8 +3,12 @@ canvas.width = 900;
 canvas.height = 600;
 var world;
 var socket;
+var qStringMatch = location.search.match(/game=([^&]*)/);
+if(qStringMatch == null) {
+    window.location.href = "/";
+}
 var gameInfo = { 
-    gameId: +location.search.match(/game=([^&]*)/)?+location.search.match(/game=([^&]*)/)[1]:location.search.match(/game=([^&]*)/)[1]
+    gameId: qStringMatch[1]
 };
 var raceList = ["elves", "orcs"];
 var raceDict = {};
@@ -20,7 +24,10 @@ window.addEventListener("load", function() {
 
     socket.emit("alldata", gameInfo);
     socket.on("initdata", function(data) {
-	gameInfo.player = data.player;
+	gameInfo.player = data.player || { username:"Observer", gold:0 };
+
+	$("#top-username").text(gameInfo.player.username);
+
 	gameInfo.activeTeam = data.activeTeam;
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
 
@@ -63,7 +70,10 @@ window.addEventListener("load", function() {
 		    var raceName = raceList[i];
 		    raceDict[raceName] = queue.getResult("race"+raceName);
 		}
-		gameInfo.player.recruitList = raceDict[gameInfo.player.race].recruitList;
+
+		if(gameInfo.player.race) {
+		    gameInfo.player.recruitList = raceDict[gameInfo.player.race].recruitList;
+		}
 
 		world = new World("c");
 		world.initGrid(toMapDict(queue.getResult("map")));
