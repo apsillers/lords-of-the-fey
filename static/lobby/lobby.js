@@ -33,8 +33,11 @@ socket.on("created room", function(data) {
 });
 
 socket.on("joined room", function(data) {
-    rooms[data.id] = data;
+    rooms[data.room.id] = data.room;
     renderRoomList();
+    if(username == data.username) {
+	window.location = "/lobby/room.html?id="+data.id;
+    }
 });
 
 function renderPlayerList() {
@@ -48,7 +51,8 @@ function renderPlayerList() {
 
 function renderRoomList() {
     var $roomList = $("#room-list");
-    
+    $roomList.html("");
+
     $.each(rooms, function(roomId, data) {
 	var roomItem = $("<div>");
 	roomItem.text(roomId + ": " + data.name + " " + data.filledSlots + "/" + data.totalSlots);

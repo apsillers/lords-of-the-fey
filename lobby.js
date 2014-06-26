@@ -20,8 +20,6 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 
 	players.push(user.username);
 
-	console.log(players);
-
 	sockets.in("lobby").emit("joined lobby", user.username);
 	socket.emit("lobby data", { players: players, rooms: rooms, you: user.username });
 	socket.join("lobby");
@@ -60,6 +58,12 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	var room = rooms[+data.id];
 	var user = socket.handshake.user;
 	joinRoom(user, room);
+	console.log(sockets.clients('room'+data.id));
+    });
+
+    socket.on("enter room", function(id) {
+	var user = socket.handshake.user;
+	socket.emit("room data", { you: user.username, room: rooms[+id] });
     });
 
     function joinRoom(user, room) {
@@ -68,11 +72,14 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	}
 
 	var freeIndex = room.players.indexOf(null);
-	if(freeIndex != -1) {
+	if(freeIndex == -1) {
 	    freeIndex = room.players.length; 
 	}
 
 	room.players[freeIndex] = { username: user.username };
+	room.filledSlots++;
+
+	sockets.in("room"+room.id).emit("joined room", { username: user.username, players: room.players });
 	socket.join("room"+room.id);
 
 	sockets.in("lobby").emit("joined room", { username: user.username, room: room });
@@ -102,13 +109,27 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 
 	player.ready = !!data.ready;
 
+	sockets.in("room"+data.id).emit("ready change", { players: room.players, username: user.username, roomId: data.id, ready: !!data.ready });
+    });
+
+    socket.on("launch room", function() {
+	if(room.players.filter(function(o) { return o != null; }).length < 2) { return; }
 	if(room.players.every(function(p) { return p.ready; })) {
 	    require("./createGame").createNewGame(collections, players, mapName, function(id) {
-		sockets.in("room"+data.id).emit("launch game", id);
+		sockets.in("room"+data.id).emit("launched game", id);
 		// sockets.in("room"+data.id).leave("room"+data.id);
 	    });
 	};
+    });
 
-	sockets.in("room"+data.id).emit("ready change", { username: user.username, roomId: data.id, ready: !!data.ready });
+    socket.on("set race", function(data) {
+	var room = rooms[+data.id];
+	if(!room) { return; }
+	var user = socket.handshake.user;
+	if(!user) { return; }
+	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
+	if(!player) { return; }
+
+	player.race = data.race;
     });
 }
