@@ -74,9 +74,9 @@ var unitLib = {
 			unitLib.protos[k].colorImgList.push(coloredImg);
 		    }
 		}
-            }
 
-	    initCallback();
+		initCallback();
+            }
         });
     },
 
