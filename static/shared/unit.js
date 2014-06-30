@@ -457,7 +457,26 @@ unitLib.unitProto = {
 	var ownProps = Object.getOwnPropertyNames(this);
 	for(var i = 0; i < ownProps.length; i++) {
 	    var prop = ownProps[i];
-	    storableObj[prop] = this[prop];
+
+	    if(prop == "attacks") {
+		var proto = unitLib.protos[this.type];
+		var storableAttacks = [];
+		for(var j=0; j<this.attacks.length; ++j) {
+		    var newAttack = {};
+		    var oldAttack = this.attacks[j];
+		    var protoAttack = proto.attacks[j];
+		    for(var attackProp in oldAttack) {
+			// populate newAttack with properties that differ from the prototype's attack
+			if(oldAttack[attackProp] != protoAttack[attackProp]) {
+			    newAttack[attackProp] = oldAttack[attackProp];
+			}
+		    }
+		    storableAttacks[j] = newAttack;
+		}
+		storableObj["attacks"] = storableAttacks;
+	    } else {
+		storableObj[prop] = this[prop];
+	    }
 	}
 	return storableObj;
     }
