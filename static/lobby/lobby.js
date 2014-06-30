@@ -36,7 +36,7 @@ socket.on("joined room", function(data) {
     rooms[data.room.id] = data.room;
     renderRoomList();
     if(username == data.username) {
-	window.location = "/lobby/room.html?id="+data.id;
+	window.location = "/lobby/room.html?id="+data.room.id;
     }
 });
 

@@ -42,6 +42,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	playerList[i].team = i+1;
 	playerList[i].alliance = i+1;
 	if(!("gold" in playerList[i])) { playerList[i].gold = 100; }
+	if(!("race" in playerList[i]) || playerList[i].race == "random") { playerList[i].race = Math.random()>0.5?"elves":"orcs"; }
     }
 
     loadMap(map, function(err, mapData) {

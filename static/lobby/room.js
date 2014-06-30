@@ -17,7 +17,7 @@ socket.on("joined room", function(data) {
     renderPlayerList();
 });
 
-socket.on("ready change", function(data) {
+socket.on("player update", function(data) {
     players = data.players;
     renderPlayerList();
 });
@@ -33,6 +33,7 @@ function renderPlayerList() {
 	    readyBox.click(function() {
 		socket.emit("ready", { ready: $(this).is(':checked'), id: roomId });
 	    });
+	    readyBox.prop("checked", data.ready);
 	    playerItem.append(readyBox);
 
 	    var playerText = $("<span>");
@@ -43,13 +44,24 @@ function renderPlayerList() {
 	    raceSelector.append('<option value="random">Random</option>')
 	    raceSelector.append('<option value="elves">Elves</option>')
 	    raceSelector.append('<option value="orcs">Orcs</option>')
+	    raceSelector.val(data.race);
 	    raceSelector.change(function() {
-		socket.emit("change race", { id: roomId, race: raceSelector.value() });
+		socket.emit("set race", { id: roomId, race: raceSelector.val() });
 	    });
 	    playerItem.append(raceSelector);
 	} else {
-	    playerItem.text((data.ready?"- ":"+ ") + i + ": " + data.username + " | " + (data.race||"Random"));
+	    playerItem.text((data.ready?"+ ":"_ ") + i + ": " + data.username + " | " + (data.race||"Random"));
 	}
 	$playerList.append(playerItem);
     });
 }
+
+socket.on("launched room", function(gameId) {
+    window.location = "/client/grid.html?game="+gameId;
+});
+
+$("#start-game-button").click(function() {
+    if(players.every(function(p) { return p.ready; })) {
+	socket.emit("launch room", roomId);
+    }
+});

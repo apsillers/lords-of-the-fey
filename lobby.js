@@ -34,6 +34,9 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
     });
 
     socket.on("create room", function(data) {
+	var user = socket.handshake.user;
+	if(!user) { return; }
+
 	var loadMap = require("./loadUtils").loadMap;
 
 	var user = socket.handshake.user;
@@ -47,7 +50,8 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 		map: data.map,
 		totalSlots: startPositions.length - 1,
 		filledSlots: 0,
-		players:[]
+		players:[],
+		owner:user.username
 	    };
 	    sockets.in("lobby").emit("created room", rooms[id]);
 	    joinRoom(user, rooms[id]);
@@ -63,6 +67,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 
     socket.on("enter room", function(id) {
 	var user = socket.handshake.user;
+	socket.join("room"+id);
 	socket.emit("room data", { you: user.username, room: rooms[+id] });
     });
 
@@ -97,6 +102,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	socket.leave("room"+data.id);
 
 	sockets.in("lobby").emit("left room", { username: user.username, roomId: room.id });
+	sockets.in("room"+data.id).emit("left room", { username: user.username, players: room.players, roomId: data.id });
     });
 
     socket.on("ready", function(data) {
@@ -109,14 +115,22 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 
 	player.ready = !!data.ready;
 
-	sockets.in("room"+data.id).emit("ready change", { players: room.players, username: user.username, roomId: data.id, ready: !!data.ready });
+	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+
+//	sockets.in("room"+data.id).emit("ready change", { players: room.players, username: user.username, roomId: data.id, ready: !!data.ready });
     });
 
-    socket.on("launch room", function() {
+    socket.on("launch room", function(roomId) {
+	var room = rooms[+roomId];
+	if(!room) { return; }
+
+	console.log("maybe launching " + roomId);
+
 	if(room.players.filter(function(o) { return o != null; }).length < 2) { return; }
 	if(room.players.every(function(p) { return p.ready; })) {
-	    require("./createGame").createNewGame(collections, players, mapName, function(id) {
-		sockets.in("room"+data.id).emit("launched game", id);
+	    console.log("yes launching " + roomId);
+	    require("./createGame").createNewGame(collections, room.players, room.map, function(gameId) {
+		sockets.in("room"+roomId).emit("launched room", gameId);
 		// sockets.in("room"+data.id).leave("room"+data.id);
 	    });
 	};
@@ -131,5 +145,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	if(!player) { return; }
 
 	player.race = data.race;
+
+	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
     });
 }
