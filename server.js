@@ -97,11 +97,11 @@ function initListeners(socket, collections) {
     // request for all game data
     socket.on("alldata", function(data) {
 	console.log("serving data to", socket.handshake.user.username);
-        var gameId = data.gameId;
+        var gameId = ObjectID(data.gameId);
 	var user = socket.handshake.user;
 
         collections.units.find({ gameId:gameId }, function(err, cursor) {
-            collections.games.findOne({ _id:ObjectID(gameId) }, function(err, game) {
+            collections.games.findOne({ _id:gameId }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
                     socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay });
@@ -112,6 +112,7 @@ function initListeners(socket, collections) {
 
     // subscribe to a game channel
     socket.on("join game", function(gameId) {
+	var gameId = ObjectID(gameId);
         socket.join("game"+gameId);
 	if(socket.handshake.user) {
 	    socketList.push({ gameId: gameId, username: socket.handshake.user.username, socket: socket })
@@ -138,12 +139,13 @@ function initListeners(socket, collections) {
 
     // move a unit
     socket.on("move", function(data) {
-        var gameId = data.gameId;
+	console.log(data.gameId);
+        var gameId = ObjectID(data.gameId);
         var path = data.path;
 	var attackIndex = data.attackIndex;
 	var user = socket.handshake.user;
 
-        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
+        collections.games.findOne({_id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 
@@ -246,48 +248,13 @@ function initListeners(socket, collections) {
         });
     });
 
-    function checkForVictory(game, collections, callback) {
-	var result = { victory: false };
-	var teamsWithCommanders = {};
-	collections.units.find({ gameId: game._id.toString(), isCommander: true }, function(err, cursor) {
-	    cursor.next(function indexCommanderTeam(err, commander) {
-		if(!commander) { produceResult(); return; }
-		teamsWithCommanders[commander.team] = true;
-		cursor.next(indexCommanderTeam);
-	    });
-
-	    function produceResult() {
-		var winningAlliance = null;
-		var survivingTeamList = Object.getOwnPropertyNames(teamsWithCommanders);
-		console.log(survivingTeamList);
-		for(var i=0; i < survivingTeamList.length; ++i) {
-		    var team = survivingTeamList[i];
-		    var thisAlliance = game.players[team-1].alliance;
-		    if(winningAlliance == null) { winningAlliance = thisAlliance }
-		    if(thisAlliance != winningAlliance) {
-			winningAlliance = null;
-			break;
-		    }
-		}
-
-		if(winningAlliance !== null) {
-		    result.victory = true;
-		    result.alliance = winningAlliance;
-		}
-
-		callback(result);
-	    }
-	});
-	
-	
-    }
 
     // create a new unit
     socket.on("create", function(data) {
-	var gameId = data.gameId;
+	var gameId = ObjectID(data.gameId);
 	var user = socket.handshake.user;
 
-        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
+        collections.games.findOne({_id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
@@ -304,11 +271,11 @@ function initListeners(socket, collections) {
     });
 
     socket.on("levelup", function(data) {
-        var gameId = data.gameId;
+        var gameId = ObjectID(data.gameId);
         var choiceNum = data.choiceNum;
 	var user = socket.handshake.user;
 
-        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
+        collections.games.findOne({_id:gameId}, function(err, game) {
 	    // ensure that the logged-in user has the right to act
 	    if(!socketOwnerCanAct(socket, game, true)) {
 		return;
@@ -349,9 +316,9 @@ function initListeners(socket, collections) {
 	    
 
     socket.on("endTurn", function(data) {
-	var gameId = data.gameId;
+	var gameId = ObjectID(data.gameId);
 
-        collections.games.findOne({_id:ObjectID(gameId)}, function(err, game) {
+        collections.games.findOne({_id:gameId}, function(err, game) {
 	    if(!socketOwnerCanAct(socket, game)) {
 		return;
 	    }
@@ -381,7 +348,7 @@ function initListeners(socket, collections) {
 			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates, timeOfDay: game.timeOfDay });
 
 			var activePlayerSocketData = socketList.filter(function(o) {
-			    return o.gameId == gameId && o.username == game.players[game.activeTeam-1].username;
+			    return o.gameId.equals(gameId) && o.username == game.players[game.activeTeam-1].username;
 			})[0];
 
 			if(activePlayerSocketData) {

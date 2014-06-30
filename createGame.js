@@ -69,7 +69,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 		console.log(index, playerList.length, typeName);
 
 		var unit = new Unit({
-		    gameId: game._id.toString(),
+		    gameId: game._id,
 		    x: +coords[0],
 		    y: +coords[1],
 		    type: typeName,
