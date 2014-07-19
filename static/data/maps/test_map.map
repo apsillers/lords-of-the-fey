@@ -1,7 +1,7 @@
 border_size=1
 usage=map
 
-Ch          , Ch          , Ch          , Ch          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Ch          , Kh         , Ch         , Gg
+Ch          , Ch          , Ch          , Ch          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Gg          , Ch          , 3 Kh         , Ch         , Gg
 1 Ch          , Kh        , Ch      , Re          , Re          , Re          , Re          , Gg         , Gg         , Gg          , Gg         , Gg          , Gg          , Gg^Fd,          Gg         , Ch         , Gg
 Gg          , Sw          , Ch          , Sw          , Gg          , Gg          , Sw          , Gg          , Gg          , Gg          , Sw          , Sw          , Gg          , Gg^Fd         , Gg         , Gg         , Gg
 Sw          , Sw          , Gg          , Sw          , Gg          , Sw          , Sw          , Gg          , Gg^Ve          , Gg          , Ch          , Gg          , Gg          , Gg^Fd          , Sw         , Gg         , Gg
