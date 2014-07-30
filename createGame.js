@@ -31,18 +31,23 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
     // TODO: ensure that the player creating the game is on the playerList
 
     var gameData = {
-	"map" : "test_map.map",
+	"map" : map,
 	"timeOfDay" : "morning",
 	"players" : playerList,
 	"villages": {},
-	"activeTeam": 1
+	"activeTeam": 1,
+	"alliances": {}
     };
 
     for(var i=0; i<playerList.length; ++i) {
-	playerList[i].team = i+1;
-	playerList[i].alliance = i+1;
-	if(!("gold" in playerList[i])) { playerList[i].gold = 100; }
-	if(!("race" in playerList[i]) || playerList[i].race == "random") { playerList[i].race = Math.random()>0.5?"elves":"orcs"; }
+	var playerItem = playerList[i];
+	playerItem.team = i+1;
+	if(!("alliance" in playerItem)) { playerItem.alliance = i+1; }
+
+	gameData.alliances[playerItem.team] = playerItem.alliance;
+
+	if(!("gold" in playerItem)) { playerItem.gold = 100; }
+	if(!("race" in playerItem) || playerItem.race == "random") { playerItem.race = Math.random()>0.5?"elves":"orcs"; }
     }
 
     loadMap(map, function(err, mapData) {

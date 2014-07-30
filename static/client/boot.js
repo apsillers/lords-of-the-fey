@@ -28,6 +28,7 @@ window.addEventListener("load", function() {
 
 	$("#top-username").text(gameInfo.player.username);
 
+	gameInfo.alliances = data.alliances;
 	gameInfo.activeTeam = data.activeTeam;
 	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
 

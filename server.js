@@ -104,7 +104,7 @@ function initListeners(socket, collections) {
             collections.games.findOne({ _id:gameId }, function(err, game) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, docs) {
-                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay });
+                    socket.emit("initdata", {map: game.map, units: docs, player: player, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay, alliances: game.alliances });
                 });
             });
         });
@@ -160,8 +160,10 @@ function initListeners(socket, collections) {
 
                     collections.units.find({ gameId: gameId }, function(err, cursor) {
                         cursor.toArray(function(err, unitArray) {
+			    unitArray = unitArray.map(function(u) { return new Unit(u); });
+
 			    // make the move
-                            var moveResult = require("./executePath")(path, unit, unitArray, mapData);
+                            var moveResult = require("./executePath")(path, unit, unitArray, mapData, game);
 
                             var endPoint = moveResult.path[moveResult.path.length-1];
                             unit.x = endPoint.x;
@@ -189,7 +191,9 @@ function initListeners(socket, collections) {
 				if(moveResult.attack && !unit.hasAttacked) {
 				    var targetCoords = path[path.length-1];
 				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-					if(defender == null || defender.alliance == unit.alliance) { 
+					defender = new Unit(defender);
+
+					if(defender == null || defender.getAlliance(game) == unit.getAlliance(game)) { 
 					    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
 					}
 

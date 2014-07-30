@@ -1,5 +1,6 @@
 var getNeighborCoords = require("./static/shared/terrain.js").Terrain.getNeighborCoords;
 
+
 function areNeighbors(space1, space2) {
     var neighbors = getNeighborCoords(space1);
     for(var i=0; i<neighbors.length; ++i) {
@@ -9,7 +10,7 @@ function areNeighbors(space1, space2) {
 }
 
 // attempt to move a unit through a given path
-module.exports = function executePath(path, unit, unitArray, mapData) {
+module.exports = function executePath(path, unit, unitArray, mapData, game) {
     var actualPath = [path[0]];
     var standingClear = true;
     var totalMoveCost = 0;
@@ -22,7 +23,7 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 
 	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
 	if(occupant) {
-	    if(occupant.alliance != unit.alliance) {
+	    if(occupant.getAlliance(game) != unit.getAlliance(game)) {
 		if(isLastSpace && standingClear) {
 		    return { path:actualPath, revealedUnits:[], attack: true, moveCost: totalMoveCost };
 		}
@@ -52,7 +53,7 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 	var neighborSpaces = getNeighborCoords(coords);
 	var hasAdjacentEnemy = unitArray.some(function(u) {
 	    for(var i=0; i<neighborSpaces.length; ++i) {
-		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.alliance != unit.alliance) { return true; }
+		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.getAlliance(game) != unit.getAlliance(game)) { return true; }
 	    }
 	    return false;
 	});

@@ -23,7 +23,7 @@ var ui = {
 	if(ui.pathSource && space != ui.pathTarget) {
             ui.pathTarget = space;
 
-            ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget, ui.path);
+            ui.path = aStar(world, world.getUnitAt(ui.pathSource), ui.pathSource, ui.pathTarget, ui.path, gameInfo);
 	    world.mapContainer.removeChild(ui.pathShape);
 
 	    if(ui.path) {

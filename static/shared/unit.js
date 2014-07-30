@@ -146,6 +146,8 @@ unitLib.abilityDict = {
 }
 
 function Unit(unitData, isCreation, isLevelUp) {
+    if(unitData == null) { return unitData; }
+
     var proto = unitLib.protos[unitData.type];
     var unit = Object.create(proto);
 
@@ -329,6 +331,10 @@ unitLib.unitProto = {
 	this.gem.graphics.beginStroke("black").beginFill(color).drawRect(10.5,15.5,5,10);
 	this.shape.addChild(this.gem);
     },
+
+    getAlliance: function(gameInfo) {
+	return gameInfo.alliances[this.team];
+    }, 
 
     calculateAvailability: function() {
 	if(gameInfo.activeTeam != this.team) { return -1; }
