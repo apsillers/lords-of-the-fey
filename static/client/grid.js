@@ -91,6 +91,10 @@ World.prototype = {
         }
         return neighbors;
     },
+
+    getDirection: function(s1, s2) {
+	return Terrain.getDirection(s1, s2);
+    },
     
     addUnit: function(unit, space) {
         unit.shape.x = space.shape.x - 1;

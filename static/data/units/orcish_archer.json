@@ -40,14 +40,16 @@
       "type":"ranged",
       "damageType":"pierce",
       "damage":6,
-      "number":3
+      "number":3,
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     },
     {
       "name":"Bow",
       "type":"ranged",
       "damageType":"fire",
       "damage":7,
-      "number":2
+      "number":2,
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     }
   ],
   "resistances": {

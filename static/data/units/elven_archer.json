@@ -39,7 +39,8 @@
       "type":"ranged",
       "damageType":"pierce",
       "number":3,
-      "damage":5
+      "damage":5,
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     }
   ],
   "resistances": {

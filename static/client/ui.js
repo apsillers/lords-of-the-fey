@@ -411,15 +411,32 @@ var ui = {
 
 		var attack = entry.offense?offense:defense;
 
+		var direction;
+		if(entry.offense) { direction = world.getDirection(offender.shape.owner, defender.shape.owner); }
+		else {              direction = world.getDirection(defender.shape.owner, offender.shape.owner); }
+
 		if(attack.type == "melee") {
 		    actor.shape.x += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dX;
 		    actor.shape.y += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dY;
 		    world.stage.update();
 		} else if(attack.type == "ranged" && !retreat) {
 		    var projectile = new createjs.Shape();
-		    projectile.graphics.beginFill("black").drawRect(0,0,7,7);
-		    projectile.x = actor.shape.x + Space.WIDTH / 2;
-		    projectile.y = actor.shape.y + Space.HEIGHT / 2;
+
+		    if(attack.img) {
+			var path = (direction=="n" || direction=="s") ? attack.img["n"] : attack.img["ne"];
+			projectile = new createjs.Bitmap(path);
+			var rotationTable = { s: 180, n: 0, ne: 0, nw: -90, se: 90, sw: 180 };
+			projectile.rotation = rotationTable[direction];
+			projectile.x = actor.shape.x + Space.WIDTH/2;
+			projectile.y = actor.shape.y + Space.HEIGHT/2;
+			projectile.regX = Space.WIDTH/2;
+			projectile.regY = Space.HEIGHT/2;
+		    } else {
+			projectile.graphics.beginFill("black").drawRect(0,0,7,7);
+			projectile.x = actor.shape.x + Space.WIDTH / 2;;
+			projectile.y = actor.shape.y + Space.HEIGHT / 2;;
+		    }
+
 		    for(var j=0; j<15; j++) {
 			setTimeout(function() {
 			    projectile.x += (entry.offense ? -1 : 1) * dX;

@@ -54,6 +54,27 @@ var Terrain = {
 		{ x: x-1, y: y },
 		{ x: x,   y: y-offset },
 		{ x: x+1, y: y }];
+    },
+
+    getDirection: function(s1, s2) {
+	if(s1.x == s2.x) {
+	    return s1.y > s2.y ? "n" : "s";
+	}
+
+	// is a high space on a row
+	var isHigh = (s1.x % 2);
+	var result = "";
+	
+	if((isHigh && s1.y == s2.y) || (!isHigh && s1.y < s2.y)) {
+	    result = "s";
+	} else {
+	    result = "n";
+	}
+
+	if(s1.x > s2.x) { result += "w"; }
+	else { result += "e"; }
+
+	return result;
     }
 }
 

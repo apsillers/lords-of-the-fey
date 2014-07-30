@@ -39,6 +39,19 @@ var unitLib = {
                 Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })
             );
 
+	    var attackAnimationList = [];
+	    for(var p in unitLib.protos) {
+		var proto = unitLib.protos[p];
+		for(var a=0; a < proto.attacks.length; ++a) {
+		    var attackObj = proto.attacks[a];
+		    for(var direction in attackObj.img) {
+			var imgPath = attackObj.img[direction];
+			attackAnimationList.push({ id: p+"|"+a+"|"+direction, src: imgPath });
+		    }
+		}
+	    }
+	    queue.loadManifest(attackAnimationList);
+
             function handleComplete() {
 		for(var k in unitLib.protos) {
 		    var img = queue.getResult(k);
@@ -73,6 +86,14 @@ var unitLib = {
 			coloredImg.src = colorCanvas.toDataURL();
 			unitLib.protos[k].colorImgList.push(coloredImg);
 		    }
+
+		    // load attack images
+		    /*
+		    for(var i=0; i < unitLib.proto[k].attacks.length; ++i) {
+			var attack = unitLib.proto[k].attacks[i];
+			var img = queue.getResult(k);
+		    }
+		    */
 		}
 
 		initCallback();
