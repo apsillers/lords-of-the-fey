@@ -10,13 +10,23 @@
   <body>
 
     <div id="lobby-menu">
-      <input type="button" value="Create Game" id="create-game">
+      <input type="button" value="Create Room" id="create-game">
     </div>
 
     <div id="lobby-below-menu">
       <div id="player-list"></div>
 
       <div id="room-list"></div>
+    </div>
+
+    <div style="display:none; width:400px; margin: auto 0; background-color: gray; position: fixed; top: 0;" id="create-dialog">
+      <div>Name: <input type="text" id="create-dialog-name"></div>
+      <div>
+	<select id="create-dialog-map">
+	  <option value="test_map.map">Test Map</option>
+	</select>
+      </div>
+      <div><input type="button" value="Launch Room" id="launch-game"></div>
     </div>
 
     <script src="lobby.js"></script>

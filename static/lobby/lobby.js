@@ -64,8 +64,11 @@ function renderRoomList() {
 }
 
 $("#create-game").click(function() {
+    $("#create-dialog").show();
+});
+$("#launch-game").click(function() {
     socket.emit("create room", {
-	name: "some game " + Math.random(),
-	map: "test_map.map"
+	name: $("#create-dialog-name").val(),
+	map: $("#create-dialog-map").val()
     });
 });
