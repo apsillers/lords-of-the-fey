@@ -158,8 +158,6 @@ function initListeners(socket, collections) {
 
 		    unit = new Unit(unit);
 
-		    console.log(unit.type, unit.name);
-
                     collections.units.find({ gameId: gameId }, function(err, cursor) {
                         cursor.toArray(function(err, unitArray) {
 			    // make the move
@@ -191,7 +189,9 @@ function initListeners(socket, collections) {
 				if(moveResult.attack && !unit.hasAttacked) {
 				    var targetCoords = path[path.length-1];
 				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-					if(defender == null) { emitMove(); }
+					if(defender == null || defender.alliance == unit.alliance) { 
+					    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
+					}
 
 					unit.hasAttacked = true;
 					unit.moveLeft = 0;
@@ -334,6 +334,7 @@ function initListeners(socket, collections) {
 	    }
 	    game.players[game.activeTeam - 1].gold += villageCount*2;
 
+	    // if all players have taken a turn and now we're back to player #1
 	    if(game.activeTeam == 1) {
 		var times = ["morning", "afternoon", "dusk", "first watch", "second watch", "dawn"];
 		game.timeOfDay = times[(times.indexOf(game.timeOfDay) + 1) % times.length];

@@ -21,9 +21,6 @@ function executeAttack(offender, attackIndex, defender, units, mapData, game) {
     var defense = defender.applyAttack(defenseChoice.defense, defender, game.timeOfDay);
     var defenseIndex = defenseChoice.defenseIndex;
 
-    console.log(offender.name, offense);
-    console.log(defender.name, defense);
-
     for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
 	if(round < offense.number) {
 	    swingResult = attackSwing(true, offense, offender, defender, defenderCover, units);

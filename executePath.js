@@ -22,7 +22,7 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 
 	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
 	if(occupant) {
-	    if(occupant.team != unit.team) {
+	    if(occupant.alliance != unit.alliance) {
 		if(isLastSpace && standingClear) {
 		    return { path:actualPath, revealedUnits:[], attack: true, moveCost: totalMoveCost };
 		}
@@ -52,7 +52,7 @@ module.exports = function executePath(path, unit, unitArray, mapData) {
 	var neighborSpaces = getNeighborCoords(coords);
 	var hasAdjacentEnemy = unitArray.some(function(u) {
 	    for(var i=0; i<neighborSpaces.length; ++i) {
-		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.team != unit.team) { return true; }
+		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.alliance != unit.alliance) { return true; }
 	    }
 	    return false;
 	});

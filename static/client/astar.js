@@ -19,7 +19,7 @@ function aStar(world, unit, start, goal, prevPath) {
 	// this allows the player to pcik the offense location, instead of relying on the normal A* path to the enemy
 	if(!world.getUnitAt(prevDest) && // if the previous path did not end on an occupied space (i.e., was not an attack)
 	   attackTarget &&                   // if the goal space is occupied...
-	   attackTarget.team != unit.team && // ...by an opponent
+	   attackTarget.alliance != unit.alliance && // ...by an opponent
 	   world.getNeighbors(goal).indexOf(prevDest) != -1 // and the occupied goal space is adjacent to the end of the previous path
 	  ) {
 	    var newPath = prevPath.slice();
@@ -104,14 +104,14 @@ function aStar(world, unit, start, goal, prevPath) {
 
     function cost_to_move_here(space) {
 	var occupant = world.getUnitAt(space);
-        var is_enemy_present = occupant && occupant.team != unit.team;
+        var is_enemy_present = occupant && occupant.alliance != unit.alliance;
 	var normal_move_cost = unit.getMoveCostForSpace(space);
 	if(space == goal && is_enemy_present) { return 0; }
 
         // test if this pace has an enemy adjacent
         var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
             var n_occupant = world.getUnitAt(n);
-            if(n_occupant && n_occupant.team != unit.team) {
+            if(n_occupant && n_occupant.alliance != unit.alliance) {
                 return true;
             }
         });
@@ -131,14 +131,14 @@ function aStar(world, unit, start, goal, prevPath) {
     // is this space free of enemies?
     function not_blocked_by_enemy(space) {
         var occupant = world.getUnitAt(space);
-        if(occupant && occupant.team != unit.team && space != goal) { return false; }
+        if(occupant && occupant.alliance != unit.alliance && space != goal) { return false; }
         return true;
     }
 
     // is this space non-final or free of friendly units?
     function not_blocked_by_friend(space) {
         var occupant = world.getUnitAt(space);
-        if(occupant && occupant.team == unit.team && space == goal) { return false; }
+        if(occupant && occupant.alliance == unit.alliance && space == goal) { return false; }
         return true;
     }
 }
