@@ -1,4 +1,6 @@
-Media assets (/static/data/img/*) are taken directly from Battle for Wesnoth and are available under the GPLv2. That license is included in the img directory. Copyright ownership of those media resources is unclear, so no copyright information is currently included; any information regarding copyright ownership of the media would be welcome.
+Media assets (/static/data/img/*) are taken directly from Battle for Wesnoth and are available under the GPLv2. That license is included in the img directory.
+
+A full list of Wesnoth art credits (some of which may not apply to the artwork used in this project) is here: http://wiki.wesnoth.org/Credits#Artwork_and_Graphics
 
 All code files: Copyright 2014 Andrew P. Sillers
 All rights reserved (except as required by the Github terms of service)
