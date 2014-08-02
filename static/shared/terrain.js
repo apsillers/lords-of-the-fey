@@ -39,7 +39,7 @@ var Terrain = {
 
         MOUNTAINS: { symbol: "Mm", name: "mountains", img: "/data/img/terrain/mountains.png", properties:["mountains"], color:"#AAA" },
         DRY_MOUNTAINS: { symbol: "Md", name: "dry mountains", img: "/data/img/terrain/dry-mountains.png", properties:["mountains"], color:"#AAA" },
-        SNOWY_MOUNTAINS: { symbol: "Mm", name: "snowy mountains", img: "/data/img/terrain/snow-mountains.png", properties:["mountains", "frozen"], color:"#99D" },
+        SNOWY_MOUNTAINS: { symbol: "Ms", name: "snowy mountains", img: "/data/img/terrain/snow-mountains.png", properties:["mountains", "frozen"], color:"#99D" },
 
         DESERT: { symbol: "Dd", name: "desert", img: "/data/img/terrain/desert.png", properties:["sand"], color:"#EDC9AF" },
         BEACH: { symbol: "Ds", name: "beach", img: "/data/img/terrain/desert.png", properties:["sand"], color:"#EDC9AF" },
