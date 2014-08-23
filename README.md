@@ -1,6 +1,8 @@
 Lords of the Fey
 =======
 
+![Lords of the Fey screenshot](https://apsillers.github.io/images/projects/fey.png)
+
 A multiplayer fantasy-themed turn-based strategy game that you can play in your browser using HTML5 technologies. The game's rules and artwork are taken from [Battle for Wesnoth](http://www.wesnoth.org).
 
 The server requires:
