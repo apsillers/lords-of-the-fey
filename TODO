@@ -1,0 +1,50 @@
+Focus on moves/attacks on map
+Good-looking:
+  - attack prompt (images, cover percentages)
+  - recruit prompt (images, unit stats, costs)
+  - villages (flags, overlap northern uints)
+  - right-click menu
+  - move pathing
+End turn logic
+  - heal units (healers)
+  - poison
+Implement all unit attributes
+Implement all attack properties
+Implement all terrain types
+Implement all Wesnoth races
+Attack animations
+  - Projectile images (omnidirectional / every-directional)
+  - Pojectile animations
+  - Swing animations
+Victory conditions, resolution
+Make lobby actually usable by normal humans
+Show list of player's active games
+
+DONE :)
+User auth
+Limit unit movement to owner only
+Show unit defense
+End-turn logic
+  - award gold
+  - refill move meters
+  - heal resting units and village units
+Add unit creation rules
+  - keeps
+  - commanders
+Attack prompt
+Show unit defense correctly in attack
+Add player-race unit creation rules
+Right-click menu
+Each terrain type should have many terrain properties
+Villages
+Day/night
+Damage types
+Unit advancement (non-branching)
+Branching unit advancement
+Day/night images
+AMLA
+Branching level-up
+Minimap
+Game creation
+Attack animations
+  - Projectile images (N/NE)
