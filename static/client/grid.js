@@ -219,8 +219,13 @@ Space.prototype = {
 
 	if(terrain.overlayImgObj) {
 	    var overlay = new createjs.Bitmap(terrain.overlayImgObj);
-	    overlay.x = this.x * Math.ceil(this.width * 3/4) - overlay.image.width / 4;
-	    overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - overlay.image.height/4;
+        if(overlay.image.width == 72) {
+	        overlay.x = this.x * Math.ceil(this.width * 3/4);
+	        overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2);
+        } else {
+	        overlay.x = this.x * Math.ceil(this.width * 3/4) - overlay.image.width / 4;
+	        overlay.y = this.y * (this.height) + (this.x%2?0:this.height/2) - overlay.image.height/4;
+        }
 	    this.overlayShape = overlay;
 	    this.overlayShape.owner = this;
 	    this.overlayShape.addEventListener("click", Space.passthroughFunc);
