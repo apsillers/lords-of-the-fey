@@ -3,11 +3,13 @@ var socket = io.connect('//' + location.host);
 var roomId = location.search.match(/id=([^&]*)/)[1];
 var players;
 var yourUsername;
+var room;
 
 socket.emit("enter room", roomId);
 
 socket.on("room data", function(data) {
     players = data.room.players;
+    room = data.room;
     yourUsername = data.you;
     renderPlayerList();
 });
@@ -49,8 +51,18 @@ function renderPlayerList() {
 		socket.emit("set race", { id: roomId, race: raceSelector.val() });
 	    });
 	    playerItem.append(raceSelector);
+
+	    var allianceSelector = $("<select>");
+	    for(var j=0; j<room.totalSlots; ++j) {
+		allianceSelector.append('<option value="'+(j+1)+'">'+(j+1)+'</option>')
+	    }
+	    allianceSelector.val(data.alliance || (i+1));
+	    allianceSelector.change(function() {
+		socket.emit("set alliance", { id: roomId, alliance: allianceSelector.val() });
+	    });
+	    playerItem.append(allianceSelector);
 	} else {
-	    playerItem.text((data.ready?"+ ":"_ ") + i + ": " + data.username + " | " + (data.race||"Random"));
+	    playerItem.text((data.ready?"+ ":"_ ") + i + ": " + data.username + " | " + (data.race||"Random") + " | " + data.alliance);
 	}
 	$playerList.append(playerItem);
     });
