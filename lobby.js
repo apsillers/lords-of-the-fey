@@ -62,7 +62,6 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	var room = rooms[+data.id];
 	var user = socket.handshake.user;
 	joinRoom(user, room);
-	console.log(sockets.clients('room'+data.id));
     });
 
     socket.on("enter room", function(id) {
@@ -137,6 +136,19 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
     });
 
     socket.on("set race", function(data) {
+	var room = rooms[+data.id];
+	if(!room) { return; }
+	var user = socket.handshake.user;
+	if(!user) { return; }
+	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
+	if(!player) { return; }
+
+	player.race = data.race;
+
+	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+    });
+
+    socket.on("set alliance", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
 	var user = socket.handshake.user;
