@@ -240,7 +240,7 @@ var ui = {
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
-	var promptHeight = 300;
+	var promptHeight = 350;
 
 	var recruitPromptDOM = $("#recruit-prompt");
 	var recruitListDOM = $("#recruit-list");
@@ -581,7 +581,7 @@ var ui = {
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 400;
-	var promptHeight = 300;
+	var promptHeight = 350;
 
 	var recruitPromptDOM = $("#recruit-prompt");
 	var recruitListDOM = $("#recruit-list");
