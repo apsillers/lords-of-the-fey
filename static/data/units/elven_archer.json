@@ -32,7 +32,8 @@
       "type":"melee",
       "damageType":"blade",
       "number":2,
-      "damage":3
+      "damage":3,
+      "icon": "/data/img/attacks/sword-elven.png"
     },
     {
       "name":"Bow",
@@ -40,7 +41,8 @@
       "damageType":"pierce",
       "number":3,
       "damage":5,
-      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" },
+      "icon": "/data/img/attacks/bow-elven.png"
     }
   ],
   "resistances": {

@@ -51,6 +51,19 @@ div.recruit-item.selected {
     background-color: #CCF;
 }
 
+div.attack-item {
+    text-align:center;
+    padding: 3px;
+    margin: 2px;
+    background-color: #555;
+    height: 60px;
+    color: #FFF;
+}
+
+div.attack-item.selected {
+    background-color: #66D;
+}
+
 .translucent {
     filter:alpha(opacity=60); 
     -moz-opacity: 0.6; 

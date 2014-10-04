@@ -514,61 +514,83 @@ var ui = {
 	ui.modal.addChild(ui.modalWall);
 	world.stage.addChild(ui.modal);
 
-	var promptWidth = 300;
-	var promptHeight = 52 * attacker.attacks.length + 50;
-	ui.attackPrompt = new createjs.Container();
-	ui.attackPrompt.x = (canvas.width - promptWidth) / 2;
-	ui.attackPrompt.y = (canvas.height - promptHeight) / 2;
+	var promptWidth = 600;
+	var promptHeight = 68 * attacker.attacks.length + 30;
 
-	var promptShape = new createjs.Shape();
-	promptShape.graphics.beginFill("rgb(0,0,128)").drawRect(0, 0, promptWidth, promptHeight);
-	ui.attackPrompt.addChild(promptShape);
+	var attackPromptDOM = $("#attack-prompt");
+	var attackListDOM = $("#attack-list");
+
+	attackPromptDOM.width(promptWidth);
+	attackPromptDOM.height(promptHeight);
+	attackPromptDOM.show();
+
+	ui.attackPrompt = new createjs.DOMElement(attackPromptDOM.get(0));
+	ui.attackPrompt.x = (canvas.width - promptWidth) / 2;
+	ui.attackPrompt.y = -canvas.height + ((canvas.height - promptHeight) / 2);
+
+	attackListDOM.html("");
+
+	var stringifyAttack = function(attack) {
+	    if(!attack) { return "-- none --"; }
+	    return attack.name + ": " + attack.damage + "-" + attack.number + " (" + attack.type + ")";
+	}
+
+	var selectedItem;
 
 	for(var i=0; i<attacker.attacks.length; ++i) {
-	    var stringifyAttack = function(attack) {
-		if(!attack) { return "-- none --"; }
-		return attack.name + ": " + attack.damage + "-" + attack.number + " (" + attack.type + ")";
-	    }
-
 	    var attackerCover = attacker.getCoverOnSpace(world.getSpaceByCoords(attacker));
 	    var defenderCover = defender.getCoverOnSpace(world.getSpaceByCoords(defender));
 
 	    var attack = attacker.attacks[i];
 	    attack = defender.applyAttack(attack, attacker, gameInfo.timeOfDay);
 	    var attackText = stringifyAttack(attack);
+	    var attackIcon = new Image();
+	    attackIcon.src = attack.icon;
+	    $(attackIcon).css("float","left");
 
 	    var defense = defender.selectDefense(attacker, attack, gameInfo.timeOfDay, attackerCover, defenderCover).defense;
 	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay);
 	    var defenseText = stringifyAttack(defense);
+	    var defenseIcon;
+	    if(defense) {
+		defenseIcon = new Image();
+		defenseIcon.src = defense.icon;
+		$(defenseIcon).css("float","right");
+	    } else {
+		defenseIcon = null;
+		defense = {};
+	    }
 
-	    var attackButton = new createjs.Shape();
-	    attackButton.graphics.beginFill("rgb(50,50,50)").drawRect(10, 10 + 52 * i, promptWidth - 20, 50);
+	    var attackButton = $("<div class='attack-item'>");
 
-	    var itemText = new createjs.Text(attackText + "  |  " + defenseText);
-	    itemText.y = 30 + 52 * i;
-	    itemText.x = 20;
-	    itemText.color = "#fff";
-	    ui.attackPrompt.addChild(attackButton);
-	    ui.attackPrompt.addChild(itemText);
+	    attackButton.append(attackIcon);
+	    var itemText = $("<span>", { text: attackText + " | " + defenseText });
+	    itemText.css({ position:"relative", top:"20px" });
+	    attackButton.append(itemText);
+	    attackButton.append(defenseIcon);
 
-	    attackButton.addEventListener("click", resolutionCallback.bind(null, i));
-	    attackButton.addEventListener("click", ui.clearModal);
+	    attackListDOM.append(attackButton);
+
+	    attackButton.on("click", function(i) {
+		$(".attack-item").removeClass("selected");
+		if(this == selectedItem) {
+		    resolutionCallback(i);
+		    ui.clearModal();
+		} else {
+		    selectedItem = this;
+		    $(this).addClass("selected");
+		}
+	    }.bind(attackButton, i));
 	}
 
-	var cancelText = new createjs.Text("Cancel");
-	var cancelButton = new createjs.Shape();
-	cancelButton.graphics.beginFill("rgb(50,50,50)").drawRect(promptWidth - 70, 10 + 52 * i, 60, 30);
-	
-	cancelText.y = 15 + 52 * i;
-	cancelText.x = promptWidth - 60;
-	cancelText.color = "#fff";
-	ui.attackPrompt.addChild(cancelButton);
-	ui.attackPrompt.addChild(cancelText);
-	
-	cancelButton.addEventListener("click", resolutionCallback.bind(null, -1));
-	cancelButton.addEventListener("click", ui.clearModal);
-	
+	var cancelButton = $("<button>Cancel</button>");
+	cancelButton.on("click", resolutionCallback.bind(null, -1));
+	cancelButton.on("click", ui.clearModal);
+	$("#attack-cancel").html("").append(cancelButton);
+
 	ui.modal.addChild(ui.attackPrompt);
+	world.stage.update();
+
     },
 
     showAdvancementPromptFor: function(levelingUnit, resolutionCallback) {

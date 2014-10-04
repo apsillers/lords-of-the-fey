@@ -33,7 +33,8 @@
       "type":"melee",
       "damageType":"blade",
       "damage":3,
-      "number":2
+      "number":2,
+      "icon": "/data/img/attacks/sword-orcish.png"
     },
     {
       "name":"Bow",
@@ -41,6 +42,7 @@
       "damageType":"pierce",
       "damage":6,
       "number":3,
+      "icon": "/data/img/attacks/bow-orcish.png",
       "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     },
     {
@@ -49,6 +51,7 @@
       "damageType":"fire",
       "damage":7,
       "number":2,
+      "icon": "/data/img/attacks/bow-orcish.png",
       "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     }
   ],

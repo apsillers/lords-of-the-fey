@@ -32,7 +32,8 @@
       "type":"melee",
       "damageType":"blade",
       "number":2,
-      "damage":11
+      "damage":11,
+      "icon": "/data/img/attacks/sword-orcish.png"
     }
   ],
   "resistances": {
