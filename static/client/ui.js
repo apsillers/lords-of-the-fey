@@ -354,7 +354,11 @@ var ui = {
             unit.shape.x = prevX + stepProgress * diffX;
             unit.shape.y = prevY + stepProgress * diffY;
             world.stage.update();
-            
+
+	    var cornerX = unit.shape.x - world.stage.canvas.width / 2;
+	    var cornerY = unit.shape.y - world.stage.canvas.height / 2;
+	    scroll.scrollTo(-cornerX, -cornerY);
+
             if(stepProgress == 1) {
                 currSpace = world.getSpaceByCoords(path[pathPos]);
                 nextSpace = world.getSpaceByCoords(path[pathPos + 1]);
@@ -393,8 +397,6 @@ var ui = {
 
 	var offender = world.getUnitAt(moveData.combat.offender);
 	var defender = world.getUnitAt(moveData.combat.defender);
-
-	scroll.scrollTo(-offender.x, -offender.y);
 
 	var cornerX = offender.shape.x - world.stage.canvas.width / 2;
 	var cornerY = offender.shape.y - world.stage.canvas.height / 2;
