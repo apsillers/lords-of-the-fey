@@ -394,6 +394,12 @@ var ui = {
 	var offender = world.getUnitAt(moveData.combat.offender);
 	var defender = world.getUnitAt(moveData.combat.defender);
 
+	scroll.scrollTo(-offender.x, -offender.y);
+
+	var cornerX = offender.shape.x - world.stage.canvas.width / 2;
+	var cornerY = offender.shape.y - world.stage.canvas.height / 2;
+	scroll.scrollTo(-cornerX, -cornerY);
+
 	var offense = offender.attacks[moveData.combat.offenseIndex];
 	var defense = defender.attacks[moveData.combat.defenseIndex];
 
