@@ -380,13 +380,13 @@ function initListeners(socket, collections) {
 	
 			    // if on a village, heal
 			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){
-				unit.hp = Math.min(unit.hp+8, unit.maxHp);
-				update.hp = unit.hp;
-				
 				if(unit.hasCondition("poisoned")) {
 				    unit.removeCondition("poisoned");
 				    update.conditionChanges = update.conditionChanges || {};
 				    update.conditionChanges.poisoned = false;
+				} else {
+				    unit.hp = Math.min(unit.hp+8, unit.maxHp);
+				    update.hp = unit.hp;
 				}
 			    }
 
