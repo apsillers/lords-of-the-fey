@@ -43,7 +43,8 @@
       "damage":6,
       "number":3,
       "icon": "/data/img/attacks/bow-orcish.png",
-      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" },
+      "properties":["poison"]
     },
     {
       "name":"Bow",

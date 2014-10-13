@@ -264,7 +264,8 @@ function Unit(unitData, isCreation, isLevelUp) {
 
 	unit.shape = new createjs.Container();
 	unit.shape.owner = unit;
-	unit.shape.addChild(new createjs.Bitmap(unit.imgObj));
+	unit.bodyShape = new createjs.Bitmap(unit.imgObj);
+	unit.shape.addChild(unit.bodyShape);
 
 	// forward click to underlying space
 	unit.shape.addEventListener("click", Space.passthroughFunc);
@@ -278,7 +279,8 @@ function Unit(unitData, isCreation, isLevelUp) {
 	unit.drawHpBar();
 	unit.drawXpBar();
 	unit.drawGem();
-    
+	unit.redrawConditions();
+
 	if(unit.isCommander) { unit.drawCrown(); }
     }
 
@@ -378,6 +380,15 @@ unitLib.unitProto = {
     },
 	    
     update: function(update) {
+	// remove expired conditions
+	var prop, conditionName;
+	for(conditionName in update.conditionChanges) {
+	    var change = update.conditionChanges[conditionName];
+	    if(change === false) { this.removeCondition(conditionName); }
+	    // TODO: add or update new conditions (does this ever happen? maybe countdown conditions?)
+	}
+	delete update.conditionChanges;
+
 	for(prop in update) {
 	    this[prop] = update[prop];
 	}
@@ -410,7 +421,72 @@ unitLib.unitProto = {
 	thisUnit.drawHpBar();
 	thisUnit.drawXpBar();
 	thisUnit.drawGem();
+	thisUnit.redrawConditions();
 	world.stage.update();
+    },
+
+    drawDamageNumber: function(value) {
+	if(!value) { return; }
+	this.damageNumber = new createjs.Text(Math.abs(value));
+	this.shape.addChild(this.damageNumber);
+	this.damageNumber.x = 30;
+	this.damageNumber.y = -10;
+	this.damageNumber.color = value>0?"#E00":"#0E0";
+	this.damageNumber.font = "bold 12pt sans serif";
+    },
+
+    dismissDamageNumber: function() {
+	if(this.damageNumber) {
+	    this.shape.removeChild(this.damageNumber);
+	    this.damageNumber = null;
+	}
+    },
+
+    addCondition: function(c) {
+	if(!(this.conditions instanceof Array)) {
+	    this.conditions = [];
+	}
+	this.conditions.push(c);
+	this.redrawConditions();
+    },
+
+    removeCondition: function(c) {
+	c = this.getCondition(c);
+	if(c === false) { return false; }
+	var index = this.conditions.indexOf(c);
+	this.conditions.splice(c, 1);
+	if(this.conditions.length == 0) {
+	    delete this.conditions;
+	}
+	this.redrawConditions();
+	return true;
+    },
+
+    hasCondition: function(c) {
+	return this.getCondition(c) !== false;
+    },
+
+    getCondition: function(c) {
+	if(!this.conditions) { return false; }
+	c = c.name || c;
+	var index = this.conditions.map(function(c) { return c.name || c; }).indexOf(c);
+	return this.conditions[index];
+    },
+
+    redrawConditions: function() {
+	if(this.shape) {
+	    var filters = [];
+	    if(this.conditions) {
+		for(var i=0; i<this.conditions.length; ++i) {
+		    if(this.conditions[i] == "poisoned") {
+			filters.push(new createjs.ColorFilter(0.7,1,0.7,1, 0,100,0,0));
+		    }
+		}
+	    }
+	    this.bodyShape.filters = filters;
+	    this.bodyShape.cache(0, 0, this.bodyShape.image.width, this.bodyShape.image.height);
+	    world.stage.update();
+	}	
     },
 
     // select a defnsive attack to counter the attack `offense` offered by `offender`

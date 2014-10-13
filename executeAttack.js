@@ -85,6 +85,11 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
 	if(hittee.hp <= 0) {
 	    swingRecord.kill = true;
 	}
+
+	if(attack.properties && attack.properties.indexOf("poison") != -1 && !hittee.hasCondition("poisoned")) {
+	    hittee.addCondition("poisoned");
+	    swingRecord.poisoned = true;
+	}
     } else {
 	swingRecord = { event: "miss", offense: isOffense };
     }

@@ -461,17 +461,9 @@ var ui = {
 		}
 
 		if(!retreat) {
-		    hittee.damageNumber = new createjs.Text(entry.damage);
-		    hittee.shape.addChild(hittee.damageNumber);
-		    hittee.damageNumber.x = 30;
-		    hittee.damageNumber.y = -10;
-		    hittee.damageNumber.color = "#E00";
-		    hittee.damageNumber.font = "bold 12pt sans serif";
+		    hittee.drawDamageNumber(entry.damage);
 		} else {
-		    if(hittee.damageNumber) {
-			hittee.shape.removeChild(hittee.damageNumber);
-			hittee.damageNumber = null;
-		    }
+		    hittee.dismissDamageNumber();
 		}
 
 		// show damage at appropriate time for melee and ranged attacks
@@ -482,6 +474,10 @@ var ui = {
 		    
 		    if(entry.kill) {
 			world.removeUnit(hittee);
+		    }
+
+		    if(entry.poisoned) {
+			hittee.addCondition("poisoned");
 		    }
 		}
 

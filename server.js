@@ -383,11 +383,21 @@ function initListeners(socket, collections) {
 				unit.hp = Math.min(unit.hp+8, unit.maxHp);
 				update.hp = unit.hp;
 				
-				// TODO: remove poison
+				if(unit.hasCondition("poisoned")) {
+				    unit.removeCondition("poisoned");
+				    update.conditionChanges = update.conditionChanges || {};
+				    update.conditionChanges.poisoned = false;
+				}
 			    }
-				    
-			    // TODO: if poisoned, hurt
-			    // TODO: remove slow
+
+			    if(unit.hasCondition("poisoned")) {
+				unit.hp = Math.max(1, unit.hp-8);
+				update.hp = unit.hp;
+			    }
+
+			    /*if(unit.hasCondition("slowed")) {
+				update.slow
+			    }*/
 				
 			    updates.push(update);
 			    
