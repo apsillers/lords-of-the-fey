@@ -1,7 +1,7 @@
 var unitLib = {
     
     protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer",
-                "orcish_archer", "orcish_crossbowman", "orcish_slurbow"],
+                "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
     protos: {},
 
     init: function(initCallback) {

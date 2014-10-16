@@ -2,6 +2,7 @@
     "name": "Orcs",
     "recruitList": [
         "grunt",
-        "orcish_archer"
+        "orcish_archer",
+        "orcish_assassin"
     ]
 }
