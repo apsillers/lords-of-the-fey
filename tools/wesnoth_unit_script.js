@@ -13,7 +13,7 @@ unit = {};
 // basic stats
 var c = document.querySelector(".unitinfo tbody").children;
 unit.name = c[8].children[1].textContent;
-unit.img = "/data/img/units/"+nameToId(unit.name);
+unit.img = "/data/img/units/"+nameToId(unit.name)+".png";
 unit.cost = parseInt(c[2].children[1].textContent);
 unit.maxHp = parseInt(c[3].children[1].textContent);
 unit.move = parseInt(c[4].children[1].textContent);
@@ -39,11 +39,11 @@ unit.attacks = [];
     attack.type = c[1].lastChild.textContent;
 
     var attackProps = c[2].children[0].textContent.split(" - ");
-    attack.damage = attackProps[0];
-    attack.number = attackProps[1];
+    attack.damage = parseInt(attackProps[0], 10);
+    attack.number = parseInt(attackProps[1], 10);
     attack.damageType = c[2].lastChild.textContent;
 
-    if(c[3].textContent) { attack.properties = c[3].textContent.split(", "); }
+    if(c[3].textContent) { attack.properties = c[3].innerHTML.split("<br>"); }
 
     unit.attacks.push(attack);
 });
@@ -56,12 +56,13 @@ unit.terrain = {};
     if(idx < 2) { return; }
 
     var terrain = {};
-    var type = types[idx];
+    var type = types[idx - 2];
 
     var c = el.children;
 
-    console.log(terrain.move = parseInt(c[2].textContent) || -1)
-    console.log(terrain.cover = parseInt(c[3].textContent) / 100)
+    console.log(idx, type);
+    console.log(terrain.move = parseInt(c[2].textContent, 10) || -1)
+    console.log(terrain.cover = parseInt(c[3].textContent, 10) / 100)
 
     unit.terrain[type] = terrain;
 });
