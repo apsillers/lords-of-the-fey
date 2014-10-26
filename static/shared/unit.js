@@ -1,6 +1,6 @@
 var unitLib = {
     
-    protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer",
+    protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer", "elvish_shaman",
                 "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
     protos: {},
 
@@ -385,7 +385,10 @@ unitLib.unitProto = {
 	for(conditionName in update.conditionChanges) {
 	    var change = update.conditionChanges[conditionName];
 	    if(change === false) { this.removeCondition(conditionName); }
-	    // TODO: add or update new conditions (does this ever happen? maybe countdown conditions?)
+	    else {
+		this.removeCondition(conditionName);
+		this.addCondition(change);
+	    }
 	}
 	delete update.conditionChanges;
 
@@ -442,11 +445,17 @@ unitLib.unitProto = {
 	}
     },
 
-    addCondition: function(c) {
+    addCondition: function(c, isMulti) {
 	if(!(this.conditions instanceof Array)) {
 	    this.conditions = [];
 	}
-	this.conditions.push(c);
+	if(isMulti || !this.hasCondition(c)) { this.conditions.push(c); }
+	else {
+	    var storedCondition = this.getCondition(c);
+	    var conditionIndex = this.conditions.indeOf(storedCondition)
+	    this.conditions.splice(conditionIndex, 1, storedCondition);
+	}
+
 	this.redrawConditions();
     },
 
@@ -463,7 +472,7 @@ unitLib.unitProto = {
     },
 
     hasCondition: function(c) {
-	return this.getCondition(c) !== false;
+	return !!this.getCondition(c);
     },
 
     getCondition: function(c) {
@@ -476,12 +485,11 @@ unitLib.unitProto = {
     redrawConditions: function() {
 	if(this.shape) {
 	    var filters = [];
-	    if(this.conditions) {
-		for(var i=0; i<this.conditions.length; ++i) {
-		    if(this.conditions[i] == "poisoned") {
-			filters.push(new createjs.ColorFilter(0.7,1,0.7,1, 0,100,0,0));
-		    }
-		}
+	    if(this.hasCondition("poisoned")) {
+		filters.push(new createjs.ColorFilter(0.7,1,0.7,1, 0,100,0,0));
+	    }
+	    if(this.hasCondition("slowed")) {
+		filters.push(new createjs.ColorFilter(0.7,0.7,0.9,1, 0,0,0,0));
 	    }
 	    this.bodyShape.filters = filters;
 	    this.bodyShape.cache(0, 0, this.bodyShape.image.width, this.bodyShape.image.height);

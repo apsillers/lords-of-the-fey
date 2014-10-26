@@ -75,7 +75,12 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     var swingRecord;
 
     if(attack.properties) {
-	hitteeCover = attack.properties.indexOf("magical") != -1 ? Math.min(hitteeCover, .3) : hitteeCover;
+	if(attack.properties.indexOf("magical") != -1) {
+	    hitteeCover =  0.3;
+	}
+	if(isOffense && attack.properties.indexOf("marksman") != -1) {
+	    hitteeCover =  Math.min(hitteCover, 0.4);
+	}
     }
 
     if(Math.random() > hitteeCover) {
@@ -86,9 +91,15 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
 	    swingRecord.kill = true;
 	}
 
-	if(attack.properties && attack.properties.indexOf("poison") != -1 && !hittee.hasCondition("poisoned")) {
-	    hittee.addCondition("poisoned");
-	    swingRecord.poisoned = true;
+	if(attack.properties) {
+	    if(attack.properties.indexOf("poison") != -1 && !hittee.hasCondition("poisoned")) {
+		hittee.addCondition("poisoned");
+		swingRecord.poisoned = true;
+	    }
+	    if(attack.properties.indexOf("slows") != -1 && !hittee.hasCondition("slowed")) {
+		hittee.addCondition({ name: "slowed", countdown: 2 });
+		swingRecord.slowed = { name: "slowed", countdown: 2 };
+	    }
 	}
     } else {
 	swingRecord = { event: "miss", offense: isOffense };

@@ -479,6 +479,9 @@ var ui = {
 		    if(entry.poisoned) {
 			hittee.addCondition("poisoned");
 		    }
+		    if(entry.slowed) {
+			hittee.addCondition(entry.slowed);
+		    }
 		}
 
 		// if this is the final step of the final round, animation is done

@@ -1,0 +1,58 @@
+{
+  "name":"Elvish Shaman",
+  "img":"/data/img/units/elvish_shaman.png",
+  "cost":15,
+  "maxHp":26,
+  "move":5,
+  "maxXp":32,
+  "level":1,
+  "alignment":"neutral",
+  "fixedAttributes":["heals +4"],
+  "advancesTo":["elvish_druid","elvish_sorceress"],
+  "attacks":[
+    {
+      "icon":"/data/img/attacks/druidstaff.png",
+      "name":"Staff",
+      "type":"melee",
+      "damage":3,
+      "number":2,
+      "damageType":"impact"
+    },
+    {
+      "icon":"/data/img/attacks/entangle.png",
+      "name":"Entangle","type":"ranged",
+      "damage":3,
+      "number":2,
+      "damageType":"impact",
+      "img": { "n":"/data/img/projectiles/entangle.png", "ne":"/data/img/projectiles/entangle.png" },
+      "properties":["slows"]
+    }
+  ],
+  "terrain":{
+    "castle":{"move":1,"cover":0.6},
+    "cave":{"move":3,"cover":0.3},
+    "reef":{"move":2,"cover":0.3},
+    "deep_water":{"move":-1,"cover":0},
+    "flat":{"move":1,"cover":0.4},
+    "forest":{"move":1,"cover":0.7},
+    "frozen":{"move":2,"cover":0.3},
+    "hills":{"move":2,"cover":0.5},
+    "mountains":{"move":3,"cover":0.6},
+    "fungus":{"move":2,"cover":0.5},
+    "sand":{"move":2,"cover":0.3},
+    "shallow_water":{"move":3,"cover":0.2},
+    "swamp":{"move":2,"cover":0.3},
+    "unwalkable":{"move":-1,"cover":0},
+    "village":{"move":1,"cover":0.6},
+    "impassable":{"move":-1,"cover":0}
+  },
+  "resistances":{
+    "blade":0,
+    "pierce":0,
+    "impact":0,
+    "fire":0,
+    "cold":0,
+    "arcane":-0.1
+  }
+}
+

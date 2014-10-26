@@ -2,6 +2,7 @@
     "name": "Elves",
     "recruitList": [
         "scout",
-        "elven_archer"
+        "elven_archer",
+        "elvish_shaman"
     ]
 }

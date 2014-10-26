@@ -372,9 +372,30 @@ function initListeners(socket, collections) {
 				unit.hp = Math.min(unit.hp+2, unit.maxHp);
 				update.hp = unit.hp;
 			    }
-				
+			    // TODO: unmoved slowed units don't have full move
+			
+			    // countdown and possibly remove slowed
+			    if(unit.hasCondition("slowed")) {
+				update.conditionChanges = update.conditionChanges || {};
+
+				var slowedCondition = unit.getCondition("slowed");
+				slowedCondition.countdown--;
+				if(slowedCondition.countdown <= 0) {
+				    update.conditionChanges.slowed = false;
+				    unit.removeCondition("slowed");
+				} else {
+				    update.conditionChanges.slowed = slowedCondition;
+				}
+			    }
+	
 			    // refill move points
-			    unit.moveLeft = unit.move;
+			    if(unit.hasCondition("slowed")) {
+				unit.moveLeft = Math.ceil(unit.move / 2);
+			    } else {
+				unit.moveLeft = unit.move;
+			    }
+
+
 			    update.moveLeft = unit.moveLeft;
 			    unit.hasAttacked = false;
 	
@@ -394,10 +415,6 @@ function initListeners(socket, collections) {
 				unit.hp = Math.max(1, unit.hp-8);
 				update.hp = unit.hp;
 			    }
-
-			    /*if(unit.hasCondition("slowed")) {
-				update.slow
-			    }*/
 				
 			    updates.push(update);
 			    
