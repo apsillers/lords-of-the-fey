@@ -195,13 +195,12 @@ function initListeners(socket, collections) {
 
 					if(defender == null || defender.getAlliance(game) == unit.getAlliance(game)) { 
 					    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
+					    return;
 					}
 
 					unit.hasAttacked = true;
 					unit.moveLeft = 0;
 
-					defender = new Unit(defender);
-					
 					// resolve combat
 					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game);
 
