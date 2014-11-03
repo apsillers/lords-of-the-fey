@@ -79,7 +79,7 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
 	    hitteeCover =  0.3;
 	}
 	if(isOffense && attack.properties.indexOf("marksman") != -1) {
-	    hitteeCover =  Math.min(hitteCover, 0.4);
+	    hitteeCover =  Math.min(hitteeCover, 0.4);
 	}
     }
 
