@@ -1,12 +1,13 @@
 <html>
 <head>
-<title>Log In</title>
+  <title>Log In</title>
+  <link rel="stylesheet" type="text/css" href="/css/login.css" />
 </head>
 <body>
 <form action="/login" method="post">
-<input name="username" autofocus="true"><br>
-<input type="password" name="password"><br>
-<input type="submit">
+<label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
+<label for="password">Password</label><input type="password" id="password" name="password"><br>
+<input type="submit" value="Log in">
 </form>
 </body>
 </html>

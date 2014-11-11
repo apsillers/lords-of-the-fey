@@ -1,6 +1,36 @@
-<a href="login.html">Log In</a><br>
-<a href="signup.html">Sign Up</a><br>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lords of the Fey</title>
+  <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
+</head>
+<body style="padding:0; margin:0;">
+  <div id="top-main-menu">
+    <div class="username-main-menu" style="float: left;">
+      {{#if username}}
+          {{username}}
+      {{else}}
+          <a href="login.html">Log in</a> / <a href="signup.html">Sign up</a>
+      {{/if}}
+    </div>
+    <div class="username-main-menu" style="float: right;">
+      {{#if username}}<a style="color:white;" href="/logout">Log out</a>{{/if}}
+    </div>
+</div>
+<div class="main-content" style="padding: 5px; text-align: center;">
+<h1>Lords of the Fey</h1>
+
+<div>Lords ot the Fey is an attempt to recreate <a href="http://wesnoth.org">Battle for Wesnoth</a> for the browser.</div>
+<div>Learn more the <a href="https://github.com/apsillers/lords-of-the-fey">project's GitHub page</a> and <a href="https://github.com/apsillers/lords-of-the-fey/wiki">wiki</a>.</div>
+<br>
+{{#if username}}
+<a href="lobby">Lobby (<em>extremely</em> experimental)</a><br><br>
+<a href="/gamelist">Your game list</a><br><br>
 <a href="create">Create Test Game between users <i>hello</i> and <i>goodbye</i></a>
-<br><br>
-<a href="lobby">Lobby (requires login) (<em>extremely</em> experimental)</a><br>
-<a href="/gamelist">Your game list</a>
+{{else}}
+<a href="login.html">Log In</a><br><br>
+<a href="signup.html">Sign Up</a><br>
+{{/if}}
+</div>
+</body>
+</html>

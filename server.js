@@ -38,7 +38,7 @@ mongoClient.open(function(err, mongoClient) {
     require("./gameList").initListing(app, collections);
 
     app.get("/", function(req, res) {
-	var user = res.user || {};
+	var user = req.user || {};
 	res.render("index", { username: user.username });
     });
 

@@ -1,13 +1,14 @@
 <html>
 <head>
-<title>Sign Up</title>
+  <title>Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="/css/login.css" />
 </head>
 <body>
 <form action="/signup" method="post">
-<input name="username"><br>
-<input type="password" name="password"><br>
-<input type="password" name="passconfirm"><br>
-<input type="submit">
+<label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
+<label for="password">Password</label><input type="password" id="password" name="password"><br>
+<label for="passconfirm">Confirm</label><input type="password" id="passconfirm" name="passconfirm"><br>
+<input type="submit" value="Sign up">
 </form>
 </body>
 </html>
