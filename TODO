@@ -1,3 +1,4 @@
+Show list of player's active games
 Good-looking:
   - attack prompt (images, cover percentages)
   - recruit prompt (images, unit stats, costs)
@@ -17,7 +18,6 @@ Attack animations
   - Swing animations
 Victory conditions, resolution
 Make lobby actually usable by normal humans
-Show list of player's active games
 Prevent subpixel rendering (an image's x/y must always be an integer)
 
 DONE :)

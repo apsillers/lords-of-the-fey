@@ -35,6 +35,12 @@ mongoClient.open(function(err, mongoClient) {
 
     require("./auth").initAuth(app, mongo, collections);
     require("./createGame").initLobby(app, collections);
+    require("./gameList").initListing(app, collections);
+
+    app.get("/", function(req, res) {
+	var user = res.user || {};
+	res.render("index", { username: user.username });
+    });
 
     unitLib.init(function() {
 	io.sockets.on('connection', function (socket) {
@@ -44,6 +50,9 @@ mongoClient.open(function(err, mongoClient) {
 
 });
 
+app.set('view engine', 'hbs');
+express.static.mime.define({'text/html': ['hbs']});
+app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/static'));
 app.use(express.cookieParser());
 app.use(express.bodyParser());
