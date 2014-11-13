@@ -1,6 +1,15 @@
-Media assets (/static/data/img/*) are taken directly from Battle for Wesnoth and are available under the GPLv2. That license is included in the img directory.
+The project as a whole (all files except /static/data/img*) is licensed under the
+GNU Affero General Public License (AGPL) version 3.0 (or, at your option, any later
+version). A copy is included in the COPYING file in the root directory.
 
-A full list of Wesnoth art credits (some of which may not apply to the artwork used in this project) is here: http://wiki.wesnoth.org/Credits#Artwork_and_Graphics
+Media assets (/static/data/img/*) are taken directly from Battle for Wesnoth
+and are available under the GPLv3 (or any later version). That license is 
+included in the /static/data/img directory.
+
+A full list of Wesnoth art credits (some of which may not apply to the
+particular artwork used in this project) is here: 
+  
+  http://wiki.wesnoth.org/Credits#Artwork_and_Graphics
 
 All code files: Copyright 2014 Andrew P. Sillers
-All rights reserved (except as required by the Github terms of service)
+
