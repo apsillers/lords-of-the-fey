@@ -9,9 +9,9 @@ A multiplayer fantasy-themed turn-based strategy game that you can play in your 
 
 Development is currently focused on implementing Wesnoth-style multiplayer without fog-of-war. The game currently supports many features of Wesnoth gameplay: unit recruiting, villages, single-turn movement, combat with partial animation support, unit level-up advancement, and some Wesnoth units, including some unit attibutes (e.g., quick, strong) and some unit abilities (e.g., slow, poison).
 
-Due to its centralized architecture, Lords of the Fey multiplayer differs from multiplayer in Battle for Wesnoth by having persistent games on the server: players can quit and resume games freely without needing to save the game state and reload. Instead, players have a persistent list of their ongoing games. A player can select any ongoing game to view the game and make moves (on that palyer's turn), even when other players are offline.
+Due to its centralized architecture, Lords of the Fey multiplayer differs from multiplayer in Battle for Wesnoth by having persistent games on the server: players can quit and resume games freely without needing to save the game state and reload. Instead, players have a persistent list of their ongoing games. A player can select any ongoing game to view the game and make moves (on that player's turn), even when other players are offline.
 
-If you're interested in contributing, have a look at the [issue tracker](https://github.com/apsillers/issues). The game is currently playable, so most development work is directed toward:
+If you're interested in contributing, have a look at the [issue tracker](https://github.com/apsillers/lords-of-the-fey/issues). The game is currently playable, so most development work is directed toward:
 
  * implementing new game content (adding more terrain and unit types)
  * adding ability-specific logic (e.g., making the "*drains*" ability actually drain life on attack, etc.)
