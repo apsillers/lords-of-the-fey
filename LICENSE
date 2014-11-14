@@ -1,6 +1,8 @@
-The project as a whole (all files except /static/data/img*) is licensed under the
-GNU Affero General Public License (AGPL) version 3.0 (or, at your option, any later
-version). A copy is included in the COPYING file in the root directory.
+Lords of the Fey as a whole is licensed under the GNU Affero General Public
+License (AGPL) version 3.0 (or, at your option, any later version). A copy is
+included in the COPYING file in the root directory.
+
+----------
 
 Media assets (/static/data/img/*) are taken directly from Battle for Wesnoth
 and are available under the GPLv3 (or any later version). That license is 
@@ -11,5 +13,18 @@ particular artwork used in this project) is here:
   
   http://wiki.wesnoth.org/Credits#Artwork_and_Graphics
 
-All code files: Copyright 2014 Andrew P. Sillers
+----------
 
+The project uses some libraries released under the MIT (X11) license:
+
+  * jQuery
+  * EaselJS
+  * PreloadJS
+
+Those libraries are included in /static/client/ and include their own licensing
+and copyright headers within each file.
+
+---------
+
+Utilities included in the /tools directory are licensed under the MIT (X11)
+license.

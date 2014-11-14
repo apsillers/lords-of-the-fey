@@ -5,6 +5,21 @@ Lords of the Fey
 
 A multiplayer fantasy-themed turn-based strategy game that you can play in your browser using HTML5 technologies. The game's rules and artwork are taken from [Battle for Wesnoth](http://www.wesnoth.org).
 
+# Features
+
+Development is currently focused on implementing Wesnoth-style multiplayer without fog-of-war. The game currently supports many features of Wesnoth gameplay: unit recruiting, villages, single-turn movement, combat with partial animation support, unit level-up advancement, and some Wesnoth units, including some unit attibutes (e.g., quick, strong) and some unit abilities (e.g., slow, poison).
+
+Due to its centralized architecture, Lords of the Fey multiplayer differs from multiplayer in Battle for Wesnoth by having persistent games on the server: players can quit and resume games freely without needing to save the game state and reload. Instead, players have a persistent list of their ongoing games. A player can select any ongoing game to view the game and make moves (on that palyer's turn), even when other players are offline.
+
+If you're interested in contributing, have a look at the [issue tracker](https://github.com/apsillers/issues). The game is currently playable, so most development work is directed toward:
+
+ * implementing new game content (adding more terrain and unit types)
+ * adding ability-specific logic (e.g., making the "*drains*" ability actually drain life on attack, etc.)
+ * cosmetic improvements (unit animations and map rendering)
+ * adding features outside of actual gameplay (lobby improvements, OAuth-based login, inviting friends to join new games, etc.)
+
+For information about how to get started, check out [the project wiki](https://github.com/apsillers/lords-of-the-fey/wiki).
+
 # Setup
 
 The server requires:
@@ -31,6 +46,6 @@ To learn more, check out [the project wiki](https://github.com/apsillers/lords-o
 
 # Licenses
 
-The project as whole is licensed under the GNU Affero General Public License (AGPL) version 3, or (at your option) any later version. In addition ot normal GNU GPL requirements, this means that anyone who interacts with the program over a network must be offered the source code of the version of the program they are using.
+The project as whole is licensed under the GNU Affero General Public License (AGPL) version 3, or (at your option) any later version. In addition to normal GNU GPL requirements, this means that, if you modify the software and host it on a network, you must offer your version's source code to anyone who interacts with the program over a network.
 
-All art assets (in `/static/data/img/`) are taken directly from Battle for Wesnoth and are licensed under the GNU General Public License, version 3 or(at your options) any later version.
+All art assets (in `/static/data/img/`) are taken directly from Battle for Wesnoth and are licensed under the GNU General Public License (GPL), version 3 or (at your option) any later version.
