@@ -22,17 +22,18 @@ var unitLib = {
                 "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
     protos: {},
 
-    init: function(initCallback) {
+    init: function(initCallback, progressCallback) {
 	if(typeof createjs != "undefined") {
-	    this.clientInit(initCallback);
+	    this.clientInit(initCallback, progressCallback);
 	} else {
 	    this.serverInit(initCallback);
 	}
     },
 
-    clientInit: function(initCallback) {
+    clientInit: function(initCallback, progressCallback) {
 	// load unit data files
         var queue = new createjs.LoadQueue();
+	queue.on("progress", progressCallback);
 	var unitManifest = unitLib.protoList.map(function(k){
 	    return { id:k, src:"/data/units/"+k+".json", type:createjs.LoadQueue.JSON }
 	});
@@ -52,6 +53,7 @@ var unitLib = {
 	// when all data files have loaded, load images
 	queue.on("complete", function() {
             var queue = new createjs.LoadQueue();
+	    queue.on("progress", progressCallback);
             queue.on("complete", handleComplete, this);
             queue.loadManifest(
                 Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })

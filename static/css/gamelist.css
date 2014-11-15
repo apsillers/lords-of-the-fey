@@ -1,0 +1,27 @@
+.game-row {
+    padding: 7px;
+    border: thin solid black;
+    margin-top: 2px;
+    max-width: 70%;
+}
+
+.game-row a {
+    text-decoration: none;
+}
+
+.game-row.active-turn {
+    color: green;
+    background-color: #8F8;
+    border: thin solid #0F0;
+}
+
+.game-row.active-turn:before {
+    content: '(!)';
+}
+
+.game-row .username {
+    border: thin solid #00F;
+    background-color: #99F;
+    padding: 2px 2px;
+    border-radius: 5px;
+}

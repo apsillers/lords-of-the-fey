@@ -62,9 +62,13 @@ window.addEventListener("load", function() {
 	    socket.emit("endTurn", gameInfo);
 	});
 
+	$("#load-text").text("Loading units...");
+
 	unitLib.init(function() {
+	    $("#load-text").text("Loading terrain...");
             var queue = new createjs.LoadQueue();
             queue.on("complete", handleComplete, this);
+	    queue.on("progress", function(e) { $("#load-progress").attr("value", e.progress*100); });
 	    var raceManifest = raceList.map(function(k){
 		return { id:"race"+k, src:"/data/races/"+k+".json", type:createjs.LoadQueue.JSON }
 	    });
@@ -78,6 +82,8 @@ window.addEventListener("load", function() {
             queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
 
             function handleComplete() {
+		$("#loading-overlay").hide();
+
 		for(k in Terrain.bases) {
 		    Terrain.bases[k].imgObj = queue.getResult("base"+k);
 		}
@@ -121,7 +127,7 @@ window.addEventListener("load", function() {
 		    });
 		}
             }
-	});
+	}, function(e) { $("#load-progress").attr("value", e.progress*100); });
     });
 
     socket.on("leveledup", function(data) {
