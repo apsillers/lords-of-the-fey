@@ -71,6 +71,7 @@ mongoClient.open(function(err, mongoClient) {
 app.set('view engine', 'hbs');
 express.static.mime.define({'text/html': ['hbs']});
 app.set('views', __dirname + '/views');
+require("hbs").registerPartials(__dirname + '/views/partials');
 app.use(express.static(__dirname + '/static'));
 app.use(express.cookieParser());
 app.use(express.bodyParser());

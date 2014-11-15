@@ -34,3 +34,29 @@
 #top-main-menu div {
   padding: 8px 15px;
 }
+
+.main-content a.option {
+    color: #fff;
+    font-size: 16pt;
+    padding: 15px 0;
+    display: block;
+}
+
+div.option {
+    max-width: 650px;
+    margin: 3px auto;
+    background-color: #000;
+}
+
+.main-content {
+    font-size: 17pt;
+    font-family: sans-serif;
+}
+
+.main-content > div {
+  padding-bottom: 10px;
+}
+
+.main-content > div a {
+    color: #227;
+}
