@@ -37,6 +37,11 @@ socket.on("joined room", function(data) {
     renderPlayerList();
 });
 
+socket.on("left room", function(data) {
+    players = data.players;
+    renderPlayerList();
+});
+
 socket.on("player update", function(data) {
     players = data.players;
     renderPlayerList();
@@ -85,6 +90,10 @@ function renderPlayerList() {
 	$playerList.append(playerItem);
     });
 }
+
+socket.on("kicked", function(roomId) {
+    window.location = "/lobby";
+});
 
 socket.on("launched room", function(gameId) {
     window.location = "/client/grid.html?game="+gameId;

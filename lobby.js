@@ -41,14 +41,14 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	sockets.in("lobby").emit("joined lobby", user.username);
 	socket.emit("lobby data", { players: players, rooms: rooms, you: user.username });
 	socket.join("lobby");
-    });
 
-    socket.on("disconnect", function() {
-	var user = socket.handshake.user;
-	if(!user) { return; }
-	var index = players.indexOf(user.username);
-	if(index != -1) { players.splice(index, 1); }
-	sockets.in("lobby").emit("left lobby", user.username);
+	socket.on("disconnect", function() {
+	    var user = socket.handshake.user;
+	    if(!user) { return; }
+	    var index = players.indexOf(user.username);
+	    if(index != -1) { players.splice(index, 1); }
+	    sockets.in("lobby").emit("left lobby", user.username);
+	});
     });
 
     socket.on("create room", function(data) {
@@ -86,6 +86,26 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	var user = socket.handshake.user;
 	socket.join("room"+id);
 	socket.emit("room data", { you: user.username, room: rooms[+id] });
+
+	socket.on("disconnect", function() {
+	    var user = socket.handshake.user;
+	    if(!user) { return; }
+
+	    leaveRoom(+id, user.username);
+
+	    for(var roomId in rooms) {
+		if(rooms[roomId].owner == user.username) {
+		    sockets.in("lobby").emit("room destroyed", roomId);
+		    sockets.in("room"+roomId).emit("kicked", roomId);
+
+		    for(var i=0; i<rooms[roomId].players.length; i++) {	
+			leaveRoom(roomId, rooms[roomId].players[i].username);
+		    }
+
+		    delete rooms[roomId];
+		}
+	    }
+	});
     });
 
     function joinRoom(user, room) {
@@ -107,20 +127,21 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	sockets.in("lobby").emit("joined room", { username: user.username, room: room });
     }
 
-    socket.on("leave room", function(data) {
-	var room = rooms[+data.id];
+    function leaveRoom(id, username) {
+	var room = rooms[+id];
 	if(!room) { return; }
-	var user = socket.handshake.user;
-	if(!user) { return; }
-	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
+	if(!username) { return; }
+	var player = room.players.filter(function(o) { return o.username == username; })[0];
 	if(!player) { return; }
 
-	room.players.splice(room.players.indexOf(player), 1);
-	socket.leave("room"+data.id);
+	room.filledSlots--;
 
-	sockets.in("lobby").emit("left room", { username: user.username, roomId: room.id });
-	sockets.in("room"+data.id).emit("left room", { username: user.username, players: room.players, roomId: data.id });
-    });
+	room.players.splice(room.players.indexOf(player), 1);
+	socket.leave("room"+id);
+
+	sockets.in("lobby").emit("left room", { username: username, roomId: room.id });
+	sockets.in("room"+id).emit("left room", { username: username, players: room.players, roomId: id });
+    };
 
     socket.on("ready", function(data) {
 	var room = rooms[+data.id];
@@ -141,14 +162,13 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	var room = rooms[+roomId];
 	if(!room) { return; }
 
-	console.log("maybe launching " + roomId);
-
 	if(room.players.filter(function(o) { return o != null; }).length < 2) { return; }
 	if(room.players.every(function(p) { return p.ready; })) {
-	    console.log("yes launching " + roomId);
 	    require("./createGame").createNewGame(collections, room.players, room.map, function(gameId) {
 		sockets.in("room"+roomId).emit("launched room", gameId);
 		// sockets.in("room"+data.id).leave("room"+data.id);
+		sockets.in("lobby").emit("room destroyed", room.id);
+		delete room;
 	    });
 	};
     });

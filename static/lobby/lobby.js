@@ -50,6 +50,11 @@ socket.on("created room", function(data) {
     renderRoomList();
 });
 
+socket.on("room destroyed", function(id) {
+    delete rooms[id];
+    renderRoomList();
+});
+
 socket.on("joined room", function(data) {
     rooms[data.room.id] = data.room;
     renderRoomList();
