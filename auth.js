@@ -16,6 +16,8 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+var config = require("config");
+
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     var user = socket.handshake.user;
     if(!user) { return false; }
@@ -83,6 +85,35 @@ exports.initAuth = function(app, mongo, collections) {
 	    }
 	});
     });
+
+    /* Facebook auth */
+    if(config.facebook && config.facebook.enabled) {
+	passport.use(new FacebookStrategy({
+	    clientID: config.facebook.app_id,
+	    clientSecret: config.facebook.app_secret,
+	    callbackURL: config.origin + "/auth/facebook/callback"
+	},
+	function(accessToken, refreshToken, profile, done) {
+	    collections.users.findOne({ fbProfileId : profile.id },function(err,user){
+		if (err) { return done(err); }
+		
+		if(!user) {
+		    user = { fbProfileId: profile.id, username: "facebook-"+profileId };
+		    collections.users.save(user, { safe: true }, function(err) {
+			done(null, user);
+		    });
+		} else {
+		    done(null, user);
+		}
+	    });
+	}));
+
+	app.get('/login/facebook', passport.authenticate('facebook'));
+	app.get('/auth/facebook/callback',
+		passport.authenticate('facebook', { successRedirect: '/',
+						    failureRedirect: '/login' }));
+    }
+
 
     passport.serializeUser(function(user, done) {
 	done(null, user.username);
