@@ -50,6 +50,10 @@ exports.initAuth = function(app, mongo, collections) {
 	});
     }));
 
+    app.get('/login.html', function(req, res) {
+	res.render("login.hbs", { config: config });
+    });
+
     app.post('/login',
 	     passport.authenticate('local', { failureRedirect: '/login.html' }),
 	     function(req, res) {
