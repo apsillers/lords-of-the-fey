@@ -16,7 +16,8 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var config = require("./config.json");
+var config = require("./config.json"),
+    FacebookStrategy = require('passport-facebook').Strategy;
 
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     var user = socket.handshake.user;
@@ -102,7 +103,7 @@ exports.initAuth = function(app, mongo, collections) {
 		if (err) { return done(err); }
 		
 		if(!user) {
-		    user = { fbProfileId: profile.id, username: "facebook-"+profileId };
+		    user = { fbProfileId: profile.id, username: "facebook-"+profile.id };
 		    collections.users.save(user, { safe: true }, function(err) {
 			done(null, user);
 		    });
