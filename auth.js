@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var config = require("config");
+var config = require("./config.json");
 
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     var user = socket.handshake.user;
