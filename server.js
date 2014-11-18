@@ -16,9 +16,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+var config = require("./config");
 var express = require('express')
   , app = express()
-  , server = app.listen(8080);
+  , server = app.listen(config.port);
 var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server
 , ObjectID = require('mongodb').ObjectID;
@@ -35,10 +36,7 @@ var unitLib = require("./static/shared/unit.js").unitLib;
 var executeAttack = require("./executeAttack");
 var socketList = [];
 
-var mongoClient = new MongoClient(new Server('localhost', 27017));
-mongoClient.open(function(err, mongoClient) {
-    var mongo = mongoClient.db("webnoth");
-
+new MongoClient.connect(config.mongoString, function(err, mongo) {
     var collections = {};
 
     mongo.collection("games", function(err, gamesCollection) {
