@@ -75,7 +75,7 @@ app.use(express.cookieParser());
 app.use(express.bodyParser());
 
 var MongoStore = require('connect-mongo-store')(express);
-var mongoStore = new MongoStore('mongodb://localhost:27017/webnoth');
+var mongoStore = new MongoStore(config.mongoString);
 app.use(express.session({store: mongoStore, secret: 'keyboard cat'}));
 
 app.use(passport.initialize());
