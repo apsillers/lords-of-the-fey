@@ -74,9 +74,9 @@ app.use(express.static(__dirname + '/static'));
 app.use(express.cookieParser());
 app.use(express.bodyParser());
 
-var MongoStore = require('connect-mongo-store')(express);
-var mongoStore = new MongoStore(config.mongoString);
-app.use(express.session({store: mongoStore, secret: 'keyboard cat'}));
+var MongoStore = require('connect-mongo')(express);
+var mongoStore = new MongoStore({ url: config.mongoString });
+app.use(express.session({store: mongoStore, secret: config.sessionSecret }));
 
 app.use(passport.initialize());
 app.use(passport.session());
