@@ -71,12 +71,12 @@ express.static.mime.define({'text/html': ['hbs']});
 app.set('views', __dirname + '/views');
 require("hbs").registerPartials(__dirname + '/views/partials');
 app.use(express.static(__dirname + '/static'));
-app.use(express.cookieParser());
-app.use(express.bodyParser());
+app.use(require("cookie-parser")());
+app.use(require("body-parser")());
 
-var MongoStore = require('connect-mongo')(express);
+var MongoStore = require('connect-mongo')(require("express-session"));
 var mongoStore = new MongoStore({ url: config.mongoString });
-app.use(express.session({store: mongoStore, secret: config.sessionSecret }));
+app.use(require("express-session")({store: mongoStore, secret: config.sessionSecret }));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -109,7 +109,7 @@ function onAuthorizeFail(data, message, error, accept){
 }
 
 io.set('authorization', passportSocketIo.authorize({
-    cookieParser: express.cookieParser,
+    cookieParser: require("cookie-parser"),
     secret:      'keyboard cat',    // the session_secret to parse the cookie
     store:       mongoStore,        // we NEED to use a sessionstore. no memorystore please
     success:     onAuthorizeSuccess,  // *optional* callback on success - read more below
