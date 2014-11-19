@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var config = require("./config.json"),
+var config = require("./config"),
     FacebookStrategy = require('passport-facebook').Strategy;
 
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
