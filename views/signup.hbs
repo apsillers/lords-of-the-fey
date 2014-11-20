@@ -19,15 +19,21 @@
 -->
 <html>
 <head>
-  <title>Sign Up</title>
+  <title>Sign up</title>
   <link rel="stylesheet" type="text/css" href="/css/login.css" />
+  <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
 </head>
-<body>
+<body style="margin:0; padding:0;">
+{{> menuheader}}
+<div class="main-content" style="padding: 5px; text-align: center;">
 <form action="/signup" method="post">
 <label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
 <label for="password">Password</label><input type="password" id="password" name="password"><br>
 <label for="passconfirm">Confirm</label><input type="password" id="passconfirm" name="passconfirm"><br>
 <input type="submit" value="Sign up">
 </form>
+
+{{#if config.facebook.enabled}}<br><a href="/login/facebook">Sign up with Facebook</a>{{/if}}
+</div>
 </body>
 </html>

@@ -52,7 +52,13 @@ exports.initAuth = function(app, mongo, collections) {
     }));
 
     app.get('/login.html', function(req, res) {
+	if(req.user && req.user.username) { res.redirect("/"); return; }
 	res.render("login.hbs", { config: config });
+    });
+
+    app.get('/signup.html', function(req, res) {
+	if(req.user && req.user.username) { res.redirect("/"); return; }
+	res.render("signup.hbs", { config: config });
     });
 
     app.post('/login',
@@ -64,6 +70,42 @@ exports.initAuth = function(app, mongo, collections) {
     app.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
+    });
+
+    app.post('/changeusername', function(req, res) {
+	var newName = req.body.newname;
+	if(newName.replace(/\s/g, "") == "") {
+	    res.redirect('/changeusername.html?error=invalid')
+	}
+
+	if(req.user && req.user.username) {
+	    collections.users.findOne({ username: newName }, function (err, userWithName) {
+		if(!userWithName) {
+		    collections.users.findOne({ username: req.user.username }, function (err, userRecord) {
+			userRecord.username = newName;
+			delete userRecord.unchangedName;
+			collections.users.save(userRecord, { safe: true }, function(err) {
+			    req.login(userRecord, function(err) {
+				if(err) { console.log("Error in chaging user name: ", err); }
+				res.redirect('/')
+			    });
+			});
+		    });
+		} else {
+		    res.redirect('/changeusername.html?error=taken')
+		}
+	    });
+	} else {
+	    res.redirect("/login.html");
+	}
+    });
+
+    app.get('/changeusername.html', function(req, res) {
+	if(req.user && req.user.username) {
+	    res.render("changeusername.hbs", { username: req.user.username });
+	} else {
+	    res.redirect("/login.html")
+	}
     });
 
     app.post('/signup', function(req, res) {
@@ -103,7 +145,7 @@ exports.initAuth = function(app, mongo, collections) {
 		if (err) { return done(err); }
 		
 		if(!user) {
-		    user = { fbProfileId: profile.id, username: "facebook-"+profile.id };
+		    user = { fbProfileId: profile.id, username: "facebook-"+profile.id, unchangedName:true };
 		    collections.users.save(user, { safe: true }, function(err) {
 			done(null, user);
 		    });
@@ -115,8 +157,16 @@ exports.initAuth = function(app, mongo, collections) {
 
 	app.get('/login/facebook', passport.authenticate('facebook'));
 	app.get('/auth/facebook/callback',
-		passport.authenticate('facebook', { successRedirect: '/',
+		passport.authenticate('facebook', { successRedirect: '/onfacebooklogin',
 						    failureRedirect: '/login' }));
+    
+	app.get("/onfacebooklogin", function(req, res) {
+	    if(req.user && req.user.unchangedName) {
+		res.redirect("/changeusername.html");
+	    } else {
+		res.redirect("/");
+	    }
+	});
     }
 
 

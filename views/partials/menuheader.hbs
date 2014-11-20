@@ -1,12 +1,13 @@
   <div id="top-main-menu">
-    <div class="username-main-menu" style="float: left;">
+    <div style="float:left;">
+        <b><a href="/">Lords of the Fey</a></b>
+    </div>
+
+    <div class="username-main-menu" style="float: right;">
       {{#if username}}
-          {{username}}
+          {{#if username}}{{username}}{{/if}} | <a style="color:white;" href="/logout">Log out</a>
       {{else}}
           <a href="login.html">Log in</a> / <a href="signup.html">Sign up</a>
       {{/if}}
-    </div>
-    <div class="username-main-menu" style="float: right;">
-      {{#if username}}<a style="color:white;" href="/logout">Log out</a>{{/if}}
     </div>
   </div>
