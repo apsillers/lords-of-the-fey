@@ -16,9 +16,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+var config = require("./config");
 var express = require('express')
   , app = express()
-  , server = app.listen(8080);
+  , server = app.listen(config.port);
 var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server
 , ObjectID = require('mongodb').ObjectID;
@@ -35,10 +36,7 @@ var unitLib = require("./static/shared/unit.js").unitLib;
 var executeAttack = require("./executeAttack");
 var socketList = [];
 
-var mongoClient = new MongoClient(new Server('localhost', 27017));
-mongoClient.open(function(err, mongoClient) {
-    var mongo = mongoClient.db("webnoth");
-
+new MongoClient.connect(config.mongoString, function(err, mongo) {
     var collections = {};
 
     mongo.collection("games", function(err, gamesCollection) {
@@ -73,12 +71,17 @@ express.static.mime.define({'text/html': ['hbs']});
 app.set('views', __dirname + '/views');
 require("hbs").registerPartials(__dirname + '/views/partials');
 app.use(express.static(__dirname + '/static'));
-app.use(express.cookieParser());
-app.use(express.bodyParser());
+app.use(require("cookie-parser")());
+app.use(require("body-parser")({ extended: true }));
 
-var MongoStore = require('connect-mongo-store')(express);
-var mongoStore = new MongoStore('mongodb://localhost:27017/webnoth');
-app.use(express.session({store: mongoStore, secret: 'keyboard cat'}));
+var MongoStore = require('connect-mongo')(require("express-session"));
+var mongoStore = new MongoStore({ url: config.mongoString });
+app.use(require("express-session")({
+    store: mongoStore,
+    secret: config.sessionSecret,
+    saveUninitialized: true,
+    resave: true
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -111,11 +114,11 @@ function onAuthorizeFail(data, message, error, accept){
 }
 
 io.set('authorization', passportSocketIo.authorize({
-    cookieParser: express.cookieParser,
-    secret:      'keyboard cat',    // the session_secret to parse the cookie
-    store:       mongoStore,        // we NEED to use a sessionstore. no memorystore please
-    success:     onAuthorizeSuccess,  // *optional* callback on success - read more below
-    fail:        onAuthorizeFail,     // *optional* callback on fail/error - read more below
+    cookieParser: require("cookie-parser"),
+    secret:      config.sessionSecret, // the session_secret to parse the cookie
+    store:       mongoStore,           // we NEED to use a sessionstore. no memorystore please
+    success:     onAuthorizeSuccess,   // *optional* callback on success - read more below
+    fail:        onAuthorizeFail,      // *optional* callback on fail/error - read more below
 }));
 
 // initialize all socket.io listeners on a socket

@@ -19,7 +19,7 @@
 -->
 <html>
 <head>
-  <title>Log In</title>
+  <title>Sign up</title>
   <link rel="stylesheet" type="text/css" href="/css/login.css" />
   <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
 </head>
@@ -27,13 +27,14 @@
 {{> menuheader}}
 <div class="main-content" style="padding: 5px; text-align: center;">
 {{#if error}}<div style="border:thin solid red; color: red;">{{error}}</div>{{/if}}
-<form action="/login" method="post">
+<form action="/signup" method="post">
 <label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
 <label for="password">Password</label><input type="password" id="password" name="password"><br>
-<input type="submit" value="Log in">
+<label for="passconfirm">Confirm</label><input type="password" id="passconfirm" name="passconfirm"><br>
+<input type="submit" value="Sign up">
 </form>
 
-{{#if config.facebook.enabled}}<br><a href="/login/facebook">Log in with Facebook</a>{{/if}}
+{{#if config.facebook.enabled}}<br><a href="/login/facebook">Sign up with Facebook</a>{{/if}}
 </div>
 </body>
 </html>

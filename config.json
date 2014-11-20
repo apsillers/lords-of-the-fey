@@ -1,9 +1,0 @@
-{
-    "origin":"http://example.com:8080",
-    "facebook": {
-        "enabled": false,
-        "app_id":"",
-	"app_secret":""
-    },
-    "source":"https://github.com/apsillers/lords-of-the-fey"
-}

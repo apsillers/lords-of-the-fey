@@ -19,15 +19,19 @@
 -->
 <html>
 <head>
-  <title>Sign Up</title>
+  <title>Change Username</title>
   <link rel="stylesheet" type="text/css" href="/css/login.css" />
+  <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
 </head>
-<body>
-<form action="/signup" method="post">
-<label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
-<label for="password">Password</label><input type="password" id="password" name="password"><br>
-<label for="passconfirm">Confirm</label><input type="password" id="passconfirm" name="passconfirm"><br>
-<input type="submit" value="Sign up">
+<body style="margin:0; padding:0;">
+{{> menuheader}}
+<div class="main-content" style="padding: 5px; text-align: center;">
+<div>Current username: <strong>{{username}}</strong></div>
+<form action="/changeusername" method="post">
+<label for="username">New Username</label><input name="newname" id="newname" autofocus="true"><br>
+<input type="submit" value="Change Name">
 </form>
+
+</div>
 </body>
 </html>
