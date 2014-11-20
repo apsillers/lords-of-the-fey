@@ -26,6 +26,7 @@
 <body style="margin:0; padding:0;">
 {{> menuheader}}
 <div class="main-content" style="padding: 5px; text-align: center;">
+{{#if error}}<div style="border:thin solid red; color: red;">{{error}}</div>{{/if}}
 <form action="/signup" method="post">
 <label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
 <label for="password">Password</label><input type="password" id="password" name="password"><br>

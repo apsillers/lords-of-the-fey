@@ -53,16 +53,23 @@ exports.initAuth = function(app, mongo, collections) {
 
     app.get('/login.html', function(req, res) {
 	if(req.user && req.user.username) { res.redirect("/"); return; }
-	res.render("login.hbs", { config: config });
+	var error = ({
+	    "fail":"Incorrect username or password."
+	})[req.query.error];
+	res.render("login.hbs", { config: config, error: error });
     });
 
     app.get('/signup.html', function(req, res) {
 	if(req.user && req.user.username) { res.redirect("/"); return; }
-	res.render("signup.hbs", { config: config });
+	var error = ({
+	    "mismatch":"Password fields did not match.",
+	    "taken": "The username you entered is already taken."
+	})[req.query.error];
+	res.render("signup.hbs", { config: config, error: error });
     });
 
     app.post('/login',
-	     passport.authenticate('local', { failureRedirect: '/login.html' }),
+	     passport.authenticate('local', { failureRedirect: '/login.html?error=fail' }),
 	     function(req, res) {
 		 res.redirect('/');
 	     });
@@ -125,10 +132,10 @@ exports.initAuth = function(app, mongo, collections) {
 			});
 		    });
 		} else {
-		    res.redirect("/signup.html");
+		    res.redirect("/signup.html?error=mismatch");
 		}
 	    } else {
-		res.redirect("/signup.html");
+		res.redirect("/signup.html?error=taken");
 	    }
 	});
     });

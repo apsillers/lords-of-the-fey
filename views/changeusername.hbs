@@ -19,21 +19,19 @@
 -->
 <html>
 <head>
-  <title>Log In</title>
+  <title>Change Username</title>
   <link rel="stylesheet" type="text/css" href="/css/login.css" />
   <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
 </head>
 <body style="margin:0; padding:0;">
 {{> menuheader}}
 <div class="main-content" style="padding: 5px; text-align: center;">
-{{#if error}}<div style="border:thin solid red; color: red;">{{error}}</div>{{/if}}
-<form action="/login" method="post">
-<label for="username">Username</label><input name="username" id="username" autofocus="true"><br>
-<label for="password">Password</label><input type="password" id="password" name="password"><br>
-<input type="submit" value="Log in">
+<div>Current username: <strong>{{username}}</strong></div>
+<form action="/changeusername" method="post">
+<label for="username">New Username</label><input name="newname" id="newname" autofocus="true"><br>
+<input type="submit" value="Change Name">
 </form>
 
-{{#if config.facebook.enabled}}<br><a href="/login/facebook">Log in with Facebook</a>{{/if}}
 </div>
 </body>
 </html>
