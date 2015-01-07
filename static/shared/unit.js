@@ -18,8 +18,7 @@
 */
 var unitLib = {
     
-    protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer", "elvish_shaman",
-                "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
+    protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
     protos: {},
 
     init: function(initCallback, progressCallback) {
@@ -215,7 +214,7 @@ function Unit(unitData, isCreation, isLevelUp) {
 	unit.attributes = [];
 
 	if(unit.fixedAttributes) {
-	    unit.attributes.concat(unit.fixedAttributes);
+	    unit.attributes = unit.attributes.concat(unit.fixedAttributes);
 	}
 
 	var attributePool = ["quick", "strong", "resilient", "intelligent"];
@@ -532,8 +531,10 @@ unitLib.unitProto = {
     },
 
     // return a new attack object that shows how some attack would apply to this unit
-    applyAttack: function(attack, attacker, timeOfDay) {
+    applyAttack: function(attack, attacker, timeOfDay, attackSpace, units, mapData) {
 	if(!attack) { return attack; }
+
+        units = units || Object.keys(world.units).map(function(k) { return world.units[k] });
 
 	var result = {};
 	for(var prop in attack) {
@@ -541,7 +542,22 @@ unitLib.unitProto = {
 	}
 	result.damage = result.damage * (1 - this.resistances[result.damageType]);
 
-	result.damage = Math.round(result.damage * attacker.getDaytimeMultiplier(timeOfDay));
+	result.damage = result.damage * attacker.getDaytimeMultiplier(timeOfDay);
+
+	// check for adjacent, higher-level, same-team leadership-units to boost attack
+	var highestLeaderLevel = null;
+	var coords = Terrain.getNeighborCoords(attackSpace).map(function(v) { return v.x+","+v.y });
+	units.filter(function(u) {
+	    if(u.attributes.indexOf("leadership")>=0 && u.team == attacker.team && u.level > attacker.level && coords.indexOf(u.x+","+u.y)>=0) {
+		highestLeaderLevel = Math.max(highestLeaderLevel, u.level);
+	    }
+	});
+
+	if(highestLeaderLevel != null) {
+	    result.damage *= 1 + (highestLeaderLevel - attacker.level) * 0.25;
+	}
+
+	result.damage = Math.round(result.damage);
 
 	return result;
     },
@@ -622,6 +638,8 @@ var genId;
 if(typeof module != "undefined") {
     module.exports.unitLib = unitLib;
     module.exports.Unit = Unit;
+
+    var Terrain = require("./terrain.js").Terrain
 } else {
     window.unitLib = unitLib;
     window.Unit = Unit;

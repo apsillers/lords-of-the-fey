@@ -14,7 +14,7 @@
     "passport-local": "1.0.0",
     "passport.socketio": "3.0.x",
     "passport-facebook": "1.0.x",
-    "connect-mongo": "0.4.x",
+    "connect-mongo": "0.5.x",
     "password-hash": "1.2.1",
     "hbs": "2.7.x"
   },

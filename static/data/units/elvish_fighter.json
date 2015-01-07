@@ -1,0 +1,31 @@
+{
+  "name":"Elvish Fighter",
+  "img":"/data/img/units/elvish_fighter.png",
+  "cost":14,
+  "maxHp":33,
+  "move":5,
+  "maxXp":40,
+  "level":1,
+  "alignment":"neutral",
+  "advancesTo":["elvish_captain","elvish_hero"],
+  "attacks":[
+    {
+      "icon":"/data/img/attacks/sword-elven.png",
+      "name":"Sword",
+      "type":"melee",
+      "damage":5,
+      "number":4,
+      "damageType":"blade"
+    },
+    {
+      "icon":"/data/img/attacks/bow-elven.png",
+      "name":"Bow",
+      "type":"ranged",
+      "damage":3,
+      "number":3,
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" },
+      "damageType":"pierce"
+    }
+  ],
+  "terrain":{
+    "castle":{"move":1,"cover":0.6},"cave":{"move":3,"cover":0.3},"reef":{"move":2,"cover":0.3},"deep_water":{"move":-1,"cover":0},"flat":{"move":1,"cover":0.4},"forest":{"move":1,"cover":0.6},"frozen":{"move":2,"cover":0.3},"hills":{"move":2,"cover":0.5},"mountains":{"move":3,"cover":0.6},"fungus":{"move":2,"cover":0.5},"sand":{"move":2,"cover":0.3},"shallow_water":{"move":3,"cover":0.2},"swamp":{"move":2,"cover":0.3},"unwalkable":{"move":-1,"cover":0},"village":{"move":1,"cover":0.6},"impassable":{"move":-1,"cover":0}},"resistances":{"blade":0,"pierce":0,"impact":0,"fire":0,"cold":0,"arcane":-0.1}}

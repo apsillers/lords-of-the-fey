@@ -567,14 +567,14 @@ var ui = {
 	    var defenderCover = defender.getCoverOnSpace(world.getSpaceByCoords(defender));
 
 	    var attack = attacker.attacks[i];
-	    attack = defender.applyAttack(attack, attacker, gameInfo.timeOfDay);
+	    attack = defender.applyAttack(attack, attacker, gameInfo.timeOfDay, ui.path[ui.path.length-2].space);
 	    var attackText = stringifyAttack(attack);
 	    var attackIcon = new Image();
 	    attackIcon.src = attack.icon;
 	    $(attackIcon).css("float","left");
 
 	    var defense = defender.selectDefense(attacker, attack, gameInfo.timeOfDay, attackerCover, defenderCover).defense;
-	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay);
+	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay, ui.path[ui.path.length-2].space);
 	    var defenseText = stringifyAttack(defense);
 	    var defenseIcon;
 	    if(defense) {

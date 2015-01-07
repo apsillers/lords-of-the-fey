@@ -233,7 +233,8 @@ function initListeners(socket, collections) {
 					unit.moveLeft = 0;
 
 					// resolve combat
-					moveResult.combat = executeAttack(unit, attackIndex, defender, unitArray, mapData, game);
+                                        var attackSpace = moveResult.path[moveResult.path.length-2];
+					moveResult.combat = executeAttack(unit, attackIndex, attackSpace, defender, unitArray, mapData, game);
 
 					collections.games.save(game, { safe: true }, function() {
 					    // injure/kill units models
