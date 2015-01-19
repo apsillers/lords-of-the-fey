@@ -1,4 +1,3 @@
-Show list of player's active games
 Good-looking:
   - attack prompt (images, cover percentages)
   - recruit prompt (images, unit stats, costs)
@@ -49,3 +48,4 @@ Game creation
 Attack animations
   - Projectile images (N/NE)
 Focus on moves/attacks on map
+Show list of player's active games

@@ -23,14 +23,14 @@ exports.initLobby = function(app, collections) {
     app.get('/create', function(req, res) {
 	var players = [
 	    { username:"hello", race: "elves" },
-	    { username:"goodbye", race: "orcs" }
+            { username:"goodbye", race: "orcs" }
 	];
 	var mapName = "test_map.map";
-	require("./createGame").createNewGame(collections, players, mapName, function(id) {
-	    res.redirect("/client/grid.html?game=" + id);
+	require("./createGame").createNewGame(collections, players, mapName, fun
+           res.redirect("/client/grid.html?game=" + id);
 	})
     });
-}
+};
 
 exports.getStartPositions = function(mapData) {
     var startPositions = [];

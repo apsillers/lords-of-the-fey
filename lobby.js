@@ -30,8 +30,7 @@ var players = [];
     });
 }*/
 
-module.exports.initLobbyListeners = function(sockets, socket, collections) {
-
+module.exports.initLobbyListeners = function(sockets, socket, collections, app) {
     socket.on("join lobby", function() {
 	var user = socket.handshake.user;
 	if(!user) { return; }
@@ -194,7 +193,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections) {
 	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
 	if(!player) { return; }
 
-	player.race = data.race;
+	player.alliance = data.alliance;
 
 	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
     });

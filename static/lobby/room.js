@@ -26,6 +26,10 @@ var room;
 socket.emit("enter room", roomId);
 
 socket.on("room data", function(data) {
+    if(data.room == undefined) {
+        window.location.href = "/lobby"
+    }
+
     players = data.room.players;
     room = data.room;
     yourUsername = data.you;
@@ -52,6 +56,8 @@ function renderPlayerList() {
     $playerList.html("");
 
     $.each(players, function(i, data) {
+	data.alliance = data.alliance || i+1;
+
 	var playerItem = $("<div>");	
 	if(data.username == yourUsername) {
 	    var readyBox = $("<input type='checkbox'>");
@@ -62,14 +68,14 @@ function renderPlayerList() {
 	    playerItem.append(readyBox);
 
 	    var playerText = $("<span>");
-	    playerText.text(i + ": " + data.username + " | ");
+	    playerText.text((i+1) + ": " + data.username + " | ");
 	    playerItem.append(playerText);
 
 	    var raceSelector = $("<select>");
 	    raceSelector.append('<option value="random">Random</option>')
 	    raceSelector.append('<option value="elves">Elves</option>')
 	    raceSelector.append('<option value="orcs">Orcs</option>')
-	    raceSelector.val(data.race);
+	    raceSelector.val(data.race || "random");
 	    raceSelector.change(function() {
 		socket.emit("set race", { id: roomId, race: raceSelector.val() });
 	    });
@@ -77,7 +83,7 @@ function renderPlayerList() {
 
 	    var allianceSelector = $("<select>");
 	    for(var j=0; j<room.totalSlots; ++j) {
-		allianceSelector.append('<option value="'+(j+1)+'">'+(j+1)+'</option>')
+		allianceSelector.append('<option value="'+(j+1)+'">'+(j+1)+'</option>');
 	    }
 	    allianceSelector.val(data.alliance || (i+1));
 	    allianceSelector.change(function() {
@@ -85,7 +91,7 @@ function renderPlayerList() {
 	    });
 	    playerItem.append(allianceSelector);
 	} else {
-	    playerItem.text((data.ready?"+ ":"_ ") + i + ": " + data.username + " | " + (data.race||"Random") + " | " + data.alliance);
+	    playerItem.text((data.ready?"✓ ":"_ ") + (i+1) + ": " + data.username + " | " + (data.race||"Random") + " | " + data.alliance);
 	}
 	$playerList.append(playerItem);
     });
