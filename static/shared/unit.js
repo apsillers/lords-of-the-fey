@@ -185,6 +185,13 @@ unitLib.abilityDict = {
     }
 }
 
+/**
+
+@constructor
+@param {Object} unitData - object from the mongo store with unit data
+@param {boolean} isCreation - is this constructor being called to create a new unit?
+@param {boolean} isLevelUp - is this constructor being called to level-up a unit?
+*/
 function Unit(unitData, isCreation, isLevelUp) {
     if(unitData == null) { return unitData; }
 
@@ -309,6 +316,14 @@ function Unit(unitData, isCreation, isLevelUp) {
 unitLib.unitProto = {
     constructor: Unit,
 
+    /**
+       Reutrns a new, leveled-up unit
+
+       @param {number} pathChoice - index of which AdvanceTo option is being used for this level up
+       @param {boolean} preview - when true, this is not a real level-up; only a preview to see what the unit *would* look like
+
+       @returns {Unit} new Unit with leveled-up information
+     */
     levelUp: function(pathChoice, preview) {
 	// only reduce XP if this a real level-up, not a level-up preview for a prompt
 	if(!preview) {
@@ -331,6 +346,7 @@ unitLib.unitProto = {
 	return newUnit;
     },
 
+    /** Draw an HP bar for this unit */
     drawHpBar: function() {
 	if(this.healthBar) { this.shape.removeChild(this.healthBar); }
 	
@@ -343,6 +359,7 @@ unitLib.unitProto = {
 	this.shape.addChild(this.healthBar);
     },
 
+    /** Draw an XP bar for this unit */
     drawXpBar: function() {
 	if(this.xpBar) { this.shape.removeChild(this.xpBar); }
 	
@@ -354,13 +371,15 @@ unitLib.unitProto = {
 	this.xpBar.graphics.beginFill("rgba(0,0,0,0)").beginStroke("#FFF").drawRect(58.5, 8.5, 4, 20);
 	this.shape.addChild(this.xpBar);
     },
-    
+
+    /** Draw a crown on this unit (should only be called on commanders) */
     drawCrown: function() {
 	var crown = new createjs.Shape();
 	crown.graphics.beginFill("gold").drawRect(10,9,12,3).drawRect(10,7,3,3).drawRect(15,7,3,3).drawRect(19,7,3,3);
 	this.shape.addChild(crown);
     },
 
+    /** Draw gem representing unit's current ability to move/attack */
     drawGem: function() {
 	if(this.gem) { this.shape.removeChild(this.gem); }
 
@@ -374,10 +393,16 @@ unitLib.unitProto = {
 	this.shape.addChild(this.gem);
     },
 
+    /**
+       Return the alliance number of this unit's team
+     */
     getAlliance: function(gameInfo) {
 	return gameInfo.alliances[this.team];
     }, 
 
+    /**
+       Computer this unit's ability for gem rendering
+     */
     calculateAvailability: function() {
 	if(gameInfo.activeTeam != this.team) { return -1; }
 

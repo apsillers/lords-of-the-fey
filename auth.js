@@ -16,9 +16,21 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/** @module auth */
+
 var config = require("./config"),
     FacebookStrategy = require('passport-facebook').Strategy;
 
+/**
+Decide whether the owner of the given socket can act in the given game
+
+@param socket - Socket.io socket
+@param game - game object
+@param {Boolean} allowAdvancement - the operation being attempted is a unit level-up (without this, when a level-up choice is pending, the action will fail)
+
+@returns {Boolean}
+*/
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     var user = socket.handshake.user;
     if(!user) { return false; }
@@ -32,6 +44,7 @@ exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
     return player.team == game.activeTeam;
 }
 
+/** Activate passport for th eapp and mongo instance */
 exports.initAuth = function(app, mongo, collections) {
 
     var passport = require("passport");

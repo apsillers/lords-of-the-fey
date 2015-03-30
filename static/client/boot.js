@@ -35,6 +35,7 @@ var raceDict = {};
 window.addEventListener("load", function() {
 
     var toMapDict = mapUtils.toMapDict;
+    var Terrain = mapUtils.Terrain;
 
     socket = io.connect('//' + location.host);
 

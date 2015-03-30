@@ -16,8 +16,12 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/** @module executePath */
+
 var getNeighborCoords = require("./static/shared/terrain.js").Terrain.getNeighborCoords;
 
+/** Given two spaces, descide if they are neighbors */
 function areNeighbors(space1, space2) {
     var neighbors = getNeighborCoords(space1);
     for(var i=0; i<neighbors.length; ++i) {
@@ -26,7 +30,17 @@ function areNeighbors(space1, space2) {
     return false;
 }
 
-// attempt to move a unit through a given path
+/**
+Attempt to move a unit through a given path and report result
+
+@param path - array of (x,y) spaces
+@param {Unit} unit - Unit attempting to move
+@param {Array.<Unit>} unitArray - array of Units in the current game
+@param {Object} mapData - object with "x,y" keys and tile values (see toMapDict in terrain.js)
+@param game - game object
+
+@return {{path:Array, moveCost:number}|boolean} object with actual path taken and move points spent, or false (on failed move)
+*/
 module.exports = function executePath(path, unit, unitArray, mapData, game) {
     var actualPath = [path[0]];
     var standingClear = true;

@@ -17,15 +17,26 @@
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// offender attacks defender with the attack of the given index
-// returns an array of objects representing swings
-// [ {
-//     "offense": Boolean, (is swing by initiator)
-//     "event": "hit"/"miss",
-//     "damage": Number,
-//     "kill": Boolean
-//   }, ...]
-function executeAttack(offender, attackIndex, attackSpace, defender, units, mapData, game) {
+/** @module executeAttack */
+
+/**
+   Represents a single swing of an attack
+   @typedef {Object} SwingResult 
+   @prop {boolean} offense - is swing by initiator?
+   @prop {string} event - "hit" or "miss"
+   @prop {number} damage - damage inflicted by this swing
+   @prop {boolean} kill - did this swing kill the hitee?
+*/
+
+/**
+ Offender attacks defender with the attack of the given index
+
+ @param {Unit} offender - unit initiating attack
+ @param {boolean} attackIndex - index of attack used by offensive unit
+
+ @returns {SwingResult[]} an array of objects representing swings from this combat, in order
+*/
+module.exports = function executeAttack(offender, attackIndex, attackSpace, defender, units, mapData, game) {
     var battleRecord = [];
     var swingResult;
     var defenseIndex;
@@ -127,4 +138,3 @@ function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     return swingRecord;
 }
 
-module.exports = executeAttack;

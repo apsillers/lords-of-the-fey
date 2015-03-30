@@ -101,7 +101,7 @@ World.prototype = {
     
     getNeighbors: function(space) {
 	var neighbors = [];
-	var coords = Terrain.getNeighborCoords(space);
+	var coords = mapUtils.Terrain.getNeighborCoords(space);
         
         for(var i=0; i<coords.length; ++i) {
             var prospect = this.getSpaceByCoords(coords[i]);
@@ -111,7 +111,7 @@ World.prototype = {
     },
 
     getDirection: function(s1, s2) {
-	return Terrain.getDirection(s1, s2);
+	return mapUtils.Terrain.getDirection(s1, s2);
     },
     
     addUnit: function(unit, space) {

@@ -20,6 +20,10 @@ var castlePathExists = require("./static/shared/castlePathExists");
 var Unit = require("./static/shared/unit.js").Unit;
 var ObjectID = require('mongodb').ObjectID;
 
+/**
+    @param {Object} data - object of unit properties (x, y, type)
+    @mapData {Object}
+*/
 module.exports = function(data, mapData, collections, game, player, callback) {
     var gameId = ObjectID(data.gameId);
     var loadUnitType = require("./loadUtils").loadUnitType;
