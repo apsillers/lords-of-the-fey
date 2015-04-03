@@ -166,8 +166,29 @@ var ui = {
             if(unitToMove && unitToMove.team == gameInfo.player.team) {
 		ui.pathSource = space;
             }
+	    var accessibleSpaces = allAccessibleSpaces(world, space, unitToMove, gameInfo);
+	    ui.rangeShape = new createjs.Container();
+            for(var i=0;i<=world.maxX;++i){
+		for(var j=0;j<=world.maxY;++j) {
+		    if(i+","+j in accessibleSpaces) { continue; }
+ 		    var s = world.getSpaceByCoords(i,j);
+		    var pip = new createjs.Container();
+		    pip.x = s.shape.x + 17;
+		    pip.y = s.shape.y + 16;
+		    pip.owner = s;
+		    var bar = new createjs.Shape();
+		    bar.graphics.beginFill("rgba(230,230,230,0.8)").drawRect(0, 0, 38, 38);
+		    bar.regX = 0;
+		    bar.regY = 0;
+		    pip.addChild(bar);
+		    ui.rangeShape.addChild(pip);
+		}
+	    }
+	    world.mapContainer.addChild(ui.rangeShape);
+	    world.stage.update();
 	} else {
             world.mapContainer.removeChild(ui.pathShape);
+            world.mapContainer.removeChild(ui.rangeShape);
             
             if(ui.path && space != ui.pathSource) {
 		var unit = world.getUnitAt(ui.pathSource);

@@ -16,11 +16,67 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/** @module unit */
+
+/**
+   @typedef UnitData
+   @see {@link https://github.com/apsillers/lords-of-the-fey/wiki/Adding-new-content|Adding new content} from the wiki
+   @prop {string} name - human-readable unit type name
+   @prop {string} img - path to the unit's image (rooted in the web-root)
+   @prop {number} cost - gold cost
+   @prop {number} move - number of move points
+   @prop {string} alignment - `chaotic`, `neutral`, or `lawful`
+   @prop {number} maxHp - max HP
+   @prop {number} maxXp - XP amount that causes the unit to level up
+   @prop {number} level - unit level
+   @prop {string[]} advancesTo - names of types this unit can level up into
+   @prop {number} attributeCount - how many attributes the unit is created with
+   @prop {string[]} attributePool - array of extra attributes the unit might be
+     created beyond the basic 4 (quick, strong, intelligent, resilient)
+   @prop {string[]} fixedAttributes - attributes this unit always has (these do
+     not count toward the attributeCount)
+   @prop {Object<string,unit~UnitTerrainStat>} terrain - mapping of terrain
+     type strings ("flat", "swamp", etc.) to objects with `cover` and `move`
+     properties
+   @prop {AttackSpec[]} attack - list of attacks
+   @prop {Object<string, number>} resistances - mapping damage types to
+     resistance percentages (-1.0 to 1.0, or even higher or lower)
+*/
+
+/**
+   Stats for how well a unit does on a particular terrain type
+   @typedef UnitTerrainStat
+   @prop {number} move - movemet cost for this terrain
+   @prop {number} cover - defensive cover percentage, 0.0 to 1.0
+*/
+
+/**
+   @typedef AttackSpec
+   @prop {string} name - human-readable name of attack
+   @prop {string} type - `melee` or `ranged`
+   @prop {string} damageType - category of damage: `arcane`, `blade`, `cold`,
+     `fire`, `impact`, or `pierce`
+   @prop {number} number - number of swings
+   @prop {number} damage - damage per swing
+   @prop {string[]} properties - array of attack properties, e.g., `poison`
+*/
+
+/**
+   @namespace unitLib
+   @prop {string[]} protoList - array of all unit type file names 
+   @prop {Object<string, Object>} protos - mapping of file name to prototype
+*/
 var unitLib = {
-    
+    /** */
     protoList: ["grunt", "warrior", "crusher", "scout", "elven_archer", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin"],
     protos: {},
 
+    /**
+       @memberof unitLib
+       @param initCallback - called when all unit data has finished
+       @param progressCallback - called each time a prototype loads
+    */
     init: function(initCallback, progressCallback) {
 	if(typeof createjs != "undefined") {
 	    this.clientInit(initCallback, progressCallback);
@@ -188,7 +244,7 @@ unitLib.abilityDict = {
 /**
 
 @constructor
-@param {Object} unitData - object from the mongo store with unit data
+@param {module:unit~UnitData} unitData - object from the mongo store with unit data
 @param {boolean} isCreation - is this constructor being called to create a new unit?
 @param {boolean} isLevelUp - is this constructor being called to level-up a unit?
 */

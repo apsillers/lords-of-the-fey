@@ -17,12 +17,10 @@
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-
+/**
 A* implementation with built-in move rules (e.g.Only finds paths whose cost is less than the `moveLeft` property of the unit.
 
 */
-
 function aStar(world, unit, start, goal, prevPath, game) {
     var attackTarget = world.getUnitAt(goal);
 
@@ -161,3 +159,106 @@ function aStar(world, unit, start, goal, prevPath, game) {
         return true;
     }
 }
+
+
+function allAccessibleSpaces(world, start, unit, game) {
+    var g_score = {}, f_score = {};
+    var current;
+    var closedset = {};    // The set of nodes already evaluated.
+    var openset = {}; openset[start] = start;    // The set of tentative nodes to be evaluated, initially containing the start node
+    var came_from = {};    // The map of navigated nodes.
+ 
+    var accessible_set = {}; accessible_set[start] = start;
+
+    g_score[start] = 0;    // Cost from start along best known path.
+    // Estimated total cost from start to goal through y.
+    f_score[start] = g_score[start];
+ 
+    while(Object.keys(openset).length) {
+        current = null;
+        for(var k in openset) {
+            if(!current || f_score[k] < f_score[current]) {
+                var current = k;
+            }
+        }
+        current = world.getSpaceByCoords(current);
+        
+        delete openset[current];
+        closedset[current] = current;
+        
+        var neighbors = world.getNeighbors(current);
+        neighbors = neighbors.filter(not_blocked_by_enemy).filter(not_blocked_by_friend).filter(function(n) {
+	    var currentOccupant = world.getUnitAt(current);
+	    var neighborOccupant = world.getUnitAt(n);
+	    // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
+	    // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
+	    // because the attacker would not have an empty final space to attack from
+	    if(neighborOccupant && currentOccupant && currentOccupant != unit) return false;
+	    return true;
+	});
+        for(var i=0; i < neighbors.length; ++i) {
+            var neighbor = neighbors[i];
+
+            if(neighbor in closedset) { continue; }
+            var tentative_g_score = g_score[current] + cost_to_move_here(neighbor);
+
+            if(tentative_g_score > unit.moveLeft) { continue; }
+	    else { accessible_set[neighbor] = neighbor; }
+            //console.log(tentative_g_score, unit.moveLeft)
+
+            if(!(neighbor in openset) || tentative_g_score < g_score[neighbor]) {
+                g_score[neighbor] = tentative_g_score;
+                f_score[neighbor] = g_score[neighbor];
+                if(!(neighbor in openset)) {
+                    openset[neighbor] = neighbor;
+                }
+            }
+
+        }
+    }
+
+    return accessible_set;
+
+
+    function cost_to_move_here(space) {
+	var occupant = world.getUnitAt(space);
+        var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
+	var normal_move_cost = unit.getMoveCostForSpace(space);
+	if(is_enemy_present) { return 0; }
+
+        // test if this pace has an enemy adjacent
+        var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
+            var n_occupant = world.getUnitAt(n);
+            if(n_occupant && n_occupant.getAlliance(game) != unit.getAlliance(game)) {
+                return true;
+            }
+        });
+
+        // if so, moving here either costs all our remaining move
+        // OR the normal cost for this terrain (in case that's MORE than all our remaining move)
+        // so you can move adjacent to an enemy only if you could move there normally
+	if(is_enemy_adjacent) {
+            var all_remaining_move = unit.moveLeft - g_score[current];
+            return Math.max(all_remaining_move, normal_move_cost);
+        } else {
+            // just normal move cost
+            return normal_move_cost;
+        }
+    }
+
+    // is this space free of enemies?
+    function not_blocked_by_enemy(space) {
+        //var occupant = world.getUnitAt(space);
+        //if(occupant && occupant.getAlliance(game) != unit.getAlliance(game) && space != goal) { return false; }
+        return true;
+    }
+
+    // is this space non-final or free of friendly units?
+    function not_blocked_by_friend(space) {
+        var occupant = world.getUnitAt(space);
+        if(occupant && occupant.getAlliance(game) == unit.getAlliance(game)) { return false; }
+        return true;
+    }
+}
+
+

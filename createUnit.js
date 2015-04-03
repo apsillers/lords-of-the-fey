@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var castlePathExists = require("./static/shared/castlePathExists");
+var castlePathExists = require("./static/shared/castlePathExists").castlePathExists;
 var Unit = require("./static/shared/unit.js").Unit;
 var ObjectID = require('mongodb').ObjectID;
 

@@ -65,9 +65,9 @@
     var Terrain = 
 	/**
 	   Terrain object
+	   @namespace module:terrain.Terrain
 	   @prop {Object.<string,TerrainType>} bases - dictionary of base tile types
 	   @prop {Object.<string,TerrainType>} overlays - dictionary of overlay tile types
-
 	*/
     exports.Terrain = {
 	bases: {
@@ -120,7 +120,7 @@
             ROCKBOUND_CAVE: { symbol: "Uh", name: "rockbound cave", img: "/data/img/terrain/rockbound-cave.png", properties:["cave"], color:"#666" },
 
             VOLCANO: { symbol: "Mv", name: "volcano", img: "/data/img/terrain/volcano-tile.png", properties:["impassable"], color:"#666" },
-	},
+	    },
 	overlays: {
             SUMMER_DFOREST: { symbol: "Fd", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
             WINTER_DFOREST: { symbol: "Fdw", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
@@ -143,7 +143,7 @@
 
 	/**
 	   Takes one or two strings from the Wesnoth map file and returns a TerrainType object. Base and overlay are represented in the map file as either a 2 or 3 char symbol string like "Bb" (just base) or two symbols joined by a carret "Bb^Oo" (base and overlay)
-	   @method getTerrainBySymbol
+	   @memberof module:terrain.Terrain
 	   @prop {string} baseSymbol - symbol for tiles with no carret or symbole from the left side of the carret
 	   @prop {string} overlaySymbol - optional symbol from the right side of the carret
 	   @return {TerrainType} an object representing the aggregate types and images of the combination of base and overlay types
@@ -194,9 +194,10 @@
 	   Given an object with `x` and `y` properties, return array 
 	   of adjacent coordinate objects (without regard to the existence
 	   of an actual space at those coordinates)
-	   @method getNeighobCoords
-	   @param {{x:number, y:number}} space
-	 */
+	   @memberof module:terrain.Terrain
+	   @param {{x:number, y:number}} space - object with x and y properties
+	   @return {Object[]} list of objects with x and y properties
+	*/
 	getNeighborCoords: function(space) {
             var x = space.x, y = space.y;
             
@@ -210,6 +211,15 @@
                     { x: x+1, y: y }];
 	},
 
+	/**
+	   Given two objects with `x` and `y` properties, return a string
+	   representing the compass direction from the first space to the
+	   second. (The spaces need not be adjacent.)
+	   @memberof module:terrain.Terrain
+	   @param {{x:number, y:number}} s1 - source corrdinates
+	   @param {{x:number, y:number}} s1 - destination coordinates
+	   @return {string} one of `n`, `s`, `ne`, `nw`, `se`, `sw`
+	 */
 	getDirection: function(s1, s2) {
             if(s1.x == s2.x) {
 		return s1.y > s2.y ? "n" : "s";
@@ -232,6 +242,7 @@
 	}
     }
 
+    // TerrainType objects should stringify to their name
     var terrainToString = function() { return this.name; };
     for(var i in Terrain.bases) {
 	Terrain.bases[i].toString = terrainToString;
@@ -240,7 +251,13 @@
 	Terrain.overlays[i].toString = terrainToString;
     }
 
-    function toMapDict(map_data) {
+    /**
+       Parse a Wesnoth map file string into MapData
+
+       @param {string} map_data - a Wesnoth map file as a string
+       @return {MapData} a dictionary-based representation of the Wesnoth map
+    */
+    exports.toMapDict = function(map_data) {
 	var misc_lines = 0;
 	var row = 0;
 	var map_array = map_data.split('\n');
@@ -287,6 +304,4 @@
 	return map_dict;
     }
 
-    exports.Terrain = Terrain;
-    exports.toMapDict = toMapDict;
 }());
