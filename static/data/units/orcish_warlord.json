@@ -1,0 +1,56 @@
+{
+  "name":"Orcish Grunt",
+  "img":"/data/img/units/orcish_warlord.png",
+  "cost":48,
+  "maxHp":78,
+  "move":5,
+  "maxXp":150,
+  "level":3,
+  "alignment":"chaotic",
+  "attacks":[
+    {
+      "icon":"/data/img/attacks/sword-orcish.png",
+      "name":"Greatsword",
+      "type":"melee",
+      "damage":15,
+      "number":3,
+      "damageType":"blade"
+    },
+    {
+      "icon":"/data/img/attacks/bow-orcish.png",
+      "name":"Bow",
+      "type":"ranged",
+      "damage":8,
+      "number":2,
+      "damageType":"pierce",
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" },
+    }
+  ],
+  "terrain":{
+    "castle":{"move":1,"cover":0.6},
+    "cave":{"move":2,"cover":0.4},
+    "reef":{"move":2,"cover":0.3},
+    "deep_water":{"move":-1,"cover":0},
+    "flat":{"move":1,"cover":0.4},
+    "forest":{"move":2,"cover":0.5},
+    "frozen":{"move":2,"cover":0.2},
+    "hills":{"move":1,"cover":0.5},
+    "mountains":{"move":2,"cover":0.6},
+    "fungus":{"move":3,"cover":0.4},
+    "sand":{"move":2,"cover":0.3},
+    "shallow_water":{"move":3,"cover":0.2},
+    "swamp":{"move":3,"cover":0.3},
+    "unwalkable":{"move":-1,"cover":0},
+    "village":{"move":1,"cover":0.6},
+    "impassable":{"move":-1,"cover":0}
+  },
+  "resistances":{
+    "blade":0,
+    "pierce":0,
+    "impact":0,
+    "fire":0,
+    "cold":0,
+    "arcane":0
+  }
+}
+

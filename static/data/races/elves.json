@@ -5,5 +5,8 @@
         "elven_archer",
         "elvish_shaman",
         "elvish_fighter"
+    ],
+    "commanderList": [
+       "elven_archer"
     ]
 }
