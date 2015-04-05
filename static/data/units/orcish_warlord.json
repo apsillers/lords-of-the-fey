@@ -23,7 +23,7 @@
       "damage":8,
       "number":2,
       "damageType":"pierce",
-      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" },
+      "img": { "n":"/data/img/projectiles/missile-n.png", "ne":"/data/img/projectiles/missile-ne.png" }
     }
   ],
   "terrain":{

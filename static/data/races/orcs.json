@@ -4,5 +4,8 @@
         "grunt",
         "orcish_archer",
         "orcish_assassin"
+    ],
+    "commanderList": [
+       "orcish_warrior"
     ]
 }

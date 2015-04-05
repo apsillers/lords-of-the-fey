@@ -28,7 +28,12 @@ exports.loadMap = function(filename, callback) {
 
 exports.loadUnitType = function(type, callback) {
     fs.readFile('static/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
-        callback(err, JSON.parse(data));
+	try {
+            var dataObj = JSON.parse(data);
+        } catch(e) {
+            console.log("!! ERROR in unit type " + type + ": " + e);
+        }
+        callback(err, dataObj);
     });
 };
 
