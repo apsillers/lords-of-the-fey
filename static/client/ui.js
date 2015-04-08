@@ -52,13 +52,13 @@ var ui = {
             for(var i=0;i<ui.path.length;++i){
 		var s = ui.path[i].space;
 		var pip = new createjs.Container();
-		pip.x = s.shape.x + 17;
-		pip.y = s.shape.y + 16;
+		pip.x = s.shape.x;
+		pip.y = s.shape.y;
 		pip.owner = s;
 		pip.addEventListener("click", Space.passthroughFunc);
 		pip.addEventListener("rollover", Space.passthroughFunc);
 		var bar = new createjs.Shape();
-		bar.graphics.beginFill("rgba(128,128,200,0.7)").drawRect(0, 0, 38, 38);
+		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(128,128,200,0.7)"));
 		bar.regX = 0;
 		bar.regY = 0;
 		pip.addChild(bar);
@@ -70,7 +70,8 @@ var ui = {
 		    var coverText = 100 * coverValue + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
-		    textShape.y = 7;
+		    textShape.x = 17;
+		    textShape.y = 24;
 		    pip.addChild(textShape);
 		}
 
@@ -81,7 +82,8 @@ var ui = {
 		    var coverText = 100 * coverValue + "%";
 		    var textShape = new createjs.Text(coverText);
 		    textShape.font = "14pt sans serif";
-		    textShape.y = 7;
+		    textShape.x = 17;
+		    textShape.y = 24;
 		    textShape.color = "#F00";
 		    pip.addChild(textShape);
 		}
@@ -90,6 +92,17 @@ var ui = {
             }
             world.mapContainer.addChild(ui.pathShape);
             world.stage.update();
+	}
+
+	if(!ui.pathSource) {
+	    var unit = world.getUnitAt(space);
+	    if(unit) {
+		if(unit != ui.inspectedUnit) {
+		    ui.showMoveRange(space, unit);
+		}
+	    } else {
+		ui.hideMoveRange();
+	    }
 	}
 
 	// show a unit's stats in the right side area
@@ -165,30 +178,12 @@ var ui = {
             var unitToMove = world.getUnitAt(space);
             if(unitToMove && unitToMove.team == gameInfo.player.team) {
 		ui.pathSource = space;
+		ui.hideMoveRange();
+		ui.showMoveRange(space, unitToMove);
             }
-	    var accessibleSpaces = allAccessibleSpaces(world, space, unitToMove, gameInfo);
-	    ui.rangeShape = new createjs.Container();
-            for(var i=0;i<=world.maxX;++i){
-		for(var j=0;j<=world.maxY;++j) {
-		    if(i+","+j in accessibleSpaces) { continue; }
- 		    var s = world.getSpaceByCoords(i,j);
-		    var pip = new createjs.Container();
-		    pip.x = s.shape.x + 17;
-		    pip.y = s.shape.y + 16;
-		    pip.owner = s;
-		    var bar = new createjs.Shape();
-		    bar.graphics.beginFill("rgba(230,230,230,0.8)").drawRect(0, 0, 38, 38);
-		    bar.regX = 0;
-		    bar.regY = 0;
-		    pip.addChild(bar);
-		    ui.rangeShape.addChild(pip);
-		}
-	    }
-	    world.mapContainer.addChild(ui.rangeShape);
-	    world.stage.update();
 	} else {
             world.mapContainer.removeChild(ui.pathShape);
-            world.mapContainer.removeChild(ui.rangeShape);
+            ui.hideMoveRange();
             
             if(ui.path && space != ui.pathSource) {
 		var unit = world.getUnitAt(ui.pathSource);
@@ -210,6 +205,40 @@ var ui = {
             ui.pathSource = null;
             world.stage.update();
 	}
+    },
+
+    drawHexWithGraphic: function(gfx) {
+        gfx.moveTo(18, 0).lineTo(53, 0).lineTo(72, 36).lineTo(53, 72).lineTo(18,72).lineTo(0, 36).lineTo(18,0);
+    },
+
+    showMoveRange: function(space, unitToMove) {
+	ui.inspectedUnit = unitToMove;
+	var accessibleSpaces = allAccessibleSpaces(world, space, unitToMove, gameInfo);
+	ui.rangeShape = new createjs.Container();
+        for(var i=0;i<=world.maxX;++i){
+	    for(var j=0;j<=world.maxY;++j) {
+		if(i+","+j in accessibleSpaces) { continue; }
+ 		var s = world.getSpaceByCoords(i,j);
+		var pip = new createjs.Container();
+		pip.x = s.shape.x;
+		pip.y = s.shape.y;
+		pip.owner = s;
+		var bar = new createjs.Shape();
+		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
+		bar.regX = 0;
+		bar.regY = 0;
+		pip.addChild(bar);
+		ui.rangeShape.addChild(pip);
+	    }
+	}
+	world.mapContainer.addChild(ui.rangeShape);
+	world.stage.update();
+    },
+
+    hideMoveRange: function() {
+	ui.inspectedUnit = null;
+        world.mapContainer.removeChild(ui.rangeShape);
+	world.stage.update();
     },
 
     onContextMenu: function(space, coords) {
