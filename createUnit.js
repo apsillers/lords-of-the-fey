@@ -36,6 +36,7 @@ module.exports = function(data, mapData, collections, game, player, callback) {
 	    // if the space is populated, abort
 	    if(occupant) {
 		callback({});
+		return;
 	    }
 	    
 	    collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
