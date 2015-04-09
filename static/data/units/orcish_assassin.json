@@ -7,6 +7,7 @@
     "maxXp": 34,
     "level": 1,
     "alignment": "chaotic",
+    "advancesTo": ["orcish_slayer"],
     "attacks": [{
         "icon": "/data/img/attacks/dagger-orcish.png",
         "name": "Dagger",
