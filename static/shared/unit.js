@@ -69,7 +69,7 @@
 */
 var unitLib = {
     /** */
-    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "scout", "elven_archer", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer"],
+    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "scout", "elven_archer", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer", "naga_fighter", "naga_warrior", "naga_myrmidon", "wolf_rider", "goblin_knight", "goblin_pillager", "direwolf_rider","troll_whelp","troll","troll_warrior","troll_rocklobber","goblin_spearman","goblin_impaler","goblin_rouser"],
     protos: {},
 
     /**
@@ -283,6 +283,10 @@ function Unit(unitData, isCreation, isLevelUp) {
 	var attributePool = ["quick", "strong", "resilient", "intelligent"];
 	if("attributePool" in unit) {
 	    attributePool.push.apply(attributePool, unit.attributePool);
+	}
+
+	if("omittedAttributes" in unit) {
+	    unit.omittedAttributes.forEach(function(attr) { attributePool.splice(attributePool.indexOf(attr), 1); });
 	}
 
 	if(!("attributeCount" in unit)) {
@@ -720,8 +724,10 @@ if(typeof module != "undefined") {
     module.exports.unitLib = unitLib;
     module.exports.Unit = Unit;
 
-    var Terrain = require("./terrain.js").Terrain
+    var Terrain = require("./terrain.js").Terrain;
 } else {
     window.unitLib = unitLib;
     window.Unit = Unit;
+
+    var Terrain = window.mapUtils.Terrain;
 }

@@ -34,6 +34,7 @@ var initLobbyListeners = require("./lobby").initLobbyListeners;
 var Unit = require("./static/shared/unit.js").Unit;
 var unitLib = require("./static/shared/unit.js").unitLib;
 var executeAttack = require("./executeAttack");
+var Terrain = require("./static/shared/terrain.js").Terrain;
 var socketList = [];
 
 new MongoClient.connect(config.mongoString, function(err, mongo) {
@@ -398,6 +399,7 @@ function initListeners(socket, collections) {
 			    
 			    var update = { x: unit.x, y: unit.y };
 			    unit = new Unit(unit);
+			    var healedHp = 0;
 			    // heal unmoved units
 			    if(unit.moveLeft == unit.move && !unit.hasAttacked) {
 				unit.hp = Math.min(unit.hp+2, unit.maxHp);
@@ -426,27 +428,37 @@ function initListeners(socket, collections) {
 				unit.moveLeft = unit.move;
 			    }
 
-
 			    update.moveLeft = unit.moveLeft;
 			    unit.hasAttacked = false;
-	
-			    // if on a village, heal
-			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){
+
+			    // if on a village and/or has regeneration, heal and/or cure poison
+			    // (both at once causes both effects, but healing is capped at 8)
+			    function villageHeal() {
 				if(unit.hasCondition("poisoned")) {
 				    unit.removeCondition("poisoned");
 				    update.conditionChanges = update.conditionChanges || {};
 				    update.conditionChanges.poisoned = false;
 				} else {
-				    unit.hp = Math.min(unit.hp+8, unit.maxHp);
-				    update.hp = unit.hp;
+				    healedHp = 8;
 				}
 			    }
+			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){ villageHeal(); }
+			    if(unit.attributes.indexOf("regenerates") != -1) { villageHeal(); }
+
+			    // TODO: healers each bump up healedHp
+			    var coords = Terrain.getNeighborCoords(unit);
 
 			    if(unit.hasCondition("poisoned")) {
 				unit.hp = Math.max(1, unit.hp-8);
 				update.hp = unit.hp;
 			    }
-				
+
+			    if(healedHp != 0) {
+				healedHp = Math.max(healedHP, 8);
+				unit.hp = Math.max(unit.hp+healedHp, unit.maxHp);
+				update.hp = unit.hp;
+			    }
+
 			    updates.push(update);
 			    
 			    collections.units.save(unit.getStorableObj(), {safe:true}, function() {

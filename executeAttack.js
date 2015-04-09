@@ -51,17 +51,29 @@ module.exports = function executeAttack(offender, attackIndex, attackSpace, defe
     var defense = offender.applyAttack(defenseChoice.defense, defender, game.timeOfDay, defender, units, mapData);
     var defenseIndex = defenseChoice.defenseIndex;
 
+    var defenseFirst = ((defense.properties||[]).indexOf("firststrike") != -1) > ((offense.properties||[]).indexOf("firststrike") != -1);
+
     for(var round = 0; round < offense.number || (defense && round < defense.number); round++) {
+	if(defenseFirst) {
+	    if(defense && round < defense.number) {
+		swingResult = attackSwing(false, defense, defender, offender, offenderCover, units);
+		battleRecord.push(swingResult);
+	    	if(swingResult.kill) { break; }
+	    }
+	}
+
 	if(round < offense.number) {
 	    swingResult = attackSwing(true, offense, offender, defender, defenderCover, units);
 	    battleRecord.push(swingResult);
 	    if(swingResult.kill) { break; }
 	}
 
-	if(defense && round < defense.number) {
-	    swingResult = attackSwing(false, defense, defender, offender, offenderCover, units);
-	    battleRecord.push(swingResult);
-	    if(swingResult.kill) { break; }
+	if(!defenseFirst) {
+	    if(defense && round < defense.number) {
+		swingResult = attackSwing(false, defense, defender, offender, offenderCover, units);
+		battleRecord.push(swingResult);
+	    	if(swingResult.kill) { break; }
+	    }
 	}
     }
 

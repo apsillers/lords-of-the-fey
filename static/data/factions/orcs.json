@@ -1,9 +1,14 @@
 {
     "name": "Orcs",
     "recruitList": [
-        "grunt",
+        "orcish_grunt",
         "orcish_archer",
-        "orcish_assassin"
+        "orcish_assassin",
+        "naga_fighter",
+        "goblin_spearman",
+        "goblin_impaler",
+        "troll_whelp",
+        "wolf_rider"
     ],
     "commanderList": [
        "orcish_warrior"
