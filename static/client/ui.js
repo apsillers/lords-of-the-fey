@@ -223,6 +223,8 @@ var ui = {
 		pip.x = s.shape.x;
 		pip.y = s.shape.y;
 		pip.owner = s;
+		pip.addEventListener("click", Space.passthroughFunc);
+		pip.addEventListener("rollover", Space.passthroughFunc);
 		var bar = new createjs.Shape();
 		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
 		bar.regX = 0;
