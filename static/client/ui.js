@@ -98,6 +98,7 @@ var ui = {
 	    var unit = world.getUnitAt(space);
 	    if(unit) {
 		if(unit != ui.inspectedUnit) {
+		    ui.hideMoveRange();
 		    ui.showMoveRange(space, unit);
 		}
 	    } else {
@@ -229,6 +230,7 @@ var ui = {
 		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
 		bar.regX = 0;
 		bar.regY = 0;
+		bar.cache(0,0,72,72);
 		pip.addChild(bar);
 		ui.rangeShape.addChild(pip);
 	    }
