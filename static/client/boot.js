@@ -28,8 +28,8 @@ if(qStringMatch == null) {
 var gameInfo = { 
     gameId: qStringMatch[1]
 };
-var raceList = ["elves", "orcs"];
-var raceDict = {};
+var factionList = ["elves", "orcs"];
+var factionDict = {};
 
 /**************************/
 window.addEventListener("load", function() {
@@ -70,10 +70,10 @@ window.addEventListener("load", function() {
             var queue = new createjs.LoadQueue();
             queue.on("complete", handleComplete, this);
 	    queue.on("progress", function(e) { $("#load-progress").attr("value", e.progress*100); });
-	    var raceManifest = raceList.map(function(k){
-		return { id:"race"+k, src:"/data/races/"+k+".json", type:createjs.LoadQueue.JSON }
+	    var factionManifest = factionList.map(function(k){
+		return { id:"faction"+k, src:"/data/factions/"+k+".json", type:createjs.LoadQueue.JSON }
 	    });
-            queue.loadManifest(raceManifest);
+            queue.loadManifest(factionManifest);
             queue.loadManifest(
 		Object.keys(Terrain.bases).map(function(k){ return {id:"base"+k, src:Terrain.bases[k].img }; })
             );
@@ -92,13 +92,13 @@ window.addEventListener("load", function() {
 		    Terrain.overlays[k].imgObj = queue.getResult("overlay"+k);
 		}
 		
-		for(var i = 0; i < raceList.length; ++i) {
-		    var raceName = raceList[i];
-		    raceDict[raceName] = queue.getResult("race"+raceName);
+		for(var i = 0; i < factionList.length; ++i) {
+		    var factionName = factionList[i];
+		    factionDict[factionName] = queue.getResult("faction"+factionName);
 		}
 
-		if(gameInfo.player.race) {
-		    gameInfo.player.recruitList = raceDict[gameInfo.player.race].recruitList;
+		if(gameInfo.player.faction) {
+		    gameInfo.player.recruitList = factionDict[gameInfo.player.faction].recruitList;
 		}
 
 		world = new World("c");

@@ -172,7 +172,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	};
     });
 
-    socket.on("set race", function(data) {
+    socket.on("set faction", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
 	var user = socket.handshake.user;
@@ -180,7 +180,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
 	if(!player) { return; }
 
-	player.race = data.race;
+	player.faction = data.faction;
 
 	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
     });

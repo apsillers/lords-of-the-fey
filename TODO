@@ -10,7 +10,7 @@ End turn logic
 Implement all unit attributes
 Implement all attack properties
 Implement all terrain types
-Implement all Wesnoth races
+Implement all Wesnoth factions
 Attack animations
   - Projectile images (omnidirectional / every-directional)
   - Pojectile animations

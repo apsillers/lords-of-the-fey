@@ -27,10 +27,10 @@ var ObjectID = require('mongodb').ObjectID;
 module.exports = function(data, mapData, collections, game, player, callback) {
     var gameId = ObjectID(data.gameId);
     var loadUnitType = require("./loadUtils").loadUnitType;
-    var loadRace = require("./loadUtils").loadRace;
+    var loadFaction = require("./loadUtils").loadFaction;
     
-    loadRace(player.race, function(err, race) {
-	if(race.recruitList.indexOf(data.type) == -1) { callback({}); }
+    loadFaction(player.faction, function(err, faction) {
+	if(faction.recruitList.indexOf(data.type) == -1) { callback({}); }
 
 	collections.units.findOne({ gameId: gameId, x: data.x, y: data.y }, function(err, occupant) {
 	    // if the space is populated, abort

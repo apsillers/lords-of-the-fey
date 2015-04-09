@@ -22,8 +22,8 @@ var Unit = require("./static/shared/unit.js").Unit;
 exports.initLobby = function(app, collections) {
     app.get('/create', function(req, res) {
 	var players = [
-	    { username:"hello", race: "elves" },
-            { username:"goodbye", race: "orcs" }
+	    { username:"hello", faction: "elves" },
+            { username:"goodbye", faction: "orcs" }
 	];
 	var mapName = "test_map.map";
 	require("./createGame").createNewGame(collections, players, mapName, function(id) {
@@ -65,7 +65,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	gameData.alliances[playerItem.team] = playerItem.alliance;
 
 	if(!("gold" in playerItem)) { playerItem.gold = 100; }
-	if(!("race" in playerItem) || playerItem.race == "random") { playerItem.race = Math.random()>0.5?"elves":"orcs"; }
+	if(!("faction" in playerItem) || playerItem.faction == "random") { playerItem.faction = Math.random()>0.5?"elves":"orcs"; }
     }
 
     loadMap(map, function(err, mapData) {
@@ -87,7 +87,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	    (function addCommander() {
 		index++;
 		if(index == playerList.length) { console.log("wow, we made a game:", game._id); resolutionCallback(game._id); return; }
-		var typeName = playerList[index].race=="elves"?"elven_archer":"orcish_grunt";
+		var typeName = playerList[index].faction=="elves"?"elven_archer":"orcish_grunt";
 		var coords = startPositions[playerList[index].team];
 
 		console.log(index, playerList.length, typeName);

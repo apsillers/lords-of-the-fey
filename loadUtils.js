@@ -37,8 +37,8 @@ exports.loadUnitType = function(type, callback) {
     });
 };
 
-exports.loadRace = function(race, callback) {
-    fs.readFile('static/data/races/'+race+".json", { encoding: "utf8"}, function(err, data) {
+exports.loadFaction = function(factionName, callback) {
+    fs.readFile('static/data/factions/'+factionName+".json", { encoding: "utf8"}, function(err, data) {
         callback(err, JSON.parse(data));
     });
 };

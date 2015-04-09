@@ -71,15 +71,15 @@ function renderPlayerList() {
 	    playerText.text((i+1) + ": " + data.username + " | ");
 	    playerItem.append(playerText);
 
-	    var raceSelector = $("<select>");
-	    raceSelector.append('<option value="random">Random</option>')
-	    raceSelector.append('<option value="elves">Elves</option>')
-	    raceSelector.append('<option value="orcs">Orcs</option>')
-	    raceSelector.val(data.race || "random");
-	    raceSelector.change(function() {
-		socket.emit("set race", { id: roomId, race: raceSelector.val() });
+	    var factionSelector = $("<select>");
+	    factionSelector.append('<option value="random">Random</option>')
+	    factionSelector.append('<option value="elves">Elves</option>')
+	    factionSelector.append('<option value="orcs">Orcs</option>')
+	    factionSelector.val(data.faction || "random");
+	    factionSelector.change(function() {
+		socket.emit("set faction", { id: roomId, faction: factionSelector.val() });
 	    });
-	    playerItem.append(raceSelector);
+	    playerItem.append(factionSelector);
 
 	    var allianceSelector = $("<select>");
 	    for(var j=0; j<room.totalSlots; ++j) {
@@ -91,7 +91,7 @@ function renderPlayerList() {
 	    });
 	    playerItem.append(allianceSelector);
 	} else {
-	    playerItem.text((data.ready?"✓ ":"_ ") + (i+1) + ": " + data.username + " | " + (data.race||"Random") + " | " + data.alliance);
+	    playerItem.text((data.ready?"✓ ":"_ ") + (i+1) + ": " + data.username + " | " + (data.faction||"Random") + " | " + data.alliance);
 	}
 	$playerList.append(playerItem);
     });
