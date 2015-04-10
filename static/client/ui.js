@@ -136,11 +136,14 @@ var ui = {
 	    for(var i=0; i<ui.hoverUnit.attacks.length; ++i) {
 		var attackNameElm = $("<div style='font-weight: bold;'>");
 		var attackTypeElm = $("<div>");
+		var attackPropsElm = $("<div>");
 		var attack = ui.hoverUnit.attacks[i];
 		attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
 		attackTypeElm.text(attack.type);
+		attackPropsElm.text((attack.properties||[]).join(", "));
 		$("#right_data_attacks").append(attackNameElm);
 		$("#right_data_attacks").append(attackTypeElm);
+		$("#right_data_attacks").append(attackPropsElm);
 	    }
 	    
 	    if(ui.hoverUnit.hp <= 0) {
@@ -228,8 +231,6 @@ var ui = {
 		pip.addEventListener("rollover", Space.passthroughFunc);
 		var bar = new createjs.Shape();
 		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
-		bar.regX = 0;
-		bar.regY = 0;
 		bar.cache(0,0,72,72);
 		pip.addChild(bar);
 		ui.rangeShape.addChild(pip);
@@ -353,11 +354,14 @@ var ui = {
 		for(var i=0; i<unit.attacks.length; ++i) {
 		    var attackNameElm = $("<div style='font-weight: bold;'>");
 		    var attackTypeElm = $("<div>");
+		    var attackPropsElm = $("<div>");
 		    var attack = unit.attacks[i];
 		    attackNameElm.text(attack.name + " " + attack.damage + "-" + attack.number);
 		    attackTypeElm.text(attack.type);
+		    attackPropsElm.text((attack.properties||[]).join(", "));
 		    $("#recruit-stats-attacks").append(attackNameElm);
 		    $("#recruit-stats-attacks").append(attackTypeElm);
+		    $("#recruit-stats-attacks").append(attackPropsElm);
 		}
 	    }.bind(null, unit));
 

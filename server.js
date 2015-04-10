@@ -442,8 +442,10 @@ function initListeners(socket, collections) {
 				    healedHp = 8;
 				}
 			    }
-			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1){ villageHeal(); }
-			    if(unit.attributes.indexOf("regenerates") != -1) { villageHeal(); }
+			    if(mapData[unit.x+","+unit.y].terrain.properties.indexOf("village") != -1 || 
+			       unit.attributes.indexOf("regenerates") != -1){
+				villageHeal();
+			    }
 
 			    // TODO: healers each bump up healedHp
 			    var coords = Terrain.getNeighborCoords(unit);
@@ -454,7 +456,7 @@ function initListeners(socket, collections) {
 			    }
 
 			    if(healedHp != 0) {
-				healedHp = Math.max(healedHP, 8);
+				healedHp = Math.max(healedHp, 8);
 				unit.hp = Math.max(unit.hp+healedHp, unit.maxHp);
 				update.hp = unit.hp;
 			    }

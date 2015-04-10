@@ -651,11 +651,13 @@ unitLib.unitProto = {
 	if(this.alignment == "neutral") { return 1; }
 
 	if(timeOfDay == "morning" || timeOfDay == "afternoon") {
-	    return 1 + (this.alignment=="lawful"?1:-1) * 0.25;
+	    var modifier = (this.alignment=="lawful"?1:-1) * 0.25;
+	    return 1 + this.attributes.indexOf("fearless")==-1?modifier:0;
 	}
 
 	if(timeOfDay == "first watch" || timeOfDay == "second watch") {
-	    return 1 + (this.alignment=="chaotic"?1:-1) * 0.25;
+	    var modifier = (this.alignment=="chaotic"?1:-1) * 0.25;
+	    return 1 + this.attributes.indexOf("fearless")==-1?modifier:0;
 	}
 
 	return 1;
