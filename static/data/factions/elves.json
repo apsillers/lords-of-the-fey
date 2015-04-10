@@ -2,11 +2,11 @@
     "name": "Elves",
     "recruitList": [
         "scout",
-        "elven_archer",
+        "elvish_archer",
         "elvish_shaman",
         "elvish_fighter"
     ],
     "commanderList": [
-       "elven_archer"
+       "elvish_archer"
     ]
 }

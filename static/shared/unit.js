@@ -69,7 +69,7 @@
 */
 var unitLib = {
     /** */
-    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "scout", "elven_archer", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer", "naga_fighter", "naga_warrior", "naga_myrmidon", "wolf_rider", "goblin_knight", "goblin_pillager", "direwolf_rider","troll_whelp","troll","troll_warrior","troll_rocklobber","goblin_spearman","goblin_impaler","goblin_rouser"],
+    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "scout", "elvish_archer", "elvish_ranger", "elvish_avenger", "elvish_marksman", "elvish_sharpshooter", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer", "naga_fighter", "naga_warrior", "naga_myrmidon", "wolf_rider", "goblin_knight", "goblin_pillager", "direwolf_rider", "troll_whelp", "troll", "troll_warrior", "troll_rocklobber", "goblin_spearman", "goblin_impaler", "goblin_rouser"],
     protos: {},
 
     /**
