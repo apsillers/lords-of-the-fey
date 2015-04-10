@@ -87,7 +87,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	    (function addCommander() {
 		index++;
 		if(index == playerList.length) { console.log("wow, we made a game:", game._id); resolutionCallback(game._id); return; }
-		var typeName = playerList[index].faction=="elves"?"elven_archer":"orcish_grunt";
+		var typeName = playerList[index].faction=="elves"?"elvish_archer":"orcish_grunt";
 		var coords = startPositions[playerList[index].team];
 
 		console.log(index, playerList.length, typeName);
@@ -100,6 +100,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 		    team: playerList[index].team,
 		    isCommander: true
 		}, true);
+		unit.moveLeft = unit.move;
 
 		var data = unit.getStorableObj();
 
