@@ -307,7 +307,7 @@ function Unit(unitData, isCreation, isLevelUp) {
 	// if this is creation time, set initial stats
 	unit.xp = 0;
 	unit.hp = unit.maxHp;
-	unit.moveLeft = unit.move;
+	unit.moveLeft = 0;
     }
 
     if(isLevelUp) {
