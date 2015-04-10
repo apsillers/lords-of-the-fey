@@ -457,7 +457,7 @@ function initListeners(socket, collections) {
 
 			    if(healedHp != 0) {
 				healedHp = Math.max(healedHp, 8);
-				unit.hp = Math.max(unit.hp+healedHp, unit.maxHp);
+				unit.hp = Math.min(unit.hp+healedHp, unit.maxHp);
 				update.hp = unit.hp;
 			    }
 
