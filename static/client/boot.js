@@ -80,16 +80,30 @@ window.addEventListener("load", function() {
             queue.loadManifest(
 		Object.keys(Terrain.overlays).map(function(k){ return {id:"overlay"+k, src:Terrain.overlays[k].img }; })
             );
+            queue.loadManifest(
+		Object.keys(Terrain.transitions).reduce(function(arr,k){
+		    var imgBase = Terrain.transitions[k].imgBase;
+		    return arr.concat(Terrain.transitions[k].dirs.map(function(d){ return {id:"transition"+k+"-"+d, src:imgBase+"-"+d+".png" }; }));
+		}, [])
+            );
             queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
 
             function handleComplete() {
 		$("#loading-overlay").hide();
 
-		for(k in Terrain.bases) {
+		for(var k in Terrain.bases) {
 		    Terrain.bases[k].imgObj = queue.getResult("base"+k);
 		}
 		for(k in Terrain.overlays) {
 		    Terrain.overlays[k].imgObj = queue.getResult("overlay"+k);
+		}
+		console.log("hello complete");
+		for(k in Terrain.transitions) {
+		    Terrain.transitions[k].imgObjs = {};
+		    for(var i=0; i<Terrain.transitions[k].dirs.length; ++i) {
+			var d = Terrain.transitions[k].dirs[i];
+			Terrain.transitions[k].imgObjs[d] = queue.getResult("transition"+k+"-"+d);
+		    }
 		}
 		
 		for(var i = 0; i < factionList.length; ++i) {

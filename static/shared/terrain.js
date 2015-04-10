@@ -38,9 +38,9 @@
   Terrain data for a space. Represents a union of a "base" terrain type (like a desert or dirt) and optionally an "overlay" terrain (like a forest or mountain). The base and overlay have their properties ("forest", "flat", "snow", etc.) listed collectively.
   @typedef TerrainData
   @prop {Array.<string>} properties - Array of terrain type strings ("flat", "forest", etc.)
-  @prop {string} image - image path for the base terrain
+  @prop {string} img - image path for the base terrain
   @prop {HTMLImageElement} imgObj - loaded image object for the base terrain
-  @prop {string} overlayImage - image path for the overlay terrain
+  @prop {string} overlayImg - image path for the overlay terrain
   @prop {HTMLImageElement} overlayImgObj - loaded image object for the overlay terrain
   @prop {string} color - minimap color
 */
@@ -138,7 +138,25 @@
             TROP_FOREST: { symbol: "Ft", name: "summer forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
 
             MUSHROOM_GROVE: { symbol: "Uf", name: "mushroom grove", img: "/data/img/terrain/mushrooms-tile.png", properties: ["fungus"], color:"#A75" },
-            ELVEN_VILLAGE: { symbol: "Ve", name: "elven village", img: "/data/img/terrain/village.png", properties: ["village"], color:"#DDD" },
+            ELVEN_VILLAGE: { symbol: "Vht", name: "elven village", img: "/data/img/terrain/village.png", properties: ["village"], color:"#DDD" },
+            TROPICAL_VILLAGE: { symbol: "Ve", name: "tropical village", img: "/data/img/terrain/village/tropical-forest.png", properties: ["village"], color:"#DDD" },
+            SWAMP_VILLAGE: { symbol: "Vhs", name: "swamp village", img: "/data/img/terrain/village/swampwater.png", properties: ["village","water"], color:"#DDD" },
+            DWARVEN_VILLAGE: { symbol: "Vud", name: "dwarven village", img: "/data/img/terrain/village/dwarven.png", properties: ["village","cave"], color:"#DDD" },
+            MERFOLK_VILLAGE: { symbol: "Vm", name: "merfolk village", img: "/data/img/terrain/village/swampwater.png", properties: ["village","water"], color:"#DDD" },
+            WOODEN_BRIDGE_N: { symbol: "Bw|", name: "wooden bridge", img: "/data/img/terrain/wood-n-s.png", properties: ["flat","water"], color:"#DDD" },
+            WOODEN_BRIDGE_NE: { symbol: "Bw/", name: "wooden bridge", img: "/data/img/terrain/wood-ne-sw.png", properties: ["flat","water"], color:"#DDD" },
+            WOODEN_BRIDGE_NW: { symbol: "Bw\\", name: "wooden bridge", img: "/data/img/terrain/wood-se-nw.png", properties: ["flat","water"], color:"#DDD" },
+	},
+
+	transitionRank:["FORD", "SHALLOW_WATER", "DEEP_WATER", "DRY_GRASS", "SEMI_GRASS", "GRASS", "HUMAN_CASTLE", "HUMAN_KEEP", "ENCAMPMENT_CASTLE", "ENCAMPMENT_KEEP"],
+
+	transitions: {
+	    FORD: { imgBase:"/data/img/terrain/trans/ford", dirs:['n','s','ne','nw','se','sw'] },
+	    GRASS: { imgBase:"/data/img/terrain/trans/green", dirs:['n','s','ne','nw','se','sw'] },
+	    DRY_GRASS: { imgBase:"/data/img/terrain/trans/dry", dirs:['n','s','ne','nw','se','sw'] },
+	    SEMI_GRASS: { imgBase:"/data/img/terrain/trans/semi-dry", dirs:['n','s','ne','nw','se','sw'] },
+	    DEEP_WATER: { imgBase:"/data/img/terrain/trans/ocean-A01", dirs:['n','s','ne','nw','se','sw'] },
+	    SHALLOW_WATER: { imgBase:"/data/img/terrain/trans/ocean-blend-A01", dirs:['n','s','ne','nw','se','sw'] }
 	},
 
 	/**
@@ -153,6 +171,7 @@
             for(var prop in this.bases) {
 		if(this.bases[prop].symbol == baseSymbol) {
                     var base = this.bases[prop];
+		    terrainObj.tileType = prop;
                     terrainObj.properties = terrainObj.properties.concat(base.properties);
                     terrainObj.img = base.img;
                     terrainObj.imgObj = base.imgObj;

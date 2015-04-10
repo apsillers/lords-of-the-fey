@@ -18,10 +18,11 @@
 */
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
-    this.stage.enableMouseOver(20);
+    this.stage.enableMouseOver(50);
     createjs.Touch.enable(this.stage);
     this.mapContainer = new createjs.Container();
     this.baseTerrain = new createjs.Container();
+    this.transitionTerrain = new createjs.Container();
     this.grid = {};
     this.units = {};
 
@@ -62,8 +63,12 @@ World.prototype = {
 	this.mapWidth = Space.WIDTH + ((Space.WIDTH * 3/4 + 0.6) * (this.maxX));
 	this.mapHeight = Space.HEIGHT * (this.maxY + 1.5);
 
+	this.drawTransitions();
+
 	this.mapContainer.addChild(this.baseTerrain);
+	this.mapContainer.addChild(this.transitionTerrain);
 	this.mapContainer.setChildIndex(this.baseTerrain, 0);
+	this.mapContainer.setChildIndex(this.transitionTerrain, 1);
         this.stage.addChild(this.mapContainer);
 	this.resizeCanvasToWindow();
 	this.stage.update();
@@ -178,6 +183,30 @@ World.prototype = {
         }
         
         return this.units[x+","+y];
+    },
+
+    drawTransitions: function() {
+	var Terrain = mapUtils.Terrain;
+	for(var coords in this.grid) {
+	    var space = this.grid[coords];
+	    var neighbors = this.getNeighbors(space);
+	    for(var i=0; i<neighbors.length; ++i) {
+		var n = neighbors[i];
+		console.log(n.terrain.tileType)
+		if(n.terrain.tileType != space.terrain.tileType &&
+		   Terrain.transitionRank.indexOf(n.terrain.tileType) > Terrain.transitionRank.indexOf(space.terrain.tileType) &&
+		   n.terrain.tileType in Terrain.transitions) {
+		    var dir = Terrain.getDirection(space, n);
+                    if(dir in Terrain.transitions[n.terrain.tileType].imgObjs) {
+			var transImgObj = Terrain.transitions[n.terrain.tileType].imgObjs[dir];
+			var trans = new createjs.Bitmap(transImgObj);
+			trans.x = space.shape.x;
+			trans.y = space.shape.y;
+			this.transitionTerrain.addChild(trans);
+		    }
+		}
+	    }
+	}
     }
 }
 
