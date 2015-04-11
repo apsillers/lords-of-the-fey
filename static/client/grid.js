@@ -94,6 +94,8 @@ World.prototype = {
     },
     
     getSpaceByCoords: function(x, y) {
+	if(x == "hidden") { return undefined; }
+
         if(y == undefined) {
             if(typeof x == "object" && x.x != undefined && x.y != undefined) {
                 return this.grid[x.x+","+x.y]
@@ -192,7 +194,6 @@ World.prototype = {
 	    var neighbors = this.getNeighbors(space);
 	    for(var i=0; i<neighbors.length; ++i) {
 		var n = neighbors[i];
-		console.log(n.terrain.tileType)
 		if(n.terrain.tileType != space.terrain.tileType &&
 		   Terrain.transitionRank.indexOf(n.terrain.tileType) > Terrain.transitionRank.indexOf(space.terrain.tileType) &&
 		   n.terrain.tileType in Terrain.transitions) {

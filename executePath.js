@@ -45,6 +45,7 @@ module.exports = function executePath(path, unit, unitArray, mapData, game) {
     var actualPath = [path[0]];
     var standingClear = true;
     var totalMoveCost = 0;
+    var revealedUnits = [];
 
     for(var i=1; i<path.length; ++i) {
 	var coords = path[i];
@@ -56,7 +57,8 @@ module.exports = function executePath(path, unit, unitArray, mapData, game) {
 	if(occupant) {
 	    if(occupant.getAlliance(game) != unit.getAlliance(game)) {
 		if(isLastSpace && standingClear) {
-		    return { path:actualPath, revealedUnits:[], attack: true, moveCost: totalMoveCost };
+                    // attack if the unit is not hidden (we couldn't have planned to attack a hidden unit)
+		    return concludePathing(!occupant.hasCondition("hidden"));
 		}
 		return { path:[path[0]], revealedUnits:[] };
 	    } else {
@@ -67,6 +69,10 @@ module.exports = function executePath(path, unit, unitArray, mapData, game) {
 	    standingClear = false;
 	} else {
 	    standingClear = true;
+	}
+
+	if(totalMoveCost == unit.moveLeft) {
+	    return concludePathing();
 	}
 
 	// add cost to move on this sapce
@@ -81,15 +87,48 @@ module.exports = function executePath(path, unit, unitArray, mapData, game) {
 	actualPath.push(path[i]);
 
 	// if any enemy is adjacent to this space, end the path now
+	var adjacentEnemies = getAdjacentEnemies(coords);
+	if(adjacentEnemies.length > 0) {
+	    totalMoveCost = unit.moveLeft;
+	    var hiddenEnemies = adjacentEnemies.filter(function(e) { return e.hasCondition("hidden"); });
+	    revealedUnits = revealedUnits.concat(hiddenEnemies);
+	}
+    }
+
+    return concludePathing();
+
+    function concludePathing(isAttack) {
+        if(unit.attributes && unit.attributes.indexOf("ambush") != -1) {
+	    var publicPath = actualPath.map(function(s,i) {
+		// if you started visible on foreset, you're visible
+	        if(!unit.hasCondition("hidden") && i==0) { return s; }
+		// if you ended adjacent to enemies on forset, you're visible
+		if(adjacentEnemies.length>0 && i==actualPath.length-1) { return s; }
+
+	        return (mapData[s.x+","+s.y].terrain.properties.indexOf("forest")!=-1)?"hidden":s;
+	    });
+        } else {
+	    publicPath = actualPath;
+        }
+
+        return {
+	         path: actualPath,
+	         publicPath: publicPath,
+	         moveCost: totalMoveCost,
+	         revealedUnits: revealedUnits,
+	         hide: publicPath[publicPath.length-1]=="hidden",
+		 attack: isAttack
+	       };
+    }
+
+    function getAdjacentEnemies(coords) {
 	var neighborSpaces = getNeighborCoords(coords);
-	var hasAdjacentEnemy = unitArray.some(function(u) {
+	var adjacentEnemies = unitArray.filter(function(u) {
 	    for(var i=0; i<neighborSpaces.length; ++i) {
 		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.getAlliance(game) != unit.getAlliance(game)) { return true; }
 	    }
 	    return false;
 	});
-	if(hasAdjacentEnemy) { totalMoveCost = unit.moveLeft; }
+	return adjacentEnemies;
     }
-
-    return { path: actualPath, revealedUnits: [], moveCost: totalMoveCost };
 }

@@ -398,14 +398,27 @@ var ui = {
 	ui.moveAnimating = true;
         var path = moveData.path;
         var currSpace = world.getSpaceByCoords(path[0]),
-            nextSpace = world.getSpaceByCoords(path[1]),
-            unit = world.units[currSpace.x+","+currSpace.y]
-            start = null, stepProgress = 0, prevX = unit.shape.x, prevY = unit.shape.y, pathPos = 1;
+            nextSpace = world.getSpaceByCoords(path[1]);
 
-	var remainingMove = unit.moveLeft - (moveData.moveCost || 0);
+	var unit;
+	if(currSpace) { unit = world.units[currSpace.x+","+currSpace.y]; }
+	else if(moveData.unit) {
+	    var moveSuppliedUnit = true;
+	    console.log("using move-supplied unit");
+	    unit = new Unit(moveData.unit);
+	    moveData.unit = unit;
+	}
+
+	if(!unit) {
+	    ui.clearPath();
+	    ui.finishAnimation();
+	    return;
+	}
+
+	var start = null, stepProgress = 0, prevX = unit.shape.x, prevY = unit.shape.y, pathPos = 1;
+
+	var remainingMove = !moveSuppliedUnit ? unit.moveLeft - (moveData.moveCost || 0) : unit.moveLeft;
 	if(moveData.capture || moveData.combat) { remainingMove = 0; }
-
-	// TODO: reveal response.revealedUnits
 
         if(path.length < 2) {
 	    if(moveData.combat) { ui.animateAttack(moveData); }
@@ -421,19 +434,25 @@ var ui = {
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
             
-            var diffX = nextSpace.shape.x - currSpace.shape.x,
-                diffY = nextSpace.shape.y - currSpace.shape.y;
             var fraction = (timestamp - start) / (600 * ui.animationFactor);
             stepProgress += fraction;
             stepProgress = Math.min(1, stepProgress);
-            
-            unit.shape.x = prevX + stepProgress * diffX;
-            unit.shape.y = prevY + stepProgress * diffY;
-            world.stage.update();
 
-	    var cornerX = unit.shape.x - world.stage.canvas.width / 2;
-	    var cornerY = unit.shape.y - world.stage.canvas.height / 2;
-	    scroll.scrollTo(-cornerX, -cornerY);
+            if(nextSpace && currSpace) {
+                var diffX = nextSpace.shape.x - currSpace.shape.x,
+                    diffY = nextSpace.shape.y - currSpace.shape.y;
+            
+                unit.shape.x = prevX + stepProgress * diffX;
+                unit.shape.y = prevY + stepProgress * diffY;
+
+                world.stage.update();
+
+	        var cornerX = unit.shape.x - world.stage.canvas.width / 2;
+	        var cornerY = unit.shape.y - world.stage.canvas.height / 2;
+	        scroll.scrollTo(-cornerX, -cornerY);
+            } else if(nextSpace) {
+		world.addUnit(unit, nextSpace);
+	    }
 
             if(stepProgress == 1) {
                 currSpace = world.getSpaceByCoords(path[pathPos]);
@@ -446,18 +465,30 @@ var ui = {
                 stepProgress = 0;
             }
             
-            if(!nextSpace) {
+            if(path.length == pathPos) {
 		if(moveData.capture) {
 		    currSpace.setVillageFlag(unit.team);
 		}
 
-		world.positionUnit(unit, currSpace);
-		unit.update({ moveLeft: remainingMove });
+	        if(moveData.revealedUnits) {
+		    moveData.revealedUnits.forEach(function(u) {
+			u = new Unit(u);
+			if(!world.getUnitAt(u)) {
+			    world.addUnit(u, world.getSpaceByCoords(u));
+			}
+		    });
+		}
+
+		if(currSpace) {
+		    world.positionUnit(unit, currSpace);
+		    unit.update({ moveLeft: remainingMove });
+		} else {
+		    world.removeUnit(unit);
+		}
 
 		if(moveData.combat) {
 		    ui.animateAttack(moveData);
-		}
-                else {
+		} else {
 		    ui.clearPath();
 		    ui.finishAnimation();
 		}
