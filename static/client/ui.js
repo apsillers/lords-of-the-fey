@@ -632,7 +632,7 @@ var ui = {
 	    $(attackIcon).css("float","left");
 
 	    var defense = defender.selectDefense(attacker, attack, gameInfo.timeOfDay, attackerCover, defenderCover).defense;
-	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay, ui.path[ui.path.length-2].space);
+	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay, ui.path[ui.path.length-1].space);
 	    var defenseText = stringifyAttack(defense);
 	    var defenseIcon;
 	    if(defense) {
