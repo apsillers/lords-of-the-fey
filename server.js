@@ -234,7 +234,7 @@ function initListeners(socket, collections) {
 					unit.moveLeft = 0;
 
 					// resolve combat
-                                        var attackSpace = moveResult.path[moveResult.path.length-2];
+                                        var attackSpace = moveResult.path[moveResult.path.length-1];
 					moveResult.combat = executeAttack(unit, attackIndex, attackSpace, defender, unitArray, mapData, game);
 
 					collections.games.save(game, { safe: true }, function() {
@@ -377,29 +377,42 @@ function initListeners(socket, collections) {
 	    }
 
 	    collections.games.save(game, { safe: true }, function() {
-
 		// find all units owned by the newly active player
-		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) { 
-		    var updates = [];
-		    var sendUpdates = function() {
-			io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam, updates: updates, timeOfDay: game.timeOfDay });
+		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) {
+		    unitCursor.toArray(doUpdates);
+		});
+		function doUpdates(err, unitList) {
+		    unitList = unitList.map(function(u) { return new Unit(u); });
+		    var unitsIndexedBySpace = unitList.reduce(function(result, u) { result[u.x+","+u.y] = u; return result; }, {});
 
-			var activePlayerSocketData = socketList.filter(function(o) {
-			    return o.gameId.equals(gameId) && o.username == game.players[game.activeTeam-1].username;
-			})[0];
+		    var updates = {};
+		    var finishUpdates = function() {
+			(function saveUnitFromList (i) {
+			    if(unitList[i] == undefined) { sendUpdates(); return; }
+			    collections.units.save(unitList[i].getStorableObj(), {safe:true}, function() {
+				saveUnitFromList(i+1);
+			    });
+			})(0);
 
-			if(activePlayerSocketData) {
-			    activePlayerSocketData.socket.emit("playerUpdate", { gold: game.players[game.activeTeam-1].gold });
+			function sendUpdates() {
+			    io.sockets.in("game"+gameId).emit("newTurn", { activeTeam: game.activeTeam,
+									   updates: updates,
+									   timeOfDay: game.timeOfDay });
+
+			    var activePlayerSocketData = socketList.filter(function(o) {
+			        return o.gameId.equals(gameId) && o.username == game.players[game.activeTeam-1].username;
+			    })[0];
+
+			    if(activePlayerSocketData) {
+			        activePlayerSocketData.socket.emit("playerUpdate", { gold: game.players[game.activeTeam-1].gold });
+			    }
 			}
 		    };
 		    
 		    loadMap(game.map, function(err, mapData) {
-			unitCursor.next(function updateUnitForNewTurn(err, unit) {
-			    if(unit == null) { sendUpdates(); return; }
-			    
-			    var update = { x: unit.x, y: unit.y };
-			    unit = new Unit(unit);
-			    var healedHp = 0;
+			unitList.forEach(function updateUnitForNewTurn(unit) {
+			    var update = updates[unit.x+","+unit.y] || {};
+			    var healedHp = update.healedHp || 0;
 			    // heal unmoved units
 			    if(unit.moveLeft == unit.move && !unit.hasAttacked) {
 				unit.hp = Math.min(unit.hp+2, unit.maxHp);
@@ -447,8 +460,33 @@ function initListeners(socket, collections) {
 				villageHeal();
 			    }
 
-			    // TODO: healers each bump up healedHp
-			    var coords = Terrain.getNeighborCoords(unit);
+			    // TODO: heal allied off-team units as well (currently we only get same-team units from Mongo)
+			    var healingHp = 0;
+			    for(var i=0; i<(unit.attributes||[]).length; ++i) {
+				var abilityProps = unitLib.abilityDict[unit.attributes[i]];
+				if(abilityProps && abilityProps.heals) {
+				    healingHp += abilityProps.heals;
+				}
+			    }
+			    if(healingHp > 0) {
+				console.log("HEALING");
+				var coords = Terrain.getNeighborCoords(unit);
+				for(var i=0; i<coords.length; ++i) {
+				    var coord = coords[i];
+				    var healedUnit = unitsIndexedBySpace[coord.x+","+coord.y];
+				    if(healedUnit) {
+					console.log(healedUnit.name);
+					var healedUpdate = update[coord.x+","+coord.y] || {};
+					healedUpdate.healedHp = healedUpdate.healedHp || 0;
+				        healingHp = Math.min(healingHp, 8 - healedUpdate.healedHp);
+					healedUnit.hp = Math.min(healedUnit.hp+healingHp, healedUnit.maxHp);
+					healedUpdate.healedHp += healingHp;
+					console.log(healedUpdate);
+					healedUpdate.hp = healedUnit.hp;
+					updates[coord.x+","+coord.y] = healedUpdate;
+				    }
+				}
+			    }
 
 			    if(unit.hasCondition("poisoned")) {
 				unit.hp = Math.max(1, unit.hp-8);
@@ -456,19 +494,16 @@ function initListeners(socket, collections) {
 			    }
 
 			    if(healedHp != 0) {
-				healedHp = Math.max(healedHp, 8);
+				update.healedHp = Math.max(healedHp, 8);
 				unit.hp = Math.min(unit.hp+healedHp, unit.maxHp);
 				update.hp = unit.hp;
 			    }
 
-			    updates.push(update);
-			    
-			    collections.units.save(unit.getStorableObj(), {safe:true}, function() {
-				unitCursor.next(updateUnitForNewTurn);
-			    });
+			    updates[unit.x+","+unit.y] = update;
 			});
+			finishUpdates();
 		    });
-		});
+		};
 	    });
 	});
     });

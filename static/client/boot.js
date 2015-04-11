@@ -172,9 +172,9 @@ window.addEventListener("load", function() {
 	    $("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
 	    $("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
 
-	    for(var i=0; i<data.updates.length; ++i) {
+	    for(var i in data.updates) {
 		var update = data.updates[i];
-		world.getUnitAt(update).update(update);
+		world.getUnitAt(i).update(update);
 	    }
 
 	    for(var unit in world.units) {

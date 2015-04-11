@@ -238,7 +238,9 @@ unitLib.abilityDict = {
 	    }
 	    unit.attacks = newAttacks;
 	}
-    }
+    },
+    "heals +4": { heals: 4 },
+    "heals +8": { heals: 8 }
 }
 
 /**
@@ -652,12 +654,12 @@ unitLib.unitProto = {
 
 	if(timeOfDay == "morning" || timeOfDay == "afternoon") {
 	    var modifier = (this.alignment=="lawful"?1:-1) * 0.25;
-	    return 1 + this.attributes.indexOf("fearless")==-1?modifier:0;
+	    return 1 + (this.attributes.indexOf("fearless")==-1?modifier:0);
 	}
 
 	if(timeOfDay == "first watch" || timeOfDay == "second watch") {
 	    var modifier = (this.alignment=="chaotic"?1:-1) * 0.25;
-	    return 1 + this.attributes.indexOf("fearless")==-1?modifier:0;
+	    return 1 + (this.attributes.indexOf("fearless")==-1?modifier:0);
 	}
 
 	return 1;
