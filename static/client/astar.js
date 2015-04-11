@@ -255,8 +255,8 @@ function allAccessibleSpaces(world, start, unit, game) {
 
     // is this space non-final or free of friendly units?
     function not_blocked_by_friend(space) {
-        var occupant = world.getUnitAt(space);
-        if(occupant && occupant.getAlliance(game) == unit.getAlliance(game)) { return false; }
+        //var occupant = world.getUnitAt(space);
+        //if(occupant && occupant.getAlliance(game) == unit.getAlliance(game)) { return false; }
         return true;
     }
 }
