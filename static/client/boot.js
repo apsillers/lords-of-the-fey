@@ -184,6 +184,17 @@ window.addEventListener("load", function() {
 
 	    world.stage.update();
 
+	    if(ui.hasTurn) {
+	        for(var c in world.units) {
+		    u = world.units[c];
+		    if(u.isCommander && u.team == gameInfo.player.team) {
+			var cornerX = u.shape.x - world.stage.canvas.width / 2;
+			var cornerY = u.shape.y - world.stage.canvas.height / 2;
+			scroll.scrollTo(-cornerX, -cornerY);
+		    }
+	        }
+	    }
+
 	    ui.finishAnimation();
 	});
     });
