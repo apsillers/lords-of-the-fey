@@ -63,6 +63,11 @@ div.top-status img {
 div.recruit-item {
     margin-bottom: 2px;
     background-color: #CCC;
+    height: 72px;
+}
+
+div.recruit-item img {
+    float: left;
 }
 
 div.recruit-item.selected {

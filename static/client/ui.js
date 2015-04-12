@@ -344,10 +344,12 @@ var ui = {
 	    
 	    listItem.append(unit.imgObj);
 
-	    var unitText = $("<span>");
-	    unitText.text(unit.name);
-	    unitText.css({top: "-40px", position: "relative"});
+	    var unitText = $("<div>");
+	    unitText.append($("<span>", { text: unit.name }));
+	    unitText.append($("<br>"));
+	    unitText.append($("<span>", { text: unit.cost + " Gold" }));
 
+	    unitText.css({"padding-top": "10px"});
 	    listItem.append(unitText);
 	    recruitListDOM.append(listItem);
 
