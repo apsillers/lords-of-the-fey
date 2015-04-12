@@ -109,6 +109,7 @@ div.attack-item.selected {
 
 #loading-overlay progress {
     margin-top: 10px;
+    width: 400px;
 }
 
 #loading-overlay #load-text {
