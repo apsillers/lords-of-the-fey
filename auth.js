@@ -32,7 +32,7 @@ Decide whether the owner of the given socket can act in the given game
 @returns {Boolean}
 */
 exports.socketOwnerCanAct = function(socket, game, allowAdvancement) {
-    var user = socket.handshake.user;
+    var user = socket.request.user;
     if(!user) { return false; }
     var player = game.players.filter(function(p) { return p.username == user.username })[0];    
     if(!player) { return false; }

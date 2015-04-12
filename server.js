@@ -24,7 +24,7 @@ var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server
 , ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
 var passport = require("passport");
 var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
 var createUnit = require("./createUnit");
@@ -102,7 +102,7 @@ function onAuthorizeSuccess(data, accept){
 
   // The accept-callback still allows us to decide whether to
   // accept the connection or not.
-    accept(null, true);
+    accept();
 }
 
 function onAuthorizeFail(data, message, error, accept){
@@ -111,10 +111,10 @@ function onAuthorizeFail(data, message, error, accept){
     console.log('failed connection to socket.io:', message);
 
   // We use this callback to log all of our failed connections.
-    accept(null, true);
+    accept(new Error("Unknown error in Passport authentication"));
 }
 
-io.set('authorization', passportSocketIo.authorize({
+io.use(passportSocketIo.authorize({
     cookieParser: require("cookie-parser"),
     secret:      config.sessionSecret, // the session_secret to parse the cookie
     store:       mongoStore,           // we NEED to use a sessionstore. no memorystore please
@@ -130,9 +130,9 @@ function initListeners(socket, collections) {
 
     // request for all game data
     socket.on("alldata", function(data) {
-	console.log("serving data to", socket.handshake.user.username);
+	console.log("serving data to", socket.request.user.username);
         var gameId = ObjectID(data.gameId);
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 
         collections.units.find({ gameId:gameId }, function(err, cursor) {
             collections.games.findOne({ _id:gameId }, function(err, game) {
@@ -149,8 +149,8 @@ function initListeners(socket, collections) {
     socket.on("join game", function(gameId) {
 	var gameId = ObjectID(gameId);
         socket.join("game"+gameId);
-	if(socket.handshake.user) {
-	    socketList.push({ gameId: gameId, username: socket.handshake.user.username, socket: socket });
+	if(socket.request.user) {
+	    socketList.push({ gameId: gameId, username: socket.request.user.username, socket: socket });
 	}
     });
 
@@ -168,7 +168,7 @@ function initListeners(socket, collections) {
         var gameId = ObjectID(data.gameId);
         var path = data.path;
 	var attackIndex = data.attackIndex;
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
@@ -317,7 +317,7 @@ function initListeners(socket, collections) {
     // create a new unit
     socket.on("create", function(data) {
 	var gameId = ObjectID(data.gameId);
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
             loadMap(game.map, function(err, mapData) {
@@ -338,7 +338,7 @@ function initListeners(socket, collections) {
     socket.on("levelup", function(data) {
         var gameId = ObjectID(data.gameId);
         var choiceNum = data.choiceNum;
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
 	    // ensure that the logged-in user has the right to act

@@ -32,7 +32,7 @@ var players = [];
 
 module.exports.initLobbyListeners = function(sockets, socket, collections, app) {
     socket.on("join lobby", function() {
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	if(!user) { return; }
 
 	players.push(user.username);
@@ -42,7 +42,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	socket.join("lobby");
 
 	socket.on("disconnect", function() {
-	    var user = socket.handshake.user;
+	    var user = socket.request.user;
 	    if(!user) { return; }
 	    var index = players.indexOf(user.username);
 	    if(index != -1) { players.splice(index, 1); }
@@ -51,12 +51,12 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     });
 
     socket.on("create room", function(data) {
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	if(!user) { return; }
 
 	var loadMap = require("./loadUtils").loadMap;
 
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	
 	loadMap(data.map, function(err, mapData) {
 	    var startPositions = require("./createGame").getStartPositions(mapData);
@@ -77,17 +77,17 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
     socket.on("join room", function(data) {
 	var room = rooms[+data.id];
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	joinRoom(user, room);
     });
 
     socket.on("enter room", function(id) {
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	socket.join("room"+id);
 	socket.emit("room data", { you: user.username, room: rooms[+id] });
 
 	socket.on("disconnect", function() {
-	    var user = socket.handshake.user;
+	    var user = socket.request.user;
 	    if(!user) { return; }
 
 	    leaveRoom(+id, user.username);
@@ -145,7 +145,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     socket.on("ready", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	if(!user) { return; }
 	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
 	if(!player) { return; }
@@ -175,7 +175,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     socket.on("set faction", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	if(!user) { return; }
 	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
 	if(!player) { return; }
@@ -188,7 +188,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     socket.on("set alliance", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
-	var user = socket.handshake.user;
+	var user = socket.request.user;
 	if(!user) { return; }
 	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
 	if(!player) { return; }
