@@ -87,10 +87,8 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	    (function addCommander() {
 		index++;
 		if(index == playerList.length) { console.log("wow, we made a game:", game._id); resolutionCallback(game._id); return; }
-		var typeName = playerList[index].faction=="elves"?"elvish_archer":"orcish_grunt";
+		var typeName = playerList[index].faction=="elves"?"elvish_ranger":"orcish_warrior";
 		var coords = startPositions[playerList[index].team];
-
-		console.log(index, playerList.length, typeName);
 
 		var unit = new Unit({
 		    gameId: game._id,
