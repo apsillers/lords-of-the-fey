@@ -39,8 +39,8 @@ var scroll = {
 	var mapWidth = Space.WIDTH + ((Space.WIDTH * 3/4 + 0.6) * (world.maxX));
 	var mapHeight = Space.HEIGHT * (world.maxY + 1.5);
 
-	world.mapContainer.x = Math.min(0, Math.max(x, stage.canvas.width - mapWidth));
-	world.mapContainer.y = Math.max(Math.min(y, 0), stage.canvas.height - mapHeight);
+	world.mapContainer.x = Math.floor(Math.min(0, Math.max(x, stage.canvas.width - mapWidth)));
+	world.mapContainer.y = Math.floor(Math.max(Math.min(y, 0), stage.canvas.height - mapHeight));
 	world.stage.update();
 
 	minimap.positionViewBox();
