@@ -20,8 +20,8 @@ var scroll = {
     scrollX: 0,
     scrollY: 0,
     scrollInterval: null,
-    scrollPeriod: 50,
-    scrollDist: 3,
+    scrollPeriod: 25,
+    scrollDist: 50,
     scrollFunc: function() {
 	scroll.applyScroll(scroll.scrollX, scroll.scrollY);
 	if(!world.stage.mouseInBounds || (scroll.scrollX == 0 && scroll.scrollY == 0)) {
