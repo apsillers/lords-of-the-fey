@@ -29,7 +29,7 @@ var ui = {
     hoverSpace: null,
     hoverUnit: null,
 
-    animationFactor: 1,
+    animationFactor: 0.66,
 
     onSpaceHover: function(e) {
 	
@@ -215,15 +215,20 @@ var ui = {
     drawHexWithGraphic: function(gfx) {
         gfx.moveTo(18, 0).lineTo(53, 0).lineTo(72, 36).lineTo(53, 72).lineTo(18,72).lineTo(0, 36).lineTo(18,0);
     },
+    drawReverseHexWithGraphic: function(gfx) {
+        gfx.moveTo(18, 0).lineTo(0, 36).lineTo(18, 72).lineTo(53, 72).lineTo(72, 36).lineTo(53, 0).lineTo(18, 0);
+	
+    },
 
     showMoveRange: function(space, unitToMove) {
 	ui.inspectedUnit = unitToMove;
+	if(unitToMove.team != gameInfo.activeTeam) { var actualMove = unitToMove.moveLeft; unitToMove.moveLeft = unitToMove.move; }
 	var accessibleSpaces = allAccessibleSpaces(world, space, unitToMove, gameInfo);
+	if(unitToMove.team != gameInfo.activeTeam) { unitToMove.moveLeft = actualMove; }
 	ui.rangeShape = new createjs.Container();
-        for(var i=0;i<=world.maxX;++i){
-	    for(var j=0;j<=world.maxY;++j) {
-		if(i+","+j in accessibleSpaces) { continue; }
- 		var s = world.getSpaceByCoords(i,j);
+	ui.rangeShape.addChild(ui.rangeBackdrop);
+        for(var coord in accessibleSpaces) {
+ 		var s = world.getSpaceByCoords(coord);
 		var pip = new createjs.Container();
 		pip.x = s.shape.x;
 		pip.y = s.shape.y;
@@ -231,12 +236,12 @@ var ui = {
 		pip.addEventListener("click", Space.passthroughFunc);
 		pip.addEventListener("rollover", Space.passthroughFunc);
 		var bar = new createjs.Shape();
-		ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
-		bar.cache(0,0,72,72);
+		bar.compositeOperation = 'destination-out';
+		ui.drawReverseHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,1)"));
 		pip.addChild(bar);
 		ui.rangeShape.addChild(pip);
-	    }
 	}
+	ui.rangeShape.cache(0,0,world.mapWidth,world.mapHeight);
 	world.mapContainer.addChild(ui.rangeShape);
 	world.stage.update();
     },
@@ -816,4 +821,32 @@ var ui = {
 	ui.moveAnimating = false;
 	actionQueue.doNext();	
     }
-}
+};
+
+(function() {
+    var rangeBackdrop;
+    Object.defineProperty(ui, "rangeBackdrop", {
+        get: function() {
+	    if(rangeBackdrop) { return rangeBackdrop; }
+	    rangeBackdrop = new createjs.Container();
+            for(var i=0;i<=world.maxX;++i){
+	        for(var j=0;j<=world.maxY;++j) {
+ 		    var s = world.getSpaceByCoords(i,j);
+		    var pip = new createjs.Container();
+		    pip.x = s.shape.x;
+		    pip.y = s.shape.y;
+		    pip.owner = s;
+		    pip.addEventListener("click", Space.passthroughFunc);
+		    pip.addEventListener("rollover", Space.passthroughFunc);
+		    var bar = new createjs.Shape();
+		    ui.drawHexWithGraphic(bar.graphics.beginFill("rgba(160,160,160,0.6)"));
+		    pip.addChild(bar);
+		    rangeBackdrop.addChild(pip);
+	        }
+	    }
+	    rangeBackdrop.cache(0,0,world.mapWidth,world.mapHeight);
+	    return rangeBackdrop;
+        }
+    });
+})();
+

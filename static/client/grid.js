@@ -18,7 +18,7 @@
 */
 function World(canvasName) {
     this.stage = new createjs.Stage(canvasName);
-    this.stage.enableMouseOver(50);
+    this.stage.enableMouseOver(83);
     createjs.Touch.enable(this.stage);
     this.mapContainer = new createjs.Container();
     this.baseTerrain = new createjs.Container();
@@ -70,6 +70,10 @@ World.prototype = {
 	this.mapContainer.setChildIndex(this.baseTerrain, 0);
 	this.mapContainer.setChildIndex(this.transitionTerrain, 1);
         this.stage.addChild(this.mapContainer);
+
+	//this.baseTerrain.cache(0,0,this.mapWidth,this.mapHeight);
+	//this.transitionTerrain.cache(0,0,this.mapWidth,this.mapHeight);
+
 	this.resizeCanvasToWindow();
 	this.stage.update();
 

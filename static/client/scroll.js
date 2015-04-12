@@ -20,7 +20,7 @@ var scroll = {
     scrollX: 0,
     scrollY: 0,
     scrollInterval: null,
-    scrollPeriod: 25,
+    scrollPeriod: 50,
     scrollDist: 50,
     scrollFunc: function() {
 	scroll.applyScroll(scroll.scrollX, scroll.scrollY);
