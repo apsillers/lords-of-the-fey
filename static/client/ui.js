@@ -174,7 +174,8 @@ var ui = {
 	if(ui.moveHappening || !ui.hasTurn) { return; }
 
 	if(e.nativeEvent.button == 2) {
-	    ui.onContextMenu(space, { x: e.stageX, y: e.stageY });
+	    if(ui.pathSource) { ui.hideMoveRange(); world.mapContainer.removeChild(ui.pathShape); ui.pathSource = null; }
+	    else { ui.onContextMenu(space, { x: e.stageX, y: e.stageY }); }
 	    return;
 	}
 
@@ -243,6 +244,7 @@ var ui = {
     hideMoveRange: function() {
 	ui.inspectedUnit = null;
         world.mapContainer.removeChild(ui.rangeShape);
+	ui.rangeShape = null;
 	world.stage.update();
     },
 
@@ -431,6 +433,14 @@ var ui = {
 	// animate above other units while moving
 	world.mapContainer.setChildIndex(unit.shape, world.mapContainer.children.length - 1);
 
+	if(!moveSuppliedUnit) { var target = unit; }
+	else { path.some(function(s) { return target = world.getSpaceByCoords(s); }); }
+	if(target) {
+            var cornerX = target.shape.x - world.stage.canvas.width / 2;
+            var cornerY = target.shape.y - world.stage.canvas.height / 2;
+            scroll.scrollTo(-cornerX, -cornerY);
+	}
+
         window.requestAnimationFrame(function step(timestamp) {
             if (start == null) { start = timestamp; }
             
@@ -446,10 +456,6 @@ var ui = {
                 unit.shape.y = prevY + stepProgress * diffY;
 
                 world.stage.update();
-
-	        var cornerX = unit.shape.x - world.stage.canvas.width / 2;
-	        var cornerY = unit.shape.y - world.stage.canvas.height / 2;
-	        scroll.scrollTo(-cornerX, -cornerY);
             } else if(nextSpace) {
 		world.addUnit(unit, nextSpace);
 	    }
