@@ -111,7 +111,8 @@ function onAuthorizeFail(data, message, error, accept){
     console.log('failed connection to socket.io:', message);
 
   // We use this callback to log all of our failed connections.
-    accept(new Error("Unknown error in Passport authentication"));
+  //accept(new Error("Unknown error in Passport authentication"));
+  accept();
 }
 
 io.use(passportSocketIo.authorize({
