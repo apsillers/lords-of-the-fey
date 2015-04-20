@@ -16,7 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var socket = io.connect('//' + location.host);
+var socket = io();
 
 var roomId = location.search.match(/id=([^&]*)/)[1];
 var players;
