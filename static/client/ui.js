@@ -1,5 +1,5 @@
 /**
-    Copyright 2014 Andrew P. Sillers
+    Copyright 2014, 2015 Andrew P. Sillers
 
     This file is part of Lords of the Fey.
 
@@ -411,10 +411,11 @@ var ui = {
 
 	var unit;
 	if(currSpace) { unit = world.units[currSpace.x+","+currSpace.y]; }
-	else if(moveData.unit) {
+	if(!unit && moveData.unit) {
 	    var moveSuppliedUnit = true;
-	    console.log("using move-supplied unit");
 	    unit = new Unit(moveData.unit);
+            if(currSpace && currSpace.x) { world.addUnit(unit, currSpace); }
+	    //console.log("using move-supplied unit", moveData.unit, unit);
 	    moveData.unit = unit;
 	}
 
@@ -463,7 +464,7 @@ var ui = {
                 unit.shape.y = prevY + stepProgress * diffY;
 
                 world.stage.update();
-            } else if(nextSpace) {
+            } else if(nextSpace && nextSpace.x) {
 		world.addUnit(unit, nextSpace);
 	    }
 
@@ -492,7 +493,7 @@ var ui = {
 		    });
 		}
 
-		if(currSpace) {
+		if(currSpace && !path[pathPos-1].hidden) {
 		    world.positionUnit(unit, currSpace);
 		    unit.update({ moveLeft: remainingMove });
 		} else {

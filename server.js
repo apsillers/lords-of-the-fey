@@ -1,5 +1,5 @@
 /**
-    Copyright 2014 Andrew P. Sillers
+    Copyright 2014, 2015 Andrew P. Sillers
 
     This file is part of Lords of the Fey.
 
@@ -188,6 +188,8 @@ function initListeners(socket, collections) {
                         cursor.toArray(function(err, unitArray) {
 			    unitArray = unitArray.map(function(u) { return new Unit(u); });
 
+                            var isInitiallyHidden = unit.hasCondition("hidden");
+
 			    // make the move
                             var moveResult = require("./executePath")(path, unit, unitArray, mapData, game);
 
@@ -196,7 +198,7 @@ function initListeners(socket, collections) {
                             unit.y = endPoint.y;
 			    unit.moveLeft -= moveResult.moveCost || 0;
 
-			    if(unit.hasCondition("hidden")) { moveResult.unit = unit.getStorableObj(); }
+                            if(isInitiallyHidden) { moveResult.unit = unit.getStorableObj(); }
 
 			    if(moveResult.hide) {
 				unit.addCondition("hidden");

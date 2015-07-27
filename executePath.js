@@ -1,5 +1,5 @@
 /**
-    Copyright 2014 Andrew P. Sillers
+    Copyright 2014, 2015 Andrew P. Sillers
 
     This file is part of Lords of the Fey.
 
@@ -99,24 +99,43 @@ module.exports = function executePath(path, unit, unitArray, mapData, game) {
 
     function concludePathing(isAttack) {
         if(unit.attributes && unit.attributes.indexOf("ambush") != -1) {
+            var prevSpaceHidden = null;
 	    var publicPath = actualPath.map(function(s,i) {
-		// if you started visible on foreset, you're visible
+                var result;
+		// if you started visible on forest, you're visible
 	        if(!unit.hasCondition("hidden") && i==0) { return s; }
 		// if you ended adjacent to enemies on forset, you're visible
 		if(adjacentEnemies.length>0 && i==actualPath.length-1) { return s; }
 
-	        return (mapData[s.x+","+s.y].terrain.properties.indexOf("forest")!=-1)?"hidden":s;
-	    });
+                if(mapData[s.x+","+s.y].terrain.properties.indexOf("forest")!=-1) {
+                    return { x: s.x, y: s.y, hidden: true };
+                }
+	        return s;
+	    }).map(function (s,i,array) {
+                var prev = array[i-1],
+                    next = array[i+1];
+                // if unit is hidden on this tile, and will be hidden on the
+                //  surrounding tiles, do not publish the x/y coords
+                // (if the other tiles are non-hidden, we need them to animate transition)
+                if(s.hidden &&
+                   (!prev || (prev && prev.hidden)) &&
+                   (!next || (next && next.hidden))) {
+                    return { hidden: true };
+                }
+                return s;
+            });
         } else {
 	    publicPath = actualPath;
         }
+
+        console.log(publicPath);
 
         return {
 	         path: actualPath,
 	         publicPath: publicPath,
 	         moveCost: totalMoveCost,
 	         revealedUnits: revealedUnits,
-	         hide: publicPath[publicPath.length-1]=="hidden",
+	         hide: publicPath[publicPath.length-1].hidden,
 		 attack: isAttack
 	       };
     }
