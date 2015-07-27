@@ -121,6 +121,7 @@
 
             VOLCANO: { symbol: "Mv", name: "volcano", img: "/data/img/terrain/volcano-tile.png", properties:["impassable"], color:"#666" },
 	    },
+
 	overlays: {
             SUMMER_DFOREST: { symbol: "Fd", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
             WINTER_DFOREST: { symbol: "Fdw", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
@@ -145,7 +146,7 @@
             MERFOLK_VILLAGE: { symbol: "Vm", name: "merfolk village", img: "/data/img/terrain/village/swampwater.png", properties: ["village","water"], color:"#DDD" },
             WOODEN_BRIDGE_N: { symbol: "Bw|", name: "wooden bridge", img: "/data/img/terrain/wood-n-s.png", properties: ["flat","water"], color:"#DDD" },
             WOODEN_BRIDGE_NE: { symbol: "Bw/", name: "wooden bridge", img: "/data/img/terrain/wood-ne-sw.png", properties: ["flat","water"], color:"#DDD" },
-            WOODEN_BRIDGE_NW: { symbol: "Bw\\", name: "wooden bridge", img: "/data/img/terrain/wood-se-nw.png", properties: ["flat","water"], color:"#DDD" },
+            IMPASSABLE_MOUNTAIN: { symbol: "Xm", name: "impassable mountain", img: "/data/img/terrain/cloud.png", properties: ["impassable"], color:"#DDD" }
 	},
 
 	transitionRank:["FORD", "SHALLOW_WATER", "DEEP_WATER", "DRY_GRASS", "SEMI_GRASS", "GRASS", "HUMAN_CASTLE", "HUMAN_KEEP", "ENCAMPMENT_CASTLE", "ENCAMPMENT_KEEP"],
@@ -195,16 +196,16 @@
                     terrainObj.color = overlay.color;
 		}
 
-		if(overlaySymbol && !overlay) {
-		    console.log("Missing overlay:", overlaySymbol);
-		}
-
 		if(terrainObj.properties.length == 0) {
                     terrainObj = { properties: ["flat"], img: "/data/img/terrain/void-editor.png", color: "#000" };
 
                     if(overlaySymbol) { terrainObj.overlayImg = "/data/img/terrain/forest.png"; }
 		}
             }
+
+	    if(overlaySymbol && !overlay) {
+		console.log("Missing overlay:", overlaySymbol);
+	    }
 
             return terrainObj;
 	},
