@@ -21,6 +21,7 @@ var ui = {
     moveAnimating: false,
     hasTurn: false,
     showingMenu: false,
+    justMadeContextMenu: false,
 
     pathSource: null,
     pathTarget: null,
@@ -165,8 +166,11 @@ var ui = {
 	if(ui.modal) { return; }
 
 	if(ui.showingMenu) {
-	    ui.hideMenus();
-	    return;
+	    if(!ui.justMadeContextMenu) {
+		ui.hideMenus();
+		ui.justMadeContextMenu = false;
+		return;
+	    }
 	}
 
 	var space = e.target.owner;
@@ -254,6 +258,8 @@ var ui = {
     },
 
     onContextMenu: function(space, coords) {
+        if(ui.showingMenu) { ui.hideMenus(); return; }
+
 	var cm = ui.contextMenu = new createjs.Container();
 	cm.x = coords.x;
 	cm.y = coords.y;

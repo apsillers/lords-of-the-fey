@@ -254,6 +254,7 @@ Space.prototype = {
 
 	    world.noMoveTimeout = setTimeout(function() {
 		ui.onContextMenu(e.target.owner, { x: e.stageX, y: e.stageY });
+		ui.justMadeContextMenu = true;
 	    }, 1000);
 	});
 
@@ -265,6 +266,12 @@ Space.prototype = {
 	    }
 
 	    ui.onSpaceHover(e);
+	});
+
+	this.shape.addEventListener("mouseup", function(e) {
+	    setTimeout(function() {
+		ui.justMadeContextMenu = false;
+	    }, 200);
 	});
 
         this.shape.addEventListener("rollover", ui.onSpaceHover);
