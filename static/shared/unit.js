@@ -1,5 +1,5 @@
 /**
-    Copyright 2014 Andrew P. Sillers
+    Copyright 2014, 2015 Andrew P. Sillers
 
     This file is part of Lords of the Fey.
 
@@ -199,6 +199,24 @@ var unitLib = {
     }
 }
 
+/* Function-factory for functions that take a unit and alter its attacks of a given type (ranged or melee) */
+function createModifyAttacksFunc(type, modifier) {
+    return function(unit) {
+        console.log("modifying ", type, modifier);
+	var newAttacks = [];
+	for(var i=0; i < unit.attacks.length; ++i) {
+	    var attack = unit.attacks[i];
+	    var newAttack = Object.create(attack);
+
+	    if(attack.type == type) {
+		newAttack.damage += modifier;
+	    }
+	    newAttacks.push(newAttack);
+	}
+	unit.attacks = newAttacks;
+    }
+}
+
 unitLib.abilityDict = {
     "resilient": {
 	onCreate: function(unit) { unit.maxHp += 4 + unit.level; }
@@ -206,38 +224,23 @@ unitLib.abilityDict = {
     "intelligent": {
 	onCreate: function(unit) { unit.maxXp = Math.round(unit.maxXp * 0.8); }
     },
+    "dim": {
+	onCreate: function(unit) { unit.maxXp = Math.round(unit.maxXp * 1.2); }
+    },
     "quick": {
 	onCreate: function(unit) { unit.maxHp = Math.round(unit.maxHp * .95); unit.move += 1; }
     },
+    "slow": {
+	onCreate: function(unit) { unit.maxHp = Math.round(unit.maxHp * 1.05); unit.move -= 1; }
+    },
     "strong": {
-	onCreate: function(unit) {
-	    var newAttacks = [];
-	    for(var i=0; i < unit.attacks.length; ++i) {
-		var attack = unit.attacks[i];
-		var newAttack = Object.create(attack);
-
-		if(attack.type == "melee") {
-		    newAttack.damage += 1;
-		}
-		newAttacks.push(newAttack);
-	    }
-	    unit.attacks = newAttacks;
-	}
+	onCreate: createModifyAttacksFunc("melee", +1)
+    },
+    "weak": {
+	onCreate: createModifyAttacksFunc("melee", -1)
     },
     "dextrous": {
-	onCreate: function(unit) {
-	    var newAttacks = [];
-	    for(var i=0; i < unit.attacks.length; ++i) {
-		var attack = unit.attacks[i];
-		var newAttack = Object.create(attack);
-
-		if(attack.type == "ranged") {
-		    newAttack.damage += 1;
-		}
-		newAttacks.push(newAttack);
-	    }
-	    unit.attacks = newAttacks;
-	}
+	onCreate: createModifyAttacksFunc("ranged", +1)
     },
     "heals +4": { heals: 4 },
     "heals +8": { heals: 8 }
