@@ -68,7 +68,7 @@ new MongoClient.connect(config.mongoString, function(err, mongo) {
 });
 
 app.set('view engine', 'hbs');
-express.static.mime.define({'text/html': ['hbs']});
+express.static.mime.define({'text/html': ['hbs'], 'text/cache-manifest': ['appcache']});
 app.set('views', __dirname + '/views');
 require("hbs").registerPartials(__dirname + '/views/partials');
 app.use(express.static(__dirname + '/static'));

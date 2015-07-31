@@ -4,7 +4,7 @@ date
 echo
 echo 'CACHE:'
 cd static
-find data/img -type f | sed 's/^/\//'
+find data/img -type f | sed 's/^/\//' | sed 's/ /%20/g'
 
 # don't cache these yet -- they change too often in development
 #find data/units -type f | sed 's/^/\//'
