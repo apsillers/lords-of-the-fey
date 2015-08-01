@@ -5,9 +5,10 @@
         "elvish_archer",
         "elvish_shaman",
         "elvish_fighter",
-        "wose"
+        "wose",
+        "mage"
     ],
     "commanderList": [
-       "elvish_archer"
+       "elvish_ranger"
     ]
 }
