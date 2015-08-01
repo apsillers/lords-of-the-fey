@@ -512,6 +512,12 @@ var ui = {
 		    ui.clearPath();
 		    ui.finishAnimation();
 		}
+
+		if(moveData.hide) {
+		    unit.addCondition("hidden");
+		} else {
+		    unit.removeCondition("hidden");
+		}
             } else {
                 start = timestamp;
                 window.requestAnimationFrame(step);

@@ -600,6 +600,9 @@ unitLib.unitProto = {
 	    if(this.hasCondition("slowed")) {
 		filters.push(new createjs.ColorFilter(0.7,0.7,0.9,1, 0,0,0,0));
 	    }
+	    if(this.hasCondition("hidden")) {
+		filters.push(new createjs.ColorFilter(1,1,1,0.75, 0,0,0,0));
+	    }
 	    this.bodyShape.filters = filters;
 	    this.bodyShape.cache(0, 0, this.bodyShape.image.width, this.bodyShape.image.height);
 	    world.stage.update();
