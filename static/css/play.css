@@ -120,11 +120,15 @@ div.attack-item.selected {
 }
 
 #loading-overlay progress {
-    margin-top: 10px;
+    margin: 10px auto;
     width: 400px;
 }
 
 #loading-overlay #load-text {
     margin-top: 20px;
+}
+
+.small-load-text {
+    font-size: 10pt;
 }
 
