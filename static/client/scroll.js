@@ -67,7 +67,22 @@ var scroll = {
 	    } else {
 		scroll.scrollY = 0;
 	    }
-        })
+        });
+
+        window.addEventListener("keydown", function(e) {
+            if(e.keyCode==38) { scroll.scrollY = -scroll.scrollDist; }
+            if(e.keyCode==40) { scroll.scrollY = scroll.scrollDist; }
+            if(e.keyCode==37) { scroll.scrollX = -scroll.scrollDist; }
+            if(e.keyCode==39) { scroll.scrollX = scroll.scrollDist; }
+            if(!scroll.scrollInterval) { scroll.scrollInterval = setInterval(scroll.scrollFunc, scroll.scrollPeriod); }
+        });
+
+        window.addEventListener("keyup", function(e) {
+            if(e.keyCode==38) { scroll.scrollY = 0; }
+            if(e.keyCode==40) { scroll.scrollY = 0; }
+            if(e.keyCode==37) { scroll.scrollX = 0; }
+            if(e.keyCode==39) { scroll.scrollX = 0; }
+        });
     }
 }
 
