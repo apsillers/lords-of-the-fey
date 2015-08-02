@@ -27,6 +27,7 @@ socket.emit("enter room", roomId);
 
 socket.on("room data", function(data) {
     if(data.room == undefined) {
+	window.removeEventListener("beforeunload", confirmLeave);
         window.location.href = "/lobby"
     }
 
@@ -98,10 +99,12 @@ function renderPlayerList() {
 }
 
 socket.on("kicked", function(roomId) {
+    window.removeEventListener("beforeunload", confirmLeave);
     window.location = "/lobby";
 });
 
 socket.on("launched room", function(gameId) {
+    window.removeEventListener("beforeunload", confirmLeave);
     window.location = "/client/grid.html?game="+gameId;
 });
 
@@ -110,3 +113,11 @@ $("#start-game-button").click(function() {
 	socket.emit("launch room", roomId);
     }
 });
+
+function confirmLeave(e) {
+    var confirmationMessage = 'You are about to leave this room. If you are the owner, the room will be closed.';
+
+    e.returnValue = confirmationMessage;
+    return confirmationMessage;
+}
+window.addEventListener("beforeunload", confirmLeave);
