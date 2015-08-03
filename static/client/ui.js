@@ -401,6 +401,8 @@ var ui = {
 
 	ui.modal.addChild(ui.recruitPrompt);
 	world.stage.update();
+
+	recruitListDOM.scrollTop(0);
     },
 
     hideMenus: function() {
@@ -808,7 +810,9 @@ var ui = {
 	$("#recruit-cancel").html("");
 
 	ui.modal.addChild(ui.recruitPrompt);
-	world.stage.update();	
+	world.stage.update();
+
+	recruitListDOM.scrollTop(0);
     },
 
     clearModal: function() {
