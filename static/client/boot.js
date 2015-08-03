@@ -25,8 +25,11 @@ var qStringMatch = location.search.match(/game=([^&]*)/);
 if(qStringMatch == null) {
     window.location.href = "/";
 }
-var gameInfo = { 
-    gameId: qStringMatch[1]
+var qTokenMatch = location.search.match(/token=([^&]*)/);
+var qTokenMatch = qTokenMatch && qTokenMatch[1];
+var gameInfo = {
+    gameId: qStringMatch[1],
+    anonToken: qTokenMatch
 };
 var factionList = ["elves", "orcs"];
 var factionDict = {};
@@ -39,188 +42,194 @@ window.addEventListener("load", function() {
 
     socket = io();
 
-    socket.emit("join game", gameInfo.gameId);
+    socket.emit("anon auth", gameInfo);
 
-    socket.emit("alldata", gameInfo);
-    socket.on("initdata", function(data) {
-	gameInfo.player = data.player || { username:"Observer", gold:0 };
+	    socket.on("anon auth done", function() {
 
-	$("#top-username").text(gameInfo.player.username);
+	    socket.emit("join game", gameInfo.gameId);
 
-	gameInfo.alliances = data.alliances;
-	gameInfo.activeTeam = data.activeTeam;
-	if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
+	    socket.emit("alldata", gameInfo);
+	    socket.on("initdata", function(data) {
+		gameInfo.player = data.player || { username:"Observer", gold:0 };
 
-	gameInfo.timeOfDay = data.timeOfDay;
-	$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
-	$("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
+		$("#top-username").text(gameInfo.player.username);
 
-	$("#top-gold-text").text(gameInfo.player.gold);
-	$("#top-active-team-text").text(gameInfo.activeTeam);
+		gameInfo.alliances = data.alliances;
+		gameInfo.activeTeam = data.activeTeam;
+		if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
 
-	$("#end-turn-button").on("click", function() {
-	    ui.hasTurn = false;
-	    socket.emit("endTurn", gameInfo);
-	});
+		gameInfo.timeOfDay = data.timeOfDay;
+		$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
+		$("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
 
-	$("#load-text").text("Loading units...");
+		$("#top-gold-text").text(gameInfo.player.gold);
+		$("#top-active-team-text").text(gameInfo.activeTeam);
 
-	unitLib.init(function() {
-	    $("#load-text").text("Loading terrain...");
-            var queue = new createjs.LoadQueue();
-            queue.on("complete", handleComplete, this);
-	    queue.on("progress", function(e) { $("#load-progress").attr("value", e.progress*100); });
-	    var factionManifest = factionList.map(function(k){
-		return { id:"faction"+k, src:"/data/factions/"+k+".json", type:createjs.LoadQueue.JSON }
-	    });
-            queue.loadManifest(factionManifest);
-            queue.loadManifest(
-		Object.keys(Terrain.bases).map(function(k){ return {id:"base"+k, src:Terrain.bases[k].img }; })
-            );
-            queue.loadManifest(
-		Object.keys(Terrain.overlays).map(function(k){ return {id:"overlay"+k, src:Terrain.overlays[k].img }; })
-            );
-            queue.loadManifest(
-		Object.keys(Terrain.transitions).reduce(function(arr,k){
-		    var imgBase = Terrain.transitions[k].imgBase;
-		    return arr.concat(Terrain.transitions[k].dirs.map(function(d){ return {id:"transition"+k+"-"+d, src:imgBase+"-"+d+".png" }; }));
-		}, [])
-            );
-            queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
+		$("#end-turn-button").on("click", function() {
+		    ui.hasTurn = false;
+		    socket.emit("endTurn", gameInfo);
+		});
 
-            function handleComplete() {
-		$("#loading-overlay").hide();
+		$("#load-text").text("Loading units...");
 
-		for(var k in Terrain.bases) {
-		    Terrain.bases[k].imgObj = queue.getResult("base"+k);
-		}
-		for(k in Terrain.overlays) {
-		    Terrain.overlays[k].imgObj = queue.getResult("overlay"+k);
-		}
-		console.log("hello complete");
-		for(k in Terrain.transitions) {
-		    Terrain.transitions[k].imgObjs = {};
-		    for(var i=0; i<Terrain.transitions[k].dirs.length; ++i) {
-			var d = Terrain.transitions[k].dirs[i];
-			Terrain.transitions[k].imgObjs[d] = queue.getResult("transition"+k+"-"+d);
-		    }
-		}
-		
-		for(var i = 0; i < factionList.length; ++i) {
-		    var factionName = factionList[i];
-		    factionDict[factionName] = queue.getResult("faction"+factionName);
-		}
-
-		if(gameInfo.player.faction) {
-		    gameInfo.player.recruitList = factionDict[gameInfo.player.faction].recruitList;
-		}
-
-		world = new World("c");
-		world.initGrid(toMapDict(queue.getResult("map")));
-		world.stage.canvas.addEventListener("contextmenu", function(e) { e.preventDefault(); });
-		window.addEventListener("resize", function() { world.resizeCanvasToWindow(); });
-		scroll.addScroll();
-
-		for(var i=0; i<data.units.length; i++) {
-                    var unitData = data.units[i];
-                    var unitObj = new Unit(unitData);
-                    world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
-		}
-
-		for(var unit in world.units) {
-		    world.units[unit].drawGem();
-		}
-
-		for(var i in data.villages) {
-		    world.getSpaceByCoords(i).setVillageFlag(data.villages[i]);
-		}
-
-		if(gameInfo.player.advancingUnit) {
-		    var thisUnit = world.getUnitAt(gameInfo.player.advancingUnit);
-		    ui.showAdvancementPromptFor(thisUnit, function(choiceNum) {
-			socket.emit("levelup", { gameId: gameInfo.gameId, choiceNum: choiceNum });
+		unitLib.init(function() {
+		    $("#load-text").text("Loading terrain...");
+		    var queue = new createjs.LoadQueue();
+		    queue.on("complete", handleComplete, this);
+		    queue.on("progress", function(e) { $("#load-progress").attr("value", e.progress*100); });
+		    var factionManifest = factionList.map(function(k){
+			return { id:"faction"+k, src:"/data/factions/"+k+".json", type:createjs.LoadQueue.JSON }
 		    });
-		}
-            }
-	}, function(e) { $("#load-progress").attr("value", e.progress*100); });
-    });
+		    queue.loadManifest(factionManifest);
+		    queue.loadManifest(
+			Object.keys(Terrain.bases).map(function(k){ return {id:"base"+k, src:Terrain.bases[k].img }; })
+		    );
+		    queue.loadManifest(
+			Object.keys(Terrain.overlays).map(function(k){ return {id:"overlay"+k, src:Terrain.overlays[k].img }; })
+		    );
+		    queue.loadManifest(
+			Object.keys(Terrain.transitions).reduce(function(arr,k){
+			    var imgBase = Terrain.transitions[k].imgBase;
+			    return arr.concat(Terrain.transitions[k].dirs.map(function(d){ return {id:"transition"+k+"-"+d, src:imgBase+"-"+d+".png" }; }));
+			}, [])
+		    );
+		    queue.loadFile({id:"map", src:"/data/maps/"+data.map, type:createjs.LoadQueue.TEXT});
 
-    socket.on("leveledup", function(data) {
-	actionQueue.addAction(function() {
-	    var thisUnit = world.getUnitAt(data);
-	    var newUnit = thisUnit.levelUp(data.choiceNum);
+		    function handleComplete() {
+			$("#loading-overlay").hide();
 
-	    world.removeUnit(thisUnit);
-	    world.addUnit(newUnit, world.getSpaceByCoords(data));
-	    delete gameInfo.player.advancingUnit;
-	    
-	    // trigger another level-up or prompt
-	    newUnit.update({ xp: newUnit.xp });
+			for(var k in Terrain.bases) {
+			    Terrain.bases[k].imgObj = queue.getResult("base"+k);
+			}
+			for(k in Terrain.overlays) {
+			    Terrain.overlays[k].imgObj = queue.getResult("overlay"+k);
+			}
+			console.log("hello complete");
+			for(k in Terrain.transitions) {
+			    Terrain.transitions[k].imgObjs = {};
+			    for(var i=0; i<Terrain.transitions[k].dirs.length; ++i) {
+				var d = Terrain.transitions[k].dirs[i];
+				Terrain.transitions[k].imgObjs[d] = queue.getResult("transition"+k+"-"+d);
+			    }
+			}
+		
+			for(var i = 0; i < factionList.length; ++i) {
+			    var factionName = factionList[i];
+			    factionDict[factionName] = queue.getResult("faction"+factionName);
+			}
 
-	    ui.finishAnimation();
-	});
-    });
+			if(gameInfo.player.faction) {
+			    gameInfo.player.recruitList = factionDict[gameInfo.player.faction].recruitList;
+			}
 
-    socket.on("newTurn", function(data) {
-	actionQueue.addAction(function() {
-	    gameInfo.activeTeam = data.activeTeam;
-	    $("#top-active-team-text").text(gameInfo.activeTeam);
-	    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+			world = new World("c");
+			world.initGrid(toMapDict(queue.getResult("map")));
+			world.stage.canvas.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+			window.addEventListener("resize", function() { world.resizeCanvasToWindow(); });
+			scroll.addScroll();
 
-	    gameInfo.timeOfDay = data.timeOfDay;
-	    $("#right_time_of_day").text(gameInfo.timeOfDay)
-	    $("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
-	    $("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
+			for(var i=0; i<data.units.length; i++) {
+		            var unitData = data.units[i];
+		            var unitObj = new Unit(unitData);
+		            world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
+			}
 
-	    for(var i in data.updates) {
-		var update = data.updates[i];
-		world.getUnitAt(i).update(update);
-	    }
+			for(var unit in world.units) {
+			    world.units[unit].drawGem();
+			}
 
-	    for(var unit in world.units) {
-		world.units[unit].drawGem();
-		world.units[unit].hasAttacked = false;
-	    }
+			for(var i in data.villages) {
+			    world.getSpaceByCoords(i).setVillageFlag(data.villages[i]);
+			}
 
-	    world.stage.update();
-
-	    if(ui.hasTurn) {
-	        for(var c in world.units) {
-		    u = world.units[c];
-		    if(u.isCommander && u.team == gameInfo.player.team) {
-			var cornerX = u.shape.x - world.stage.canvas.width / 2;
-			var cornerY = u.shape.y - world.stage.canvas.height / 2;
-			scroll.scrollTo(-cornerX, -cornerY);
+			if(gameInfo.player.advancingUnit) {
+			    var thisUnit = world.getUnitAt(gameInfo.player.advancingUnit);
+			    ui.showAdvancementPromptFor(thisUnit, function(choiceNum) {
+				socket.emit("levelup", { gameId: gameInfo.gameId, choiceNum: choiceNum, anonToken: gameInfo.anonToken });
+			    });
+			}
 		    }
-	        }
-	    }
+		}, function(e) { $("#load-progress").attr("value", e.progress*100); });
+	    });
 
-	    ui.finishAnimation();
-	});
-    });
+	    socket.on("leveledup", function(data) {
+		actionQueue.addAction(function() {
+		    var thisUnit = world.getUnitAt(data);
+		    var newUnit = thisUnit.levelUp(data.choiceNum);
 
-    socket.on("created", function(unitData) {
-	actionQueue.addAction(function() {
-	    if(unitData.type) {
-		var unitObj = new Unit(unitData);
-		world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
-	    }
-	    ui.finishAnimation();
-	});
-    });
+		    world.removeUnit(thisUnit);
+		    world.addUnit(newUnit, world.getSpaceByCoords(data));
+		    delete gameInfo.player.advancingUnit;
+		    
+		    // trigger another level-up or prompt
+		    newUnit.update({ xp: newUnit.xp });
 
-    socket.on("moved", function(data) {
-	actionQueue.addAction(function() {
-	    ui.animateUnitMove(data);
-	});
-    });
+		    ui.finishAnimation();
+		});
+	    });
 
-    socket.on("playerUpdate", function(data) {
-	actionQueue.addAction(function() {
-	    ui.updatePlayer(data);
-	});
+	    socket.on("newTurn", function(data) {
+		actionQueue.addAction(function() {
+		    gameInfo.activeTeam = data.activeTeam;
+		    $("#top-active-team-text").text(gameInfo.activeTeam);
+		    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+
+		    gameInfo.timeOfDay = data.timeOfDay;
+		    $("#right_time_of_day").text(gameInfo.timeOfDay)
+		    $("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
+		    $("#right_time_of_day").prop("title", gameInfo.timeOfDay.replace(/\b./g, function(s) { return s.toUpperCase(); }));
+
+		    for(var i in data.updates) {
+			var update = data.updates[i];
+			world.getUnitAt(i).update(update);
+		    }
+
+		    for(var unit in world.units) {
+			world.units[unit].drawGem();
+			world.units[unit].hasAttacked = false;
+		    }
+
+		    world.stage.update();
+
+		    if(ui.hasTurn) {
+			for(var c in world.units) {
+			    u = world.units[c];
+			    if(u.isCommander && u.team == gameInfo.player.team) {
+				var cornerX = u.shape.x - world.stage.canvas.width / 2;
+				var cornerY = u.shape.y - world.stage.canvas.height / 2;
+				scroll.scrollTo(-cornerX, -cornerY);
+			    }
+			}
+		    }
+
+		    ui.finishAnimation();
+		});
+	    });
+
+	    socket.on("created", function(unitData) {
+		actionQueue.addAction(function() {
+		    if(unitData.type) {
+			var unitObj = new Unit(unitData);
+			world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
+		    }
+		    ui.finishAnimation();
+		});
+	    });
+
+	    socket.on("moved", function(data) {
+		actionQueue.addAction(function() {
+		    ui.animateUnitMove(data);
+		});
+	    });
+
+	    socket.on("playerUpdate", function(data) {
+		actionQueue.addAction(function() {
+		    ui.updatePlayer(data);
+		});
 
 	
+	    });
+
     });
 });
 

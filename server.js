@@ -120,7 +120,7 @@ io.use(passportSocketIo.authorize({
     secret:      config.sessionSecret, // the session_secret to parse the cookie
     store:       mongoStore,           // we NEED to use a sessionstore. no memorystore please
     success:     onAuthorizeSuccess,   // *optional* callback on success - read more below
-    fail:        onAuthorizeFail,      // *optional* callback on fail/error - read more below
+    fail:        onAuthorizeFail      // *optional* callback on fail/error - read more below
 }));
 //io.set('log level', 0);
 //setInterval(function() { console.log(socketList.map(function(o) { return o.username; })); }, 1000);
@@ -128,6 +128,16 @@ io.use(passportSocketIo.authorize({
 // initialize all socket.io listeners on a socket
 function initListeners(socket, collections) {
     initLobbyListeners(io.sockets, socket, collections);
+
+    socket.on("anon auth", function(data) {
+	collections.games.findOne({ _id:ObjectID(data.gameId) }, function(err, game) {
+	    var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0];
+	    if(player) {
+		socket.request.user = { username: player.username };
+	    }
+	    socket.emit("anon auth done");
+        });
+    });
 
     // request for all game data
     socket.on("alldata", function(data) {

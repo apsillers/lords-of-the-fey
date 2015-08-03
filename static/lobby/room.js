@@ -114,6 +114,10 @@ $("#start-game-button").click(function() {
     }
 });
 
+$("#add-anon-button").click(function() {
+    socket.emit("add anon to room", { id: roomId });
+});
+
 function confirmLeave(e) {
     var confirmationMessage = 'You are about to leave this room. If you are the owner, the room will be closed.';
 

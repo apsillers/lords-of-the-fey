@@ -295,7 +295,7 @@ var ui = {
 	    createMenuItem(0, "Recruit", function() {
 		ui.showRecruitPrompt(function(typeName) {
 		    if(typeName) {
-			socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y });
+			socket.emit("create", { gameId: gameInfo.gameId, type: typeName, x: space.x, y: space.y, anonToken: gameInfo.anonToken });
 		    	ui.moveHappening = true;
 		    }
 		});

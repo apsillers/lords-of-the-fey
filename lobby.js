@@ -81,6 +81,14 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	joinRoom(user, room);
     });
 
+    socket.on("add anon to room", function(data) {
+	var room = rooms[+data.id];
+console.log(room);
+	var user = socket.request.user;
+        var token = Math.random();
+	joinRoom({ username: "anon"+token, ready: true, anonToken: token }, room);
+    });
+
     socket.on("enter room", function(id) {
 	var user = socket.request.user;
 	socket.join("room"+id);
@@ -114,10 +122,11 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
 	var freeIndex = room.players.indexOf(null);
 	if(freeIndex == -1) {
-	    freeIndex = room.players.length; 
+	    freeIndex = room.players.length;
 	}
 
-	room.players[freeIndex] = { username: user.username };
+	room.players[freeIndex] = { username: user.username, ready: user.ready };
+        if(user.anonToken) { room.players[freeIndex].anonToken = user.anonToken; }
 	room.filledSlots++;
 
 	sockets.in("room"+room.id).emit("joined room", { username: user.username, players: room.players });
