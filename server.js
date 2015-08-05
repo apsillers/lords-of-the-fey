@@ -131,7 +131,7 @@ function initListeners(socket, collections) {
 
     socket.on("anon auth", function(data) {
 	collections.games.findOne({ _id:ObjectID(data.gameId) }, function(err, game) {
-	    var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0];
+	    if(data.anonToken) { var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0]; }
 	    if(player) {
 		socket.request.user = { username: player.username };
 	    }
