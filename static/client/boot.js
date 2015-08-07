@@ -21,11 +21,11 @@ canvas.width = 900;
 canvas.height = 600;
 var world;
 var socket;
-var qStringMatch = location.search.match(/game=([^&]*)/);
+var qStringMatch = location.hash.match(/game=([^&]*)/);
 if(qStringMatch == null) {
     window.location.href = "/";
 }
-var qTokenMatch = location.search.match(/token=([^&]*)/);
+var qTokenMatch = location.hash.match(/token=([^&]*)/);
 var qTokenMatch = qTokenMatch && qTokenMatch[1];
 var gameInfo = {
     gameId: qStringMatch[1],

@@ -29,7 +29,7 @@
 <a href="/">&lt;&lt; Back to main menu</a><br/><br/>
 
 {{#each games}}
-  <div class="game-row{{#if isYourTurn}} active-turn{{/if}}"><a href="/client/grid.html?game={{_id}}">
+  <div class="game-row{{#if isYourTurn}} active-turn{{/if}}"><a href="/client/grid.html#game={{_id}}">
     {{map}}
     [Players:{{#each players}} <span class="username">{{username}}</span>{{/each}}]
     

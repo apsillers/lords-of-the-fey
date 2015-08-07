@@ -27,7 +27,7 @@ exports.initLobby = function(app, collections) {
 	];
 	var mapName = "test_map.map";
 	require("./createGame").createNewGame(collections, players, mapName, function(id) {
-           res.redirect("/client/grid.html?game=" + id);
+           res.redirect("/client/grid.html#game=" + id);
 	})
     });
 };
