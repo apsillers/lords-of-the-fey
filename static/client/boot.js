@@ -35,12 +35,16 @@ var factionList = ["elves", "orcs"];
 var factionDict = {};
 
 /**************************/
+window.addEventListener("hashchange", function() { window.location.reload(); })
+
 window.addEventListener("load", function() {
 
     var toMapDict = mapUtils.toMapDict;
     var Terrain = mapUtils.Terrain;
 
     socket = io();
+
+    socket.on("no game", function() { window.location.href = "/"; });
 
     socket.emit("anon auth", gameInfo);
 

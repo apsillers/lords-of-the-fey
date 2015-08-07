@@ -22,7 +22,7 @@ var express = require('express')
   , server = app.listen(config.port);
 var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server
-, ObjectID = require('mongodb').ObjectID;
+, ObjectID = function(input) { if(input.length!=12 && input.length!=24) { return; } return require('mongodb').ObjectID.apply(this, arguments); }
 var fs = require('fs');
 var io = require('socket.io')(server);
 var passport = require("passport");
@@ -131,6 +131,7 @@ function initListeners(socket, collections) {
 
     socket.on("anon auth", function(data) {
 	collections.games.findOne({ _id:ObjectID(data.gameId) }, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
 	    if(data.anonToken) { var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0]; }
 	    if(player) {
 		socket.request.user = { username: player.username };
@@ -147,6 +148,7 @@ function initListeners(socket, collections) {
 
         collections.units.find({ gameId:gameId }, function(err, cursor) {
             collections.games.findOne({ _id:gameId }, function(err, game) {
+		if(!game) { socket.emit("no game"); return; }
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
                 cursor.toArray(function(err, units) {
 		    units = units.filter(function(u) { return !u.conditions || u.conditions.indexOf("hidden")==-1 || u.team==(player||{}).team; });
@@ -182,6 +184,7 @@ function initListeners(socket, collections) {
 	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 
@@ -333,6 +336,7 @@ function initListeners(socket, collections) {
 	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
             loadMap(game.map, function(err, mapData) {
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
@@ -354,6 +358,8 @@ function initListeners(socket, collections) {
 	var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
+
 	    // ensure that the logged-in user has the right to act
 	    if(!socketOwnerCanAct(socket, game, true)) {
 		return;
@@ -397,6 +403,8 @@ function initListeners(socket, collections) {
 	var gameId = ObjectID(data.gameId);
 
         collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
+
 	    if(!socketOwnerCanAct(socket, game)) {
 		return;
 	    }
