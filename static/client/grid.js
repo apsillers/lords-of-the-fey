@@ -42,6 +42,10 @@ function World(canvasName) {
     this.stage.addEventListener("pressup", function(e) {
 	clearTimeout(world.noMoveTimeout);
 
+	setTimeout(function() {
+	    ui.justMadeContextMenu = false;
+	}, 200);
+
 	delete world.scrollPointerX;
 	delete world.scrollPointerY;
     });
@@ -267,12 +271,6 @@ Space.prototype = {
 	    }
 
 	    ui.onSpaceHover(e);
-	});
-
-	this.shape.addEventListener("mouseup", function(e) {
-	    setTimeout(function() {
-		ui.justMadeContextMenu = false;
-	    }, 200);
 	});
 
         this.shape.addEventListener("rollover", ui.onSpaceHover);
