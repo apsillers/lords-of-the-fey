@@ -72,6 +72,10 @@ window.addEventListener("load", function() {
 		$("#end-turn-button").on("click", function() {
 		    ui.hasTurn = false;
 		    socket.emit("endTurn", gameInfo);
+		    world.mapContainer.removeChild(ui.pathShape);
+                    ui.hideMoveRange();
+                    world.stage.update();
+                    ui.pathSource = null;
 		});
 
 		$("#load-text").text("Loading units...");
