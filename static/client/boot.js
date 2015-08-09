@@ -44,7 +44,7 @@ window.addEventListener("load", function() {
 
     socket = io();
 
-    socket.on("no game", function() { window.location.href = "/"; });
+    socket.on("no game", function() { alert("Game not found"); });
 
     socket.emit("anon auth", gameInfo);
 
