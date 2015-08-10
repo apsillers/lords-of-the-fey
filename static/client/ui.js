@@ -127,8 +127,30 @@ var ui = {
 	    var hpColor = ["#A00", "#f0ed00"][Math.floor(hpRatio * 3)] || "green";
 	    $("#right_data_hp").css("color", hpColor);
 
+            $("#right_data_resistances").empty().append($("<table>").append(
+                Object.keys(ui.hoverUnit.resistances).map(function(resistName) {
+                    var resist = ui.hoverUnit.resistances[resistName];
+                    return $("<tr>").append([
+                        $("<td>", {text: resistName.replace(/\b\w/g, function(match) { return match.toUpperCase(); }) }),
+                        $("<td>", {text: (resist<0?"":"+")+resist*100+"%" })
+                    ]);
+                })
+            ));
+
             $("#right_data_xp").text(ui.hoverUnit.xp + "/" + ui.hoverUnit.maxXp);
             $("#right_data_move").text(ui.hoverUnit.moveLeft + "/" + ui.hoverUnit.move);
+
+            $("#right_data_move_costs").empty().append($("<table>").append(
+                Object.keys(ui.hoverUnit.terrain).map(function(terrainName) {
+                    var move = ui.hoverUnit.terrain[terrainName].move;
+                    if(move == -1) { move = "-"; }
+                    return $("<tr>").append([
+                        $("<td>", {text: terrainName.replace("_"," ").replace(/\b\w/g, function(match) { return match.toUpperCase(); }) }),
+                        $("<td>", {text: move })
+                    ]);
+                })
+            ));
+
             $("#right_data_name").text(ui.hoverUnit.name);
 
             $("#right_data_attributes").text((ui.hoverUnit.attributes||[]).join(", "));

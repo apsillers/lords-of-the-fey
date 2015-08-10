@@ -132,3 +132,30 @@ div.attack-item.selected {
     font-size: 10pt;
 }
 
+#right_data_move_costs {
+    display: none;
+    position: absolute;
+    z-index: 99;
+    left: -140px;
+    background-color: rgba(33, 33, 33, 0.6);
+    color: #FFF;
+    top: 0;
+}
+
+#right_data_move_container:hover #right_data_move_costs {
+    display: block;
+}
+
+#right_data_resistances {
+    display: none;
+    position: absolute;
+    z-index: 99;
+    left: -120px;
+    background-color: rgba(33, 33, 33, 0.6);
+    color: #FFF;
+    top: 130px;
+}
+
+#right_data_hp_container:hover #right_data_resistances {
+    display: block;
+}

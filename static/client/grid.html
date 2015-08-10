@@ -17,6 +17,17 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 -->
+
+<!--
+!! IMPORTANT NOTE FOR MODIFYING THIS FILE !!
+
+This file uses an Application Cache Manifest, which means the browser will only load new versions of this page after
+  1) the manifest file has changed, AND
+  2) the page is refresh *after* the new manifest is detected.
+
+To load a new version of this page, you must generate a new manifest (using `/tools/generate_manifest.sh`) and store it in `/static/client/client.appcache` and then refresh the page TWICE (once to detect the new manifest and again to actually reload the page).
+-->
+
 <html manifest="client.appcache">
     <head>
         <meta charset="UTF-8">
@@ -89,11 +100,18 @@
         </div>
 
         <div>
-          HP<div id="right_data_hp" style="color:green;">&nbsp;</div>
+	  <div id="right_data_hp_container">
+            HP<div id="right_data_hp" style="color:green;">&nbsp;</div>
+            <div id="right_data_resistances"></div>
+	  </div>
           XP<div id="right_data_xp" style="color:puprle">&nbsp;</div>
         </div>
 
-	<div>Move: <span id="right_data_move">&nbsp;</span></div>
+	<div id="right_data_move_container">Move:
+	  <span id="right_data_move">&nbsp;</span>
+	  <div id="right_data_move_costs"></div>
+	</div>
+	
 
         <div style="clear: both; font-weight: bold;" id="right_data_name"></div>
 
