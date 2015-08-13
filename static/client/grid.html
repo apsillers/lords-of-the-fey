@@ -27,7 +27,7 @@ This file uses an Application Cache Manifest, which means the browser will only 
 
 To load a new version of this page, you must generate a new manifest (using `/tools/generate_manifest.sh`) and store it in `/static/client/client.appcache` and then refresh the page TWICE (once to detect the new manifest and again to actually reload the page).
 -->
-
+<!--  -->
 <html manifest="client.appcache">
     <head>
         <meta charset="UTF-8">
@@ -51,6 +51,10 @@ To load a new version of this page, you must generate a new manifest (using `/to
         <!-- start top stats bar -->
         <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100;">
 
+        <div class="top-status" style="background-color: rgba(0,0,0,0);">
+        <input type="button" value="Menu" id="top-menu-button" />
+        </div>
+
         <div class="top-status" id="top-active-team">
           <!--<img src="" class="top-status-img" />--> <span id="top-active-team-text"></span>
         </div>
@@ -64,7 +68,7 @@ To load a new version of this page, you must generate a new manifest (using `/to
         </div>
 
         <div class="top-status" style="width: 70px;" id="top-village-count">
-          <img src="/data/img/ui/villages.png" class="top-status-img" /> 0/20
+          <img src="/data/img/ui/villages.png" class="top-status-img" /> <span id="top-village-count-text"></span>
         </div>
 
         <div class="top-status" id="top-unit-count">
@@ -79,7 +83,7 @@ To load a new version of this page, you must generate a new manifest (using `/to
           <img src="/data/img/ui/income.png" class="top-status-img" /> 2
         </div>
 
-        <div class="top-status" style="float: right; width:auto;" id="top-username">
+        <div class="top-status" style="float: right; width:auto; padding: 2px 10px;" id="top-username">
           
         </div>
 

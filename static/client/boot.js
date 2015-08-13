@@ -69,6 +69,9 @@ window.addEventListener("load", function() {
 		$("#top-gold-text").text(gameInfo.player.gold);
 		$("#top-active-team-text").text(gameInfo.activeTeam);
 
+		gameInfo.villages = data.villages;
+		ui.displayVillageStats();
+
 		$("#end-turn-button").on("click", function() {
 		    ui.hasTurn = false;
 		    socket.emit("endTurn", gameInfo);

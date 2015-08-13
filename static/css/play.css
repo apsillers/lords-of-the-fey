@@ -159,3 +159,10 @@ div.attack-item.selected {
 #right_data_hp_container:hover #right_data_resistances {
     display: block;
 }
+
+#top-menu-button {
+    background-color: blue;
+    border: thin solid #77F;
+    color: white;
+    cursor: pointer;
+}

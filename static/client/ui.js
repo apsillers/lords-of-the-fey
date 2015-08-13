@@ -30,6 +30,9 @@ var ui = {
     hoverSpace: null,
     hoverUnit: null,
 
+    totalVillageCount: 0,
+    ownedVillageCount: 0,
+
     animationFactor: 0.66,
 
     onSpaceHover: function(e) {
@@ -512,6 +515,7 @@ var ui = {
             if(path.length == pathPos) {
 		if(moveData.capture) {
 		    currSpace.setVillageFlag(unit.team);
+		    ui.displayVillageStats();
 		}
 
 	        if(moveData.revealedUnits) {
@@ -861,6 +865,18 @@ var ui = {
 	ui.moveHappening = false;
 	ui.moveAnimating = false;
 	actionQueue.doNext();	
+    },
+
+    displayVillageStats: function() {
+	var villageKeys = Object.keys(gameInfo.villages);
+	ui.totalVillageCount = villageKeys.length;
+	ui.ownedVillageCount = 0;
+	for(var i=0; i<villageKeys.length; i++) {
+	    if(gameInfo.player.team == gameInfo.villages[villageKeys[i]]) {
+		ui.ownedVillageCount++;
+	    }
+	}
+	$("#top-village-count-text").text(ui.ownedVillageCount + "/" + ui.totalVillageCount);
     }
 };
 

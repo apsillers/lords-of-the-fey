@@ -309,5 +309,8 @@ Space.prototype = {
 	world.minimap.addChild(this.miniflag);
 	world.minimap.setChildIndex(this.miniflag, world.minimap.children.length - 2);
 	world.minimap.update();
+
+	gameInfo.villages[this.x+","+this.y] = team;
+	ui.displayVillageStats();
     }
 }
