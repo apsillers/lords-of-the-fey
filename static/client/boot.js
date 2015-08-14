@@ -70,7 +70,7 @@ window.addEventListener("load", function() {
 		$("#top-active-team-text").text(gameInfo.activeTeam);
 
 		gameInfo.villages = data.villages;
-		ui.displayVillageStats();
+		ui.updateVillageStats();
 
 		$("#end-turn-button").on("click", function() {
 		    ui.hasTurn = false;
@@ -144,6 +144,8 @@ window.addEventListener("load", function() {
 		            var unitObj = new Unit(unitData);
 		            world.addUnit(unitObj, world.getSpaceByCoords(unitData.x,unitData.y));
 			}
+
+                        ui.updateOwnedUnitsCount();
 
 			for(var unit in world.units) {
 			    world.units[unit].drawGem();

@@ -32,6 +32,9 @@ var ui = {
 
     totalVillageCount: 0,
     ownedVillageCount: 0,
+    ownedUnitCount: 0,
+    costlyUnitCount: 0,
+    netIncome: 0,
 
     animationFactor: 0.66,
 
@@ -867,7 +870,7 @@ var ui = {
 	actionQueue.doNext();	
     },
 
-    displayVillageStats: function() {
+    updateVillageStats: function() {
 	var villageKeys = Object.keys(gameInfo.villages);
 	ui.totalVillageCount = villageKeys.length;
 	ui.ownedVillageCount = 0;
@@ -877,7 +880,33 @@ var ui = {
 	    }
 	}
 	$("#top-village-count-text").text(ui.ownedVillageCount + "/" + ui.totalVillageCount);
-    }
+        ui.updateNetIncome();
+    },
+
+    updateOwnedUnitsCount: function() {
+        ui.ownedUnitCount = 0;
+        ui.costlyUnitCount = 0;
+        for(var coords in world.units) {
+            var unit = world.units[coords];
+            if(unit.team == gameInfo.player.team) {
+                ui.ownedUnitCount++;
+                if(!unit.isCommander && (!unit.attributes || unit.attributes.indexOf("loyal")==-1)) {
+                    ui.costlyUnitCount++;
+                }
+            }
+        }
+        $("#top-unit-count-text").text(ui.ownedUnitCount)
+        ui.updateNetIncome();
+    },
+
+    updateNetIncome: function() {
+        $("#top-income-text").text(2 + ui.ownedVillageCount*2 - ui.costlyUnitCount);
+        ui.updateUpkeep();
+    },
+
+    updateUpkeep: function() {
+        $("#top-upkeep-text").text(Math.max(0, ui.costlyUnitCount - ui.ownedVillageCount) + " (" + ui.costlyUnitCount + ")");
+    },
 };
 
 (function() {

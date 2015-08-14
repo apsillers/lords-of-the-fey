@@ -148,6 +148,8 @@ World.prototype = {
 	// insert minimap unit under the minimap view box frame
 	world.minimap.setChildIndex(unit.minishape, world.minimap.children.length - 2);
 	world.minimap.update();
+
+        ui.updateOwnedUnitsCount();
     },
 
     positionUnit: function(unit, spaceCoords) {
@@ -172,6 +174,8 @@ World.prototype = {
 
 	world.minimap.removeChild(unit.minishape);
 	world.minimap.update();
+
+        ui.updateOwnedUnitsCount();
     },
     
     moveUnit: function(unit, path, attackIndex) {
@@ -311,6 +315,6 @@ Space.prototype = {
 	world.minimap.update();
 
 	gameInfo.villages[this.x+","+this.y] = team;
-	ui.displayVillageStats();
+	ui.updateVillageStats();
     }
 }
