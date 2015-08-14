@@ -409,8 +409,10 @@ function initListeners(socket, collections) {
 		return;
 	    }
 
-	    game.activeTeam %= (game.players.length);
-	    game.activeTeam++;
+	    do {
+		game.activeTeam %= (game.players.length);
+		game.activeTeam++;
+	    } while(game.players[game.activeTeam - 1] == undefined);
 
 	    var villageCount = 0;
 	    for(var coords in game.villages) {
