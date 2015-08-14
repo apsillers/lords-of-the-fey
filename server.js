@@ -409,6 +409,7 @@ function initListeners(socket, collections) {
 		return;
 	    }
 
+	    var oldActiveTeam = game.activeTeam;
 	    do {
 		game.activeTeam %= (game.players.length);
 		game.activeTeam++;
@@ -420,23 +421,36 @@ function initListeners(socket, collections) {
 		    villageCount++;
 		}
 	    }
-	    game.players[game.activeTeam - 1].gold += villageCount*2;
 
-	    // if all players have taken a turn and now we're back to player #1
-	    if(game.activeTeam == 1) {
+	    // if all players have taken a turn and active player num is now less than previous player num (because it wrapped around)
+	    if(oldActiveTeam > game.activeTeam) {
 		var times = ["morning", "afternoon", "dusk", "first watch", "second watch", "dawn"];
 		game.timeOfDay = times[(times.indexOf(game.timeOfDay) + 1) % times.length];
 	    }
 
-	    collections.games.save(game, { safe: true }, function() {
-		// find all units owned by the newly active player
-		collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) {
-		    unitCursor.toArray(doUpdates);
-		});
-		function doUpdates(err, unitList) {
-		    unitList = unitList.map(function(u) { return new Unit(u); });
-		    var unitsIndexedBySpace = unitList.reduce(function(result, u) { result[u.x+","+u.y] = u; return result; }, {});
+	    // find all units owned by the newly active player
+	    collections.units.find({ gameId: gameId, team: game.activeTeam }, function(err, unitCursor) {
+		unitCursor.toArray(doUpdates);
+	    });
+	    function doUpdates(err, unitList) {
+		unitList = unitList.map(function(u) { return new Unit(u); });
+		var unitsIndexedBySpace = unitList.reduce(function(result, u) { result[u.x+","+u.y] = u; return result; }, {});
 
+		var costlyUnitCount = 0;
+		for(var n in unitList) {
+		    var unit = unitList[n];
+		    // costly units are non-commander, non-loyal units
+		    if(unit.team == game.activeTeam &&
+		       !unit.isCommander &&
+		       (!unit.attributes || unit.attributes.indexOf("loyal") == -1)
+		    ) {
+			costlyUnitCount++;
+		    }
+		}
+		game.players[game.activeTeam - 1].gold += 2 + villageCount*2 - costlyUnitCount;
+		//console.log("gold", game.players[game.activeTeam - 1].gold, 2 + villageCount*2 - costlyUnitCount);
+
+		collections.games.save(game, { safe: true }, function() {
 		    var updates = {};
 		    var finishUpdates = function() {
 			(function saveUnitFromList (i) {
@@ -572,8 +586,8 @@ function initListeners(socket, collections) {
 			});
 			finishUpdates();
 		    });
-		};
-	    });
+		});
+	    };
 	});
     });
 };
