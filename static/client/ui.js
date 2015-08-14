@@ -518,7 +518,7 @@ var ui = {
             if(path.length == pathPos) {
 		if(moveData.capture) {
 		    currSpace.setVillageFlag(unit.team);
-		    ui.displayVillageStats();
+		    ui.updateVillageStats();
 		}
 
 	        if(moveData.revealedUnits) {
