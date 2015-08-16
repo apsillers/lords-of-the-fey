@@ -39,6 +39,8 @@ window.addEventListener("hashchange", function() { window.location.reload(); })
 
 window.addEventListener("load", function() {
 
+    menuControl.init();
+
     var toMapDict = mapUtils.toMapDict;
     var Terrain = mapUtils.Terrain;
 

@@ -437,6 +437,7 @@ var ui = {
 	world.stage.removeChild(ui.contextMenu);
 	world.stage.update();
 	ui.showingMenu = false;
+        menuControl.hideMenu();
     },
 
     animateUnitMove: function(moveData) {

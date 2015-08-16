@@ -52,7 +52,7 @@ To load a new version of this page, you must either delete or modify `/static/cl
         <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100;">
 
         <div class="top-status" style="background-color: rgba(0,0,0,0);">
-        <input type="button" value="Menu" id="top-menu-button" />
+          <input type="button" value="Menu" id="top-menu-button" />
         </div>
 
         <div class="top-status" id="top-active-team">
@@ -91,6 +91,21 @@ To load a new version of this page, you must either delete or modify `/static/cl
 
         </div>
         <!-- end top stats bar -->
+
+        <div id="top-menu-list">
+          <div class="top-menu-item" id="top-menu-players">Player info</div>
+          <div id="top-menu-animation-speed-group">
+            <div class="top-menu-item" id="top-menu-animation-speed">Animation speed</div>
+            <div id="animation-speed-menu">
+              <div class="top-menu-item">Normal</div>
+              <div class="top-menu-item">Fast</div>
+              <div class="top-menu-item">Faster</div>
+              <div class="top-menu-item">Fastest</div>
+            </div>
+          </div>
+          <div class="top-menu-item" id="top-menu-sound">Sound</div>
+          <div class="top-menu-item" id="top-menu-fullscreen">Toggle fullscreen</div>
+        </div>
 
         <!-- right status column -->
         <div id="right-column">
@@ -151,6 +166,7 @@ To load a new version of this page, you must either delete or modify `/static/cl
 
         <script src="../shared/terrain.js"></script>
         <script src="boot.js"></script>
+        <script src="menu.js"></script>
         <script src="ui.js"></script>
         <script src="grid.js"></script>
         <script src="scroll.js"></script>

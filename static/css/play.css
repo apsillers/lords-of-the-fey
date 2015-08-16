@@ -166,3 +166,42 @@ div.attack-item.selected {
     color: white;
     cursor: pointer;
 }
+
+#top-menu-list {
+    height:204px;
+    width:150px;
+    position: absolute;
+    top: 30px;
+    background-color: blue;
+    color: white;
+    display: none;
+}
+
+.top-menu-item {
+    height: 18px;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 7px;
+}
+
+.top-menu-item:hover {
+    background-color: #55F;
+}
+
+#animation-speed-menu {
+    position: absolute;
+    left: 150px;
+    top: 34px;
+    background-color: blue;
+    display: none;
+}
+
+#top-menu-animation-speed-group:hover #animation-speed-menu {
+    display: block;
+}
+
+#top-menu-sound {
+    text-decoration: line-through;
+    color: gray;
+}
+
