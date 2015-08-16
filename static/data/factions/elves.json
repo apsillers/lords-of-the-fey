@@ -1,10 +1,11 @@
 {
     "name": "Elves",
     "recruitList": [
-        "scout",
+        "elvish_scout",
         "elvish_archer",
         "elvish_shaman",
         "elvish_fighter",
+        "merman_hunter",
         "wose",
         "mage"
     ],

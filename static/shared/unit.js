@@ -69,7 +69,7 @@
 */
 var unitLib = {
     /** */
-    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "scout", "elvish_archer", "elvish_ranger", "elvish_avenger", "elvish_marksman", "elvish_sharpshooter", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer", "naga_fighter", "naga_warrior", "naga_myrmidon", "wolf_rider", "goblin_knight", "goblin_pillager", "direwolf_rider", "troll_whelp", "troll", "troll_warrior", "troll_rocklobber", "goblin_spearman", "goblin_impaler", "goblin_rouser", "wose", "elder_wose", "ancient_wose", "mage", "white_mage", "mage_of_light", "red_mage", "arch_mage", "great_mage", "silver_mage"],
+    protoList: ["orcish_grunt", "orcish_warrior", "orcish_warlord", "elvish_scout", "elvish_rider", "elvish_outrider", "elvish_archer", "elvish_ranger", "elvish_avenger", "elvish_marksman", "elvish_sharpshooter", "elvish_shaman", "elvish_fighter", "elvish_captain", "elvish_marshal", "elvish_hero", "elvish_champion", "orcish_archer", "orcish_crossbowman", "orcish_slurbow", "orcish_assassin", "orcish_slayer", "naga_fighter", "naga_warrior", "naga_myrmidon", "wolf_rider", "goblin_knight", "goblin_pillager", "direwolf_rider", "troll_whelp", "troll", "troll_warrior", "troll_rocklobber", "goblin_spearman", "goblin_impaler", "goblin_rouser", "wose", "elder_wose", "ancient_wose", "mage", "white_mage", "mage_of_light", "red_mage", "arch_mage", "great_mage", "silver_mage","merman_hunter", "merman_spearman", "merman_javelineer", "merman_netcaster", "merman_entangler"],
     protos: {},
 
     /**
