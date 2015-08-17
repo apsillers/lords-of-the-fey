@@ -201,7 +201,10 @@ div.attack-item.selected {
 }
 
 #top-menu-sound {
-    text-decoration: line-through;
     color: gray;
+}
+
+#top-menu-sound:hover {
+    background-color: inherit;
 }
 
