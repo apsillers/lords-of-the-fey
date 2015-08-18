@@ -86,6 +86,7 @@ World.prototype = {
 
     resizeCanvasToWindow: function() {
 	this.stage.canvas.height = $(window).height() - $("#top-bar").height() - 6;
+        this.stage.canvas.height = Math.max(this.stage.canvas.height, $("#right-column").height());
 	this.stage.canvas.width = $(window).width() - $("#right-column").width() - 21;
 	$("#top-bar").width($(window).width() - 3);
 

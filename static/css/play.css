@@ -53,6 +53,7 @@ div#right-column {
     padding:10px;
     float: right;
     position: relative;
+    font-size: 10pt;
 }
 
 div.top-status img {
@@ -144,6 +145,10 @@ div.attack-item.selected {
 
 #right_data_move_container:hover #right_data_move_costs {
     display: block;
+}
+
+#right_data_move_container {
+    clear: left;
 }
 
 #right_data_resistances {

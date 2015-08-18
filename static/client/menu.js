@@ -13,7 +13,7 @@ var menuControl = {
         $("#top-menu-animation-speed-3").click(function() { ui.animationFactor = 0.33; m.hideMenu(); });
         $("#top-menu-animation-speed-4").click(function() { ui.animationFactor = 0.22; m.hideMenu(); });
         $("#top-menu-fullscreen").click(function() {
-            var body = document.body;
+            var body = document.documentElement;
             if(document.fullscreenElement || document.mozFullScreenElement ||
                document.webkitFullscreenElement || document.msFullscreenElement) {
                 (document.exitFullscreen||document.webkitExitFullscreen||document.body.mozCancelFullScreen||elem.msExitFullscreen).call(document);

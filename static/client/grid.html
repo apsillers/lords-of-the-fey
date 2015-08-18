@@ -31,6 +31,7 @@ To load a new version of this page, you must either delete or modify `/static/cl
 <html manifest="client.appcache">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=1, user-scalable=0"/>
         <title>Lords of the Fey</title>
         <script src="/socket.io/socket.io.js"></script>
         <script src="easeljs-0.8.0.min.js"></script>
@@ -49,7 +50,7 @@ To load a new version of this page, you must either delete or modify `/static/cl
 	</div>
 
         <!-- start top stats bar -->
-        <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100;">
+        <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100; overflow-x: hidden;">
 
         <div class="top-status" style="background-color: rgba(0,0,0,0);">
           <input type="button" value="Menu" id="top-menu-button" />
