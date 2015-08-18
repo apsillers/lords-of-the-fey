@@ -43,6 +43,29 @@ div.top-status {
     font-size: 12px;
 }
 
+#top-active-team {
+    padding: 3px 2px 3px;
+    width: 40px;
+}
+
+#top-active-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 10px;
+    float: left;
+    background-color: white;
+    margin-right: 4px;
+}
+
+#top-turn-count {
+    width: 50px;
+}
+
+div.top-status img {
+    position: relative;
+    top: 3px;
+}
+
 div#right-column {
     width:125px;
     height: 450px;
@@ -54,11 +77,6 @@ div#right-column {
     float: right;
     position: relative;
     font-size: 10pt;
-}
-
-div.top-status img {
-    position: relative;
-    top: 3px;
 }
 
 #end-turn-button {
@@ -213,3 +231,10 @@ div.attack-item.selected {
     background-color: inherit;
 }
 
+#player-overlay {
+    width: 600px;
+    padding: 10px;
+    background-color: #999;
+    position: absolute;
+    display: none;
+}

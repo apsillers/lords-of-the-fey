@@ -52,12 +52,13 @@ To load a new version of this page, you must either delete or modify `/static/cl
         <!-- start top stats bar -->
         <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100; overflow-x: hidden;">
 
-        <div class="top-status" style="background-color: rgba(0,0,0,0);">
+        <div class="top-status" style="background-color: rgba(0,0,0,0); float: left;">
           <input type="button" value="Menu" id="top-menu-button" />
         </div>
 
         <div class="top-status" id="top-active-team">
-          <!--<img src="" class="top-status-img" />--> <span id="top-active-team-text"></span>
+          <!--<img src="" class="top-status-img" />-->
+          <div id="top-active-color"></div> <span id="top-active-team-text"></span>
         </div>
 
         <div class="top-status" id="top-turn-count">
@@ -144,7 +145,11 @@ To load a new version of this page, you must either delete or modify `/static/cl
         </div>
         <!-- right status column end -->
 
+        <div id="player-overlay"></div>
+
         <canvas id="c"></canvas>
+
+        
 
 	<div id="recruit-prompt" style="display:none; background-color:#DDD;">
 	  <div id="recruit-list" style="overflow-y: auto; float:left; width: 270px; height:100%;"></div>

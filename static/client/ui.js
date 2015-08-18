@@ -908,6 +908,30 @@ var ui = {
     updateUpkeep: function() {
         $("#top-upkeep-text").text(Math.max(0, ui.costlyUnitCount - ui.ownedVillageCount) + " (" + ui.costlyUnitCount + ")");
     },
+
+    showPlayerStats: function() {
+	$table = $("<table>");
+	$("<tr>").append([
+            $("<td>", {text: "Team" }),
+            $("<td>", {text: "Username" }),
+            $("<td>", {text: "Alliance" })
+        ]).appendTo($table);
+	for(var i=0; i<gameInfo.players.length; ++i) {
+            if(!gameInfo.players[i]) { continue; }
+	    $("<tr>").append([
+                $("<td>", {text: gameInfo.players[i].team }).css("color", ["rgba(0,0,0,0)","#F00","#00F","#F0F", "#444"][gameInfo.players[i].team]),
+                $("<td>", {text: gameInfo.players[i].username }),
+                $("<td>", {text: gameInfo.players[i].alliance }),
+                $("<td>").append(gameInfo.players[i].anonToken?$("<a>", {text: "anon auth link", href: window.location.href.replace(/&?token=([0-9a-f.])*&?/, "")+"&token="+gameInfo.players[i].anonToken }):"")
+            ]).css("font-weight", gameInfo.players[i].team == gameInfo.player.team?"bold":"").appendTo($table);
+	}
+
+        var $closeButton = $("<button>", { text: "Close" }).click(function() { ui.hidePlayerStats(); });
+
+        $("#player-overlay").empty().append($table).append($closeButton).css({ left: ($(window).width() - $("#player-overlay").width()) / 2 }).show();
+    },
+
+    hidePlayerStats: function() { $("#player-overlay").hide(); }
 };
 
 (function() {

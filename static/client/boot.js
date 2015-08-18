@@ -56,6 +56,7 @@ window.addEventListener("load", function() {
 
 	    socket.emit("alldata", gameInfo);
 	    socket.on("initdata", function(data) {
+		gameInfo.players = data.players;
 		gameInfo.player = data.player || { username:"Observer", gold:0 };
 
 		$("#top-username").text(gameInfo.player.username);
@@ -70,6 +71,7 @@ window.addEventListener("load", function() {
 
 		$("#top-gold-text").text(gameInfo.player.gold);
 		$("#top-active-team-text").text(gameInfo.activeTeam);
+		$("#top-active-color").css("background-color", ["rgba(0,0,0,0)","#F00","#00F","#F0F", "#444"][gameInfo.activeTeam]);
 
 		gameInfo.villages = data.villages;
 		ui.updateVillageStats();
@@ -187,6 +189,7 @@ window.addEventListener("load", function() {
 		actionQueue.addAction(function() {
 		    gameInfo.activeTeam = data.activeTeam;
 		    $("#top-active-team-text").text(gameInfo.activeTeam);
+		    $("#top-active-color").css("background-color", ["rgba(0,0,0,0)","#F00","#00F","#F0F", "#444"][gameInfo.activeTeam]);
 		    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
 
 		    gameInfo.timeOfDay = data.timeOfDay;

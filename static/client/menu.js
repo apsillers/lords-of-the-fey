@@ -8,6 +8,8 @@ var menuControl = {
             else { m.showMenu(); }
         });
 
+        $("#top-menu-players").click(function() { ui.showPlayerStats(); m.hideMenu(); });
+
         $("#top-menu-animation-speed-1").click(function() { ui.animationFactor = 0.66; m.hideMenu(); });
         $("#top-menu-animation-speed-2").click(function() { ui.animationFactor = 0.44; m.hideMenu(); });
         $("#top-menu-animation-speed-3").click(function() { ui.animationFactor = 0.33; m.hideMenu(); });
