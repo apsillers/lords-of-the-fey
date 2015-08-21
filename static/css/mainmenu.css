@@ -49,7 +49,7 @@ div.option {
 }
 
 .main-content {
-    font-size: 17pt;
+    font-size: 19pt;
     font-family: sans-serif;
 }
 
@@ -59,4 +59,8 @@ div.option {
 
 .main-content > div a {
     color: #227;
+}
+
+h1 {
+    margin: 20px 0 25px 0;
 }
