@@ -105,7 +105,7 @@ socket.on("kicked", function(roomId) {
 
 socket.on("launched room", function(gameId) {
     window.removeEventListener("beforeunload", confirmLeave);
-    window.location = "/client/grid.html#game="+gameId;
+    window.location = "/client/#game="+gameId;
 });
 
 $("#start-game-button").click(function() {

@@ -21,15 +21,6 @@ var roomIndex = 1;
 var rooms = {};
 var players = [];
 
-/*module.exports.initLobbyHTTP = function(app, collections) {
-    app.get('/lobby/create', function(req, res) {
-	var mapName = "test_map.map";
-	require("./createGame").createNewGame(collections, players, mapName, function(id) {
-	    res.redirect("/client/grid.html#game=" + id);
-	})
-    });
-}*/
-
 module.exports.initLobbyListeners = function(sockets, socket, collections, app) {
     socket.on("join lobby", function() {
 	var user = socket.request.user;
