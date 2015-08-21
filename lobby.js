@@ -74,10 +74,13 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
     socket.on("add anon to room", function(data) {
 	var room = rooms[+data.id];
-console.log(room);
 	var user = socket.request.user;
-        var token = Math.random();
-	joinRoom({ username: "anon"+token, ready: true, anonToken: token }, room);
+        var token = (""+Math.random()).substr(2);
+	joinRoom({
+            username: "anon"+token.substr(0,6),
+            ready: true,
+            anonToken: token
+        }, room);
     });
 
     socket.on("enter room", function(id) {
