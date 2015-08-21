@@ -1,8 +1,10 @@
 .game-row {
-    padding: 7px;
+    padding: 18px;
     border: thin solid black;
-    margin-top: 2px;
-    max-width: 70%;
+    margin: 5px auto;
+    max-width: 800px;
+    border-radius: 5px;
+    background-color: #DDD;
 }
 
 .game-row a {
@@ -24,4 +26,12 @@
     background-color: #99F;
     padding: 2px 2px;
     border-radius: 5px;
+}
+
+#gamelist-header {
+    text-align: center;
+}
+
+#nogames {
+    text-align: center;
 }

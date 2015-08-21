@@ -25,9 +25,10 @@
 </head>
 <body style="padding:0; margin:0;">
 {{> menuheader}}
+<div id="gamelist-header">
 <h1 style="margin-bottom: 3px;">Your games</h1>
 <a href="/">&lt;&lt; Back to main menu</a><br/><br/>
-
+</div>
 {{#each games}}
   <div class="game-row{{#if isYourTurn}} active-turn{{/if}}"><a href="/client/#game={{_id}}">
     {{map}}
@@ -35,7 +36,8 @@
     
   </a></div>
 {{else}}
-You don't have any games. Maybe head down to <a href="/lobby">the lobby</a> and start one?
+<div id="nogames">You don't have any games. Maybe head down to <a href="/lobby">the lobby</a> and start one?</div>
 {{/each}}
+
 </body>
 </html>
