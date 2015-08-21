@@ -63,7 +63,7 @@ window.addEventListener("load", function() {
 
 		gameInfo.alliances = data.alliances;
 		gameInfo.activeTeam = data.activeTeam;
-		if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }
+		if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; $("#end-turn-button").prop("disabled", false); }
 
 		gameInfo.timeOfDay = data.timeOfDay;
 		$("#right_time_of_day").prop("src", "/data/img/schedule/schedule-"+gameInfo.timeOfDay+".png")
@@ -83,6 +83,7 @@ window.addEventListener("load", function() {
                     ui.hideMoveRange();
                     world.stage.update();
                     ui.pathSource = null;
+                    $("#end-turn-button").prop("disabled", true);
 		});
 
 		$("#load-text").text("Loading units...");
@@ -190,7 +191,7 @@ window.addEventListener("load", function() {
 		    gameInfo.activeTeam = data.activeTeam;
 		    $("#top-active-team-text").text(gameInfo.activeTeam);
 		    $("#top-active-color").css("background-color", ["rgba(0,0,0,0)","#F00","#00F","#F0F", "#444"][gameInfo.activeTeam]);
-		    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; }	
+		    if(gameInfo.activeTeam == gameInfo.player.team) { ui.hasTurn = true; $("#end-turn-button").prop("disabled", false); }	
 
 		    gameInfo.timeOfDay = data.timeOfDay;
 		    $("#right_time_of_day").text(gameInfo.timeOfDay)
