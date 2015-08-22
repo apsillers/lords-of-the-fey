@@ -150,7 +150,11 @@ function initListeners(socket, collections) {
             collections.games.findOne({ _id:gameId }, function(err, game) {
 		if(!game) { socket.emit("no game"); return; }
 		var player = game.players.filter(function(p) { return p.username == user.username })[0];
-		var players = game.players.map(function(p) { return { username: p.username, team: p.team, alliance: p.alliance, anonToken: p.anonToken } });
+		var players = game.players.map(function(p) {
+		    var ret = { username: p.username, team: p.team, alliance: p.alliance };
+		    if(player.team == 1) { ret.anonToken = p.anonToken; }
+		    return ret;
+		});
                 cursor.toArray(function(err, units) {
 		    units = units.filter(function(u) { return !u.conditions || u.conditions.indexOf("hidden")==-1 || u.team==(player||{}).team; });
                     socket.emit("initdata", {map: game.map, units: units, player: player, players: players, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay, alliances: game.alliances });
