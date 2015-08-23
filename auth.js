@@ -21,7 +21,8 @@
 
 var config = require("./config"),
     FacebookStrategy = require('passport-facebook').Strategy,
-    TwitterStrategy = require('passport-twitter').Strategy;
+    TwitterStrategy = require('passport-twitter').Strategy,
+    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 /**
 Decide whether the owner of the given socket can act in the given game
@@ -216,6 +217,30 @@ exports.initAuth = function(app, mongo, collections) {
 	app.get('/auth/twitter/callback',
 		passport.authenticate('twitter', { successRedirect: '/onoauthlogin',
 						    failureRedirect: '/login' }));
+    }
+
+    if(config.google && config.google.enabled) {
+	passport.use(new GoogleStrategy({
+	    clientID: config.google.clientID,
+	    clientSecret: config.google.clientSecret,
+	    callbackURL: config.origin + "/auth/google/callback"
+	  },
+	  function(accessToken, refreshToken, profile, done) {
+	    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+	      return done(err, user);
+	    });
+	  }
+	));
+
+	app.get('/auth/google',
+	  passport.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.login' }));
+
+	app.get('/auth/google/callback', 
+	  passport.authenticate('google', { failureRedirect: '/login' }),
+	  function(req, res) {
+	    // Successful authentication, redirect home.
+	    res.redirect('/onoauthlogin');
+	  });
     }
 
     passport.serializeUser(function(user, done) {

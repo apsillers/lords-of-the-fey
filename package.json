@@ -15,6 +15,7 @@
     "passport.socketio": "3.5.x",
     "passport-facebook": "1.0.x",
     "passport-twitter": "1.0.x",
+    "passport-google-oauth": "0.2.x",
     "connect-mongo": "0.5.x",
     "password-hash": "1.2.1",
     "hbs": "2.7.x"

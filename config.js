@@ -16,6 +16,11 @@ module.exports = {
         "consumer_key":"<use tokens from https://apps.twitter.com>",
 	"consumer_secret":"<use tokens from https://apps.twitter.com>"
     },
+    "google": {
+        "enabled": false,
+        "clientID": "<use tokens from https://console.developers.google.com>",
+        "clientSecret": "<use tokens from https://console.developers.google.com>"
+    },
 
     "sourceLink":"https://github.com/apsillers/lords-of-the-fey"
 }
