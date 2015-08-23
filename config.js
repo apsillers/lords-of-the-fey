@@ -11,6 +11,11 @@ module.exports = {
         "app_id":"<use tokens from https://developers.facebook.com>",
 	"app_secret":"<use tokens from https://developers.facebook.com>"
     },
+    "twitter": {
+        "enabled": false,
+        "consumer_key":"<use tokens from https://apps.twitter.com>",
+	"consumer_secret":"<use tokens from https://apps.twitter.com>"
+    },
 
     "sourceLink":"https://github.com/apsillers/lords-of-the-fey"
 }
