@@ -24,6 +24,7 @@
   <link rel="stylesheet" type="text/css" href="/css/mainmenu.css" />
 </head>
 <body style="margin:0; padding:0;">
+
 {{> menuheader}}
 <div class="main-content" style="padding: 5px; text-align: center;">
 {{#if error}}<div style="border:thin solid red; color: red;">{{error}}</div>{{/if}}
@@ -32,8 +33,11 @@
 <label for="password">Password</label><input type="password" id="password" name="password"><br>
 <input type="submit" value="Log in">
 </form>
-
-{{#if config.facebook.enabled}}<br><a href="/login/facebook">Log in with Facebook</a>{{/if}}
+<div id="authlist">
+<hr>
+{{#if config.facebook.enabled}}<div class="authbox"><a href="/login/facebook"><img style="" src="/data/img/facebook.png" title="Log in with Facebook" alt="Log in with Facebook"><br>Log in with Facebook</a></div>{{/if}}
+{{#if config.twitter.enabled}}<div class="authbox"><a href="/login/twitter"><img style="height: 100px; width: 100px; background-color: #ccd6dd; border-radius: 5px;" src="/data/img/twitter.png" title="Log in with Twitter" alt="Log in with Twitter"><br>Log in with Twitter</a></div>{{/if}}
+</div>
 </div>
 </body>
 </html>

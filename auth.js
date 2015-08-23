@@ -20,7 +20,8 @@
 /** @module auth */
 
 var config = require("./config"),
-    FacebookStrategy = require('passport-facebook').Strategy;
+    FacebookStrategy = require('passport-facebook').Strategy,
+    TwitterStrategy = require('passport-twitter').Strategy;
 
 /**
 Decide whether the owner of the given socket can act in the given game
@@ -153,6 +154,14 @@ exports.initAuth = function(app, mongo, collections) {
 	});
     });
 
+    app.get("/onoauthlogin", function(req, res) {
+	if(req.user && req.user.unchangedName) {
+	    res.redirect("/changeusername.html");
+	} else {
+	    res.redirect("/");
+	}
+    });
+
     /* Facebook auth */
     if(config.facebook && config.facebook.enabled) {
 	passport.use(new FacebookStrategy({
@@ -177,18 +186,37 @@ exports.initAuth = function(app, mongo, collections) {
 
 	app.get('/login/facebook', passport.authenticate('facebook'));
 	app.get('/auth/facebook/callback',
-		passport.authenticate('facebook', { successRedirect: '/onfacebooklogin',
+		passport.authenticate('facebook', { successRedirect: '/onoauthlogin',
 						    failureRedirect: '/login' }));
-    
-	app.get("/onfacebooklogin", function(req, res) {
-	    if(req.user && req.user.unchangedName) {
-		res.redirect("/changeusername.html");
-	    } else {
-		res.redirect("/");
-	    }
-	});
     }
 
+    /* Twitter auth */
+    if(config.twitter && config.twitter.enabled) {
+	passport.use(new TwitterStrategy({
+	    consumerKey: config.twitter.consumer_key,
+	    consumerSecret: config.twitter.consumer_secret,
+	    callbackURL: config.origin + "/auth/twitter/callback"
+	},
+	function(token, tokenSecret, profile, done) {
+	    collections.users.findOne({ twProfileId : profile.id },function(err,user){
+		if (err) { return done(err); }
+		
+		if(!user) {
+		    user = { twProfileId: profile.id, username: "twitter-"+profile.id, unchangedName:true };
+		    collections.users.save(user, { safe: true }, function(err) {
+			done(null, user);
+		    });
+		} else {
+		    done(null, user);
+		}
+	    });
+	}));
+
+	app.get('/login/twitter', passport.authenticate('twitter'));
+	app.get('/auth/twitter/callback',
+		passport.authenticate('twitter', { successRedirect: '/onoauthlogin',
+						    failureRedirect: '/login' }));
+    }
 
     passport.serializeUser(function(user, done) {
 	done(null, user.username);

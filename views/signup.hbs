@@ -34,7 +34,11 @@
 <input type="submit" value="Sign up">
 </form>
 
-{{#if config.facebook.enabled}}<br><a href="/login/facebook">Sign up with Facebook</a>{{/if}}
+<div id="authlist">
+<hr>
+{{#if config.facebook.enabled}}<div class="authbox"><a href="/login/facebook"><img style="" src="/data/img/facebook.png" title="Log in with Facebook" alt="Log in with Facebook"><br>Log in with Facebook</a></div>{{/if}}
+{{#if config.twitter.enabled}}<div class="authbox"><a href="/login/twitter"><img style="height: 100px; width: 100px; background-color: #ccd6dd; border-radius: 5px;" src="/data/img/twitter.png" title="Log in with Twitter" alt="Log in with Twitter"><br>Log in with Twitter</a></div>{{/if}}
+</div>
 </div>
 </body>
 </html>
