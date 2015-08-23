@@ -219,6 +219,7 @@ exports.initAuth = function(app, mongo, collections) {
 						    failureRedirect: '/login' }));
     }
 
+    /* Google auth */
     if(config.google && config.google.enabled) {
 	passport.use(new GoogleStrategy({
 	    clientID: config.google.clientID,
@@ -226,19 +227,19 @@ exports.initAuth = function(app, mongo, collections) {
 	    callbackURL: config.origin + "/auth/google/callback"
 	  },
 	  function(accessToken, refreshToken, profile, done) {
-	    collections.users.findOne({ twProfileId : profile.id },function(err,user){
+	    collections.users.findOne({ googProfileId : profile.id },function(err,user){
 		if (err) { return done(err); }
 		
 		if(!user) {
-		    user = { twProfileId: profile.id, username: "google-"+profile.id, unchangedName:true };
+		    user = { googProfileId: profile.id, username: "google-"+profile.id, unchangedName:true };
 		    collections.users.save(user, { safe: true }, function(err) {
 			done(null, user);
 		    });
 		} else {
 		    done(null, user);
 		}
-	  }
-	));
+	    })
+	  }));
 
 	app.get('/auth/google',
 	  passport.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.login' }));
@@ -246,7 +247,7 @@ exports.initAuth = function(app, mongo, collections) {
 	app.get('/auth/google/callback', 
 	  passport.authenticate('google', { failureRedirect: '/login' }),
 	  function(req, res) {
-	    // Successful authentication, redirect home.
+	    // Successful authentication, redirect
 	    res.redirect('/onoauthlogin');
 	  });
     }
