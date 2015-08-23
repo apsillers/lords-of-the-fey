@@ -19,7 +19,7 @@
 var config = require("./config");
 var express = require('express')
   , app = express()
-  , server = app.listen(config.port);
+  , server = app.listen(config.port, config.listeningIP);
 var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server
 , ObjectID = function(input) { if(input.length!=12 && input.length!=24) { return; } return require('mongodb').ObjectID.apply(this, arguments); }

@@ -1,6 +1,8 @@
 module.exports = {
     "mongoString":"mongodb://mongoUser:mongoPasswrd@mongodb.example.com:27017/databaseName",
+
     "port": "8080",
+    "listeningIP":"0.0.0.0",
 
     "sessionSecret":"!! <replace this with a random secret> !!",
 
