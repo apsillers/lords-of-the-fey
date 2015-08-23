@@ -226,9 +226,17 @@ exports.initAuth = function(app, mongo, collections) {
 	    callbackURL: config.origin + "/auth/google/callback"
 	  },
 	  function(accessToken, refreshToken, profile, done) {
-	    User.findOrCreate({ googleId: profile.id }, function (err, user) {
-	      return done(err, user);
-	    });
+	    collections.users.findOne({ twProfileId : profile.id },function(err,user){
+		if (err) { return done(err); }
+		
+		if(!user) {
+		    user = { twProfileId: profile.id, username: "google-"+profile.id, unchangedName:true };
+		    collections.users.save(user, { safe: true }, function(err) {
+			done(null, user);
+		    });
+		} else {
+		    done(null, user);
+		}
 	  }
 	));
 
