@@ -278,6 +278,12 @@ Space.prototype = {
 	    ui.onSpaceHover(e);
 	});
 
+        /* helpful for debugging pathing issues */
+        this.debugText = new createjs.Text("");
+        this.debugText.x = 30;
+        this.debugText.y = 30;
+        this.shape.addChild(this.debugText);
+
         this.shape.addEventListener("rollover", ui.onSpaceHover);
 
 	if(terrain.overlayImgObj) {

@@ -201,6 +201,7 @@ function allAccessibleSpaces(world, start, unit, game) {
 
             if(neighbor in closedset) { continue; }
             var tentative_g_score = g_score[current] + cost_to_move_here(neighbor);
+            //neighbor.debugText.text = cost_to_move_here(neighbor);
 
             if(tentative_g_score > unit.moveLeft) { continue; }
 	    else { accessible_set[neighbor] = neighbor; }
@@ -224,7 +225,7 @@ function allAccessibleSpaces(world, start, unit, game) {
 	var occupant = world.getUnitAt(space);
         var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
 	var normal_move_cost = unit.getMoveCostForSpace(space);
-	if(is_enemy_present) { return 0; }
+	if(is_enemy_present) { return unit.moveLeft - g_score[current];; }
 
         // test if this pace has an enemy adjacent
         var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
