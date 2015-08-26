@@ -200,6 +200,11 @@ function allAccessibleSpaces(world, start, unit, game) {
             var neighbor = neighbors[i];
 
             if(neighbor in closedset) { continue; }
+
+	    var occupant = world.getUnitAt(neighbor);
+            var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
+	    if(is_enemy_present) { accessible_set[neighbor] = neighbor; }
+
             var tentative_g_score = g_score[current] + cost_to_move_here(neighbor);
             //neighbor.debugText.text = cost_to_move_here(neighbor);
 
