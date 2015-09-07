@@ -641,7 +641,7 @@ unitLib.unitProto = {
 	var highestLeaderLevel = null;
 	var coords = Terrain.getNeighborCoords(attackSpace).map(function(v) { return v.x+","+v.y });
 	units.filter(function(u) {
-	    if(u.attributes.indexOf("leadership")>=0 && u.team == attacker.team && u.level > attacker.level && coords.indexOf(u.x+","+u.y)>=0) {
+	    if(u.attributes && u.attributes.indexOf("leadership")>=0 && u.team == attacker.team && u.level > attacker.level && coords.indexOf(u.x+","+u.y)>=0) {
 		highestLeaderLevel = Math.max(highestLeaderLevel, u.level);
 	    }
 	});
@@ -660,12 +660,12 @@ unitLib.unitProto = {
 
 	if(timeOfDay == "morning" || timeOfDay == "afternoon") {
 	    var modifier = (this.alignment=="lawful"?1:-1) * 0.25;
-	    return 1 + (this.attributes.indexOf("fearless")==-1?modifier:0);
+	    return 1 + ((this.attributes && this.attributes.indexOf("fearless")==-1)?modifier:0);
 	}
 
 	if(timeOfDay == "first watch" || timeOfDay == "second watch") {
 	    var modifier = (this.alignment=="chaotic"?1:-1) * 0.25;
-	    return 1 + (this.attributes.indexOf("fearless")==-1?modifier:0);
+	    return 1 + ((this.attributes && this.attributes.indexOf("fearless")==-1)?modifier:0);
 	}
 
 	return 1;

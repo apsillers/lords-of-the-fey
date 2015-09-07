@@ -19,7 +19,7 @@
 var loadMap = require("./loadUtils").loadMap;
 var Unit = require("./static/shared/unit.js").Unit;
 
-exports.initLobby = function(app, collections) {
+/*exports.initLobby = function(app, collections) {
     app.get('/create', function(req, res) {
 	var players = [
 	    { username:"hello", faction: "elves" },
@@ -30,7 +30,7 @@ exports.initLobby = function(app, collections) {
            res.redirect("/client/#game=" + id);
 	})
     });
-};
+};*/
 
 exports.getStartPositions = function(mapData) {
     var startPositions = [];
@@ -86,7 +86,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	    var index = -1;
 	    (function addCommander() {
 		index++;
-		if(index == playerList.length) { console.log("wow, we made a game:", game._id); resolutionCallback(game._id); return; }
+		if(index == playerList.length) { resolutionCallback(game._id); return; }
 		var typeName = playerList[index].faction=="elves"?"elvish_ranger":"orcish_warrior";
 		var coords = startPositions[playerList[index].team];
 

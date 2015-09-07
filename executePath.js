@@ -19,6 +19,165 @@
 
 /** @module executePath */
 
+var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
+var loadMap = require("./loadUtils").loadMap;
+var Unit = require("./static/shared/unit.js").Unit;
+var executeAttack = require("./executeAttack");
+var Terrain = require("./static/shared/terrain.js").Terrain;
+var executeAttack = require("./executeAttack");
+var ObjectID = function(input) { if(input.length!=12 && input.length!=24) { return; } return require('mongodb').ObjectID.apply(this, arguments); }
+
+module.exports = function(collections, data, socket, socketList) {
+        var gameId = ObjectID(data.gameId),
+            path = data.path,
+            attackIndex = data.attackIndex,
+            user = socket.request.user;
+        collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
+            loadMap(game.map, function(err, mapData) {
+                collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
+
+		    // ensure that the logged-in user has the right to move this unit
+		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
+		    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
+			socket.emit("moved", { path:[path[0]] });
+			return;
+		    }
+
+		    unit = new Unit(unit);
+
+                    collections.units.find({ gameId: gameId }, function(err, cursor) {
+                        cursor.toArray(function(err, unitArray) {
+			    unitArray = unitArray.map(function(u) { return new Unit(u); });
+
+                            var isInitiallyHidden = unit.hasCondition("hidden");
+
+			    // make the move
+                            var moveResult = executePath(path, unit, unitArray, mapData, game);
+
+                            var endPoint = moveResult.path[moveResult.path.length-1];
+                            unit.x = endPoint.x;
+                            unit.y = endPoint.y;
+			    unit.moveLeft -= moveResult.moveCost || 0;
+
+                            if(isInitiallyHidden) { moveResult.unit = unit.getStorableObj(); }
+
+			    if(moveResult.hide) {
+				unit.addCondition("hidden");
+			    } else {
+				unit.removeCondition("hidden");
+			    }
+
+			    if(moveResult.revealedUnits.length) {
+				moveResult.revealedUnits = moveResult.revealedUnits.map(function(u) { u.removeCondition("hidden"); return u.getStorableObj(); });
+			    }
+
+			    // if there is a village here and
+			    // if the village is not co-team with the unit, capture it
+			    if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
+			       game.villages[endPoint.x+","+endPoint.y] != unit.team) {
+				game.villages[endPoint.x+","+endPoint.y] = unit.team;
+				moveResult.capture = true;
+				unit.moveLeft = 0;
+				collections.games.save(game, {safe: true}, saveRevealedUnits);
+			    } else {
+				saveRevealedUnits();
+			    }
+
+			    function saveRevealedUnits() {
+				(function saveRevealedUnit(index) {
+				    if(!moveResult.revealedUnits[index]) { return concludeMove(); }
+				    collections.units.save(moveResult.revealedUnits[index], {safe:true}, function() { saveRevealedUnit(index+1); });
+				}(0))
+			    }
+			    
+			    function concludeMove() {
+                                var emitMove = function() {
+					var alliedUsernames = game.players.filter(function(p) { return p.alliance == game.players[game.activeTeam-1].alliance; }).map(function(p) { return p.username; });
+					var alliedPlayerSocketData = socketList.filter(function(o) {
+					    return o.username && o.gameId.equals(gameId) &&
+					    alliedUsernames.indexOf(o.username) != -1;
+					});
+
+					alliedPlayerSocketData.forEach(function(s) {
+					    s.socket.emit("moved", moveResult);
+					});
+
+					moveResult.path = moveResult.publicPath || moveResult.path;
+					var unalliedPlayerSocketData = socketList.filter(function(o){ return alliedPlayerSocketData.indexOf(o)==-1; });
+					unalliedPlayerSocketData.forEach(function(s) {
+					    s.socket.emit("moved", moveResult);
+					});
+                                };
+				
+				// perform the attack
+				if(moveResult.attack && !unit.hasAttacked) {
+				    var targetCoords = path[path.length-1];
+				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
+					defender = new Unit(defender);
+
+					if(defender == null || defender.getAlliance(game) == unit.getAlliance(game)) { 
+					    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
+					    return;
+					}
+
+					unit.hasAttacked = true;
+					unit.moveLeft = 0;
+
+					// resolve combat
+                                        var attackSpace = moveResult.path[moveResult.path.length-1];
+					if(unit.hasCondition("hidden")) {
+					     unit.removeCondition("hidden");
+					}
+					moveResult.combat = executeAttack(unit, attackIndex, attackSpace, defender, unitArray, mapData, game);
+
+					collections.games.save(game, { safe: true }, function() {
+					    // injure/kill units models
+					    var updateUnitDamage = function(unit, callback) {
+						if(unit.hp <= 0) {
+						    collections.units.remove({ _id: unit._id }, function() {
+							if(unit.isCommander) {
+							    collections.units.findOne({
+								gameId: unit.gameId,
+								isCommander: true,
+								team: unit.team
+							    }, function(err, commander) {
+								if(!commander) {
+								    console.log("COMMANDER DEATH");
+								    checkForVictory(game, collections, function(victoryResult) {
+									callback();
+									console.log("VICTORY: ", victoryResult);
+								    });
+								} else {
+								    callback();
+								}
+							    });
+							} else {
+							    callback();
+							}
+						    });
+						}
+						else { collections.units.save(unit.getStorableObj(), {safe: true}, callback); }
+					    }
+
+					    var handleDefender = function() {
+						updateUnitDamage(defender, emitMove);
+					    }
+					
+					    updateUnitDamage(unit, handleDefender);
+					});
+				    });
+				} else {
+                                    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
+				}
+			    }
+                        });
+                    });
+                });
+            });
+        });
+}
+
 var getNeighborCoords = require("./static/shared/terrain.js").Terrain.getNeighborCoords;
 
 /** Given two spaces, descide if they are neighbors */
@@ -41,7 +200,8 @@ Attempt to move a unit through a given path and report result
 
 @return {{path:Array, moveCost:number}|boolean} object with actual path taken and move points spent, or false (on failed move)
 */
-module.exports = function executePath(path, unit, unitArray, mapData, game) {
+
+function executePath(path, unit, unitArray, mapData, game) {
     var actualPath = [path[0]];
     var standingClear = true;
     var totalMoveCost = 0;

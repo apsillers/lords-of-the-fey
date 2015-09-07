@@ -204,7 +204,7 @@
             }
 
 	    if(overlaySymbol && !overlay) {
-		console.log("Missing overlay:", overlaySymbol);
+		//console.log("Missing overlay:", overlaySymbol);
 	    }
 
             return terrainObj;

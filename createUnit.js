@@ -18,13 +18,36 @@
 */
 var castlePathExists = require("./static/shared/castlePathExists").castlePathExists;
 var Unit = require("./static/shared/unit.js").Unit;
-var ObjectID = require('mongodb').ObjectID;
+var ObjectID = function(input) { if(input.length!=12 && input.length!=24) { return; } return require('mongodb').ObjectID.apply(this, arguments); }
+var loadMap = require("./loadUtils").loadMap;
+var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
 
 /**
     @param {Object} data - object of unit properties (x, y, type)
     @mapData {Object}
 */
-module.exports = function(data, mapData, collections, game, player, callback) {
+module.exports = function(collections, data, socket, socketList) {
+	var gameId = ObjectID(data.gameId);
+	var user = socket.request.user;
+
+        collections.games.findOne({_id:gameId}, function(err, game) {
+	    if(!game) { socket.emit("no game"); return; }
+            loadMap(game.map, function(err, mapData) {
+		var player = game.players.filter(function(p) { return p.username == user.username })[0];
+
+		if(socketOwnerCanAct(socket, game)) {
+		    createUnit(data, mapData, collections, game, player, function(createResult) {
+			socketList.filter(function(o){ return o.gameId.equals(gameId); }).forEach(function(o) { o.socket.emit("created", createResult); })
+			socket.emit("playerUpdate", { gold: player.gold });
+		    });
+		} else {
+		    socket.emit("created", {});
+		}
+	    });
+	});
+}
+
+function createUnit(data, mapData, collections, game, player, callback) {
     var gameId = ObjectID(data.gameId);
     var loadUnitType = require("./loadUtils").loadUnitType;
     var loadFaction = require("./loadUtils").loadFaction;

@@ -16,18 +16,33 @@
     You should have received a copy of the GNU Affero General Public License
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
-var fs = require("fs");
-var Terrain = require("./static/shared/terrain").Terrain;
+if(typeof window == "undefined") {
+    var readFile = require("fs").readFile;
+    var prefix = "static";
+} else {
+    var prefix = "";
+    var readFile = function(filename, encoding, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", filename);
+        xhr.send();
+        xhr.onload = function() {
+            callback(null, xhr.responseText);
+        }
+        xhr.onerror = function(e) {
+            callback(e, null);
+        }
+    }
+}var Terrain = require("./static/shared/terrain").Terrain;
 var toMapDict = require("./static/shared/terrain").toMapDict;
 
 exports.loadMap = function(filename, callback) {
-    fs.readFile('static/data/maps/'+filename, { encoding: "utf8"}, function(err, data) {
+    readFile(prefix + '/data/maps/'+filename, { encoding: "utf8"}, function(err, data) {
         callback(err, toMapDict(data));
     });
 };
 
 exports.loadUnitType = function(type, callback) {
-    fs.readFile('static/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
+    readFile(prefix + '/data/units/'+type+".json", { encoding: "utf8"}, function(err, data) {
 	try {
             var dataObj = JSON.parse(data);
         } catch(e) {
@@ -38,7 +53,7 @@ exports.loadUnitType = function(type, callback) {
 };
 
 exports.loadFaction = function(factionName, callback) {
-    fs.readFile('static/data/factions/'+factionName+".json", { encoding: "utf8"}, function(err, data) {
+    readFile(prefix + '/data/factions/'+factionName+".json", { encoding: "utf8"}, function(err, data) {
         callback(err, JSON.parse(data));
     });
 };
