@@ -18,7 +18,7 @@ module.exports = function(collections, data, socket, socketList) {
             do {
                 game.activeTeam %= (game.players.length);
                 game.activeTeam++;
-            } while(game.players[game.activeTeam - 1] == undefined);
+            } while(!game.players[game.activeTeam - 1].username);
 
             var villageCount = 0;
             for(var coords in game.villages) {
@@ -75,7 +75,7 @@ module.exports = function(collections, data, socket, socketList) {
                                 if(!hiddenUpdates[updateCoord]) { publicUpdates[updateCoord] = updates[updateCoord]; }
                             }
 
-                            socketList.filter(function(o) { console.log(o.gameId, gameId); return o.gameId.equals(gameId); }).forEach(function(o) {
+                            socketList.filter(function(o) { return o.gameId.equals(gameId); }).forEach(function(o) {
                                 o.socket.emit("newTurn", { activeTeam: game.activeTeam,
                                                     updates: publicUpdates,
                                                     timeOfDay: game.timeOfDay });

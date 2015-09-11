@@ -54,23 +54,28 @@ socket.on("player update", function(data) {
 
 function renderPlayerList() {
     var $playerList = $("#room-player-list");
-    $playerList.html("");
+    $("#room-player-list tr:not(:nth-child(1))").remove();
+
+console.log(players);
 
     $.each(players, function(i, data) {
+console.log(data);
 	data.alliance = data.alliance || i+1;
 
-	var playerItem = $("<div>");	
-	if(data.username == yourUsername) {
+	var playerItem = $("<tr>");
+        if(data.empty) {
+            playerItem.append($("<td>", {colspan: 4}).text("-- empty --").css({ "text-align":"center" }));
+        } else if(data.username == yourUsername) {
 	    var readyBox = $("<input type='checkbox'>");
 	    readyBox.click(function() {
 		socket.emit("ready", { ready: $(this).is(':checked'), id: roomId });
 	    });
 	    readyBox.prop("checked", data.ready);
-	    playerItem.append(readyBox);
+	    playerItem.append($("<td>").append(readyBox));
 
 	    var playerText = $("<span>");
-	    playerText.text((i+1) + ": " + data.username + " | ");
-	    playerItem.append(playerText);
+	    playerText.text((i+1) + ": " + data.username);
+	    playerItem.append($("<td>").append(playerText));
 
 	    var factionSelector = $("<select>");
 	    factionSelector.append('<option value="random">Random</option>')
@@ -80,7 +85,7 @@ function renderPlayerList() {
 	    factionSelector.change(function() {
 		socket.emit("set faction", { id: roomId, faction: factionSelector.val() });
 	    });
-	    playerItem.append(factionSelector);
+	    playerItem.append($("<td>").append(factionSelector));
 
 	    var allianceSelector = $("<select>");
 	    for(var j=0; j<room.totalSlots; ++j) {
@@ -90,9 +95,12 @@ function renderPlayerList() {
 	    allianceSelector.change(function() {
 		socket.emit("set alliance", { id: roomId, alliance: allianceSelector.val() });
 	    });
-	    playerItem.append(allianceSelector);
+	    playerItem.append($("<td>").append(allianceSelector));
 	} else {
-	    playerItem.text((data.ready?"✓ ":"_ ") + (i+1) + ": " + data.username + " | " + (data.faction||"Random") + " | " + data.alliance);
+            playerItem.append($("<td>").append(data.ready?"✓ ":"_ "));
+            playerItem.append($("<td>").append((i+1) + ": " + data.username));
+            playerItem.append($("<td>").append(data.faction||"Random"));
+            playerItem.append($("<td>").append(data.alliance));
 	}
 	$playerList.append(playerItem);
     });
@@ -109,7 +117,7 @@ socket.on("launched room", function(gameId) {
 });
 
 $("#start-game-button").click(function() {
-    if(players.every(function(p) { return p.ready; })) {
+    if(players.filter(function(p) { return !p.empty; }).every(function(p) { return p.ready; })) {
 	socket.emit("launch room", roomId);
     }
 });

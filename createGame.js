@@ -59,6 +59,9 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 
     for(var i=0; i<playerList.length; ++i) {
 	var playerItem = playerList[i];
+
+        if(playerItem.empty) { continue; }
+
 	playerItem.team = i+1;
 	if(!("alliance" in playerItem)) { playerItem.alliance = i+1; }
 
@@ -87,6 +90,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 	    (function addCommander() {
 		index++;
 		if(index == playerList.length) { resolutionCallback(game._id); return; }
+                if(playerList[index].empty) { addCommander(); return; }
 		var typeName = playerList[index].faction=="elves"?"elvish_ranger":"orcish_warrior";
 		var coords = startPositions[playerList[index].team];
 

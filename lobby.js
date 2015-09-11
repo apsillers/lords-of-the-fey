@@ -22,6 +22,8 @@ var rooms = {};
 var players = [];
 
 module.exports.initLobbyListeners = function(sockets, socket, collections, app) {
+    var emptySlot = { empty: true };
+
     socket.on("join lobby", function() {
 	var user = socket.request.user;
 	if(!user) { return; }
@@ -58,9 +60,10 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 		map: data.map,
 		totalSlots: startPositions.length - 1,
 		filledSlots: 0,
-		players:[],
+		players: [],
 		owner:user.username
 	    };
+            for(var i=0; i < rooms[id].totalSlots; i++) { rooms[id].players[i] = emptySlot; }
 	    sockets.in("lobby").emit("created room", rooms[id]);
 	    joinRoom(user, rooms[id]);
 	});
@@ -114,10 +117,9 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	    return;
 	}
 
-	var freeIndex = room.players.indexOf(null);
-	if(freeIndex == -1) {
-	    freeIndex = room.players.length;
-	}
+        // keep setting freeIndex until we find an empty slot, then stop
+        var freeIndex;
+        room.players.some(function(p,idx) { freeIndex = idx; return p.empty; });
 
 	room.players[freeIndex] = { username: user.username, ready: user.ready };
         if(user.anonToken) { room.players[freeIndex].anonToken = user.anonToken; }
@@ -138,7 +140,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
 	room.filledSlots--;
 
-	room.players.splice(room.players.indexOf(player), 1);
+	room.players.splice(room.players.indexOf(player), 1, emptySlot);
 	socket.leave("room"+id);
 
 	sockets.in("lobby").emit("left room", { username: username, roomId: room.id });
@@ -164,8 +166,9 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	var room = rooms[+roomId];
 	if(!room) { return; }
 
-	if(room.players.filter(function(o) { return o != null; }).length < 2) { return; }
-	if(room.players.every(function(p) { return p.ready; })) {
+        var filledSlots = room.players.filter(function(o) { return !o.empty; });
+	if(filledSlots.length < 2) { return; }
+	if(filledSlots.every(function(p) { return p.ready; })) {
 	    require("./createGame").createNewGame(collections, room.players, room.map, function(gameId) {
 		sockets.in("room"+roomId).emit("launched room", gameId);
 		// sockets.in("room"+data.id).leave("room"+data.id);

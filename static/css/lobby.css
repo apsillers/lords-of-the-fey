@@ -42,12 +42,23 @@ div#player-list {
     height: 500px;
 }
 
-#room-player-list div, select, input, #create-dialog {
+#room-player-list {
+    border-collapse: collapse;
+}
+
+#room-player-list td, select, input, #create-dialog {
     font-size: 20px;
     font-family: sans-serif;
 }
-#room-player-list div {
-    padding: 10px;
+#room-player-list td {
+    padding: 0px 5px;
+    height: 50px;
+}
+#room-player-list th {
+    height: 50px;
+}
+#room-player-list tr {
+    border-bottom: thin solid black;
 }
 select, button {
     padding: 5px;
