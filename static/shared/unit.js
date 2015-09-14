@@ -202,7 +202,6 @@ var unitLib = {
 /* Function-factory for functions that take a unit and alter its attacks of a given type (ranged or melee) */
 function createModifyAttacksFunc(type, modifier) {
     return function(unit) {
-        console.log("modifying ", type, modifier);
 	var newAttacks = [];
 	for(var i=0; i < unit.attacks.length; ++i) {
 	    var attack = unit.attacks[i];
@@ -588,7 +587,7 @@ unitLib.unitProto = {
 	if(!this.conditions) { return false; }
 	c = c.name || c;
 	var index = this.conditions.map(function(c) { return c.name || c; }).indexOf(c);
-	return this.conditions[index];
+	return this.conditions[index] || false;
     },
 
     redrawConditions: function() {
@@ -671,14 +670,29 @@ unitLib.unitProto = {
 	return 1;
     },
 
-    getCoverOnSpace: function(space) {
+    // get the unit's cover on space
+    // optionally, consider the unit's cover against a specific attack (which may be magical/marksman)
+    getCoverOnSpace: function(space, attack, attackIsOffensive) {
 	var unit = this;
-	return Math.max.apply(Math,
+	var generalCover = Math.max.apply(Math,
 		      space.terrain.properties.map(function(i) {
 			  if(!unit.terrain[i]) { return 0; }
 			  return unit.terrain[i].cover;
 		      })
 	       );
+
+        if(attack) {
+            if(attack.properties) {
+                if(attack.properties.indexOf("magical") != -1) {
+                    return 0.3;
+                }
+                else if(attackIsOffensive && attack.properties.indexOf("marksman") != -1) {
+                    return Math.min(generalCover, 0.4);
+                }
+            }
+        }
+
+        return generalCover;
     },
 
     getMoveCostForSpace: function(space) {
