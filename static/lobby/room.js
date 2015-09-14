@@ -34,6 +34,8 @@ socket.on("room data", function(data) {
     players = data.room.players;
     room = data.room;
     yourUsername = data.you;
+
+    if(data.you == data.room.owner) { $("#add-anon-button").prop("disabled", false); }
     renderPlayerList();
 });
 
@@ -56,10 +58,14 @@ function renderPlayerList() {
     var $playerList = $("#room-player-list");
     $("#room-player-list tr:not(:nth-child(1))").remove();
 
-console.log(players);
+    if(players.filter(function(p){ return !p.empty; }).length > 1 &&
+       players.every(function(p) { return p.empty || p.ready; })) {
+        $("#start-game-button").prop("disabled", false);
+    } else {
+        $("#start-game-button").prop("disabled", true);
+    }
 
     $.each(players, function(i, data) {
-console.log(data);
 	data.alliance = data.alliance || i+1;
 
 	var playerItem = $("<tr>");
