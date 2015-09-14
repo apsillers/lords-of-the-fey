@@ -41,15 +41,17 @@ module.exports = function executeAttack(offender, attackIndex, attackSpace, defe
     var swingResult;
     var defenseIndex;
 
-    var defenderCover = defender.getCoverOnSpace(mapData[defender.x+","+defender.y]);
-    var offenderCover = offender.getCoverOnSpace(mapData[offender.x+","+offender.y]);
-
     var offense = offender.attacks[attackIndex];
     offense = defender.applyAttack(offense, offender, game.timeOfDay, attackSpace, units, mapData);
+
+    var defenderCover = defender.getCoverOnSpace(mapData[defender.x+","+defender.y], offense, true);
+    var offenderCover = offender.getCoverOnSpace(mapData[offender.x+","+offender.y]);
 
     var defenseChoice = defender.selectDefense(offender, offense, game.timeOfDay, offenderCover, defenderCover);
     var defense = offender.applyAttack(defenseChoice.defense, defender, game.timeOfDay, defender, units, mapData);
     var defenseIndex = defenseChoice.defenseIndex;
+
+    offenderCover = offender.getCoverOnSpace(mapData[offender.x+","+offender.y], defense, false);
 
     if(defense) {
 	var defenseFirst = ((defense.properties||[]).indexOf("firststrike") != -1) > ((offense.properties||[]).indexOf("firststrike") != -1);
@@ -120,14 +122,7 @@ module.exports = function executeAttack(offender, attackIndex, attackSpace, defe
 function attackSwing(isOffense, attack, hitter, hittee, hitteeCover, units) {
     var swingRecord;
 
-    if(attack.properties) {
-	if(attack.properties.indexOf("magical") != -1) {
-	    hitteeCover =  0.3;
-	}
-	if(isOffense && attack.properties.indexOf("marksman") != -1) {
-	    hitteeCover =  Math.min(hitteeCover, 0.4);
-	}
-    }
+
 
     if(Math.random() > hitteeCover) {
 	hittee.hp -= attack.damage;
