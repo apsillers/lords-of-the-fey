@@ -100,16 +100,21 @@ div.recruit-item.selected {
     background-color: #CCF;
 }
 
-div.attack-item {
+#attack-list {
+    width: 100%;
+}
+
+.attack-item {
     text-align:center;
     padding: 3px;
     margin: 2px;
     background-color: #555;
     height: 60px;
     color: #FFF;
+    cursor: pointer;
 }
 
-div.attack-item.selected {
+.attack-item.selected {
     background-color: #66D;
 }
 

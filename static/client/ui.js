@@ -702,44 +702,60 @@ var ui = {
 
 	attackListDOM.html("");
 
-	var stringifyAttack = function(attack) {
+	var makeAttackStatsElem = function(attack, hitChance) {
 	    if(!attack) { return "-- none --"; }
-	    return attack.name + ": " + attack.damage + "-" + attack.number + " (" + attack.type + ")";
+            var hitPercent = Math.round(hitChance*100);
+	    return $("<td>").append([
+                $("<span>").text(attack.name).css("font-weight", "bold"),
+                $("<br>"),
+                $("<span>").text(attack.damage + "-" + attack.number + " " + (attack.properties?attack.properties.join(", "):"")),
+                $("<br>"),
+                $("<span>").text(hitPercent+"%").css("color", {
+                    "10": "#F00",
+                    "20": "#F00",
+                    "30": "#F00",
+                    "40": "#FF0",
+                    "50": "#FF0",
+                    "60": "#ADFF2F",
+                    "70": "#0F0",
+                    "80": "#0F0",
+                    "90": "#0F0"
+                }[hitPercent])
+            ]);
 	}
 
 	var selectedItem;
 
 	for(var i=0; i<attacker.attacks.length; ++i) {
-	    var attackerCover = attacker.getCoverOnSpace(world.getSpaceByCoords(attacker));
-	    var defenderCover = defender.getCoverOnSpace(world.getSpaceByCoords(defender));
-
 	    var attack = attacker.attacks[i];
 	    attack = defender.applyAttack(attack, attacker, gameInfo.timeOfDay, ui.path[ui.path.length-2].space);
-	    var attackText = stringifyAttack(attack);
 	    var attackIcon = new Image();
 	    attackIcon.src = attack.icon;
 	    $(attackIcon).css("float","left");
 
+	    var attackerCover = attacker.getCoverOnSpace(world.getSpaceByCoords(attacker));
+	    var defenderCover = defender.getCoverOnSpace(world.getSpaceByCoords(defender), attack, true);
+
 	    var defense = defender.selectDefense(attacker, attack, gameInfo.timeOfDay, attackerCover, defenderCover).defense;
 	    defense = attacker.applyAttack(defense, defender, gameInfo.timeOfDay, ui.path[ui.path.length-1].space);
-	    var defenseText = stringifyAttack(defense);
+            attackerCover = attacker.getCoverOnSpace(world.getSpaceByCoords(attacker), defense, false);
+
 	    var defenseIcon;
 	    if(defense) {
 		defenseIcon = new Image();
 		defenseIcon.src = defense.icon;
-		$(defenseIcon).css("float","right");
 	    } else {
 		defenseIcon = null;
 		defense = {};
 	    }
 
-	    var attackButton = $("<div class='attack-item'>");
+	    var attackButton = $("<tr class='attack-item'>");
 
-	    attackButton.append(attackIcon);
-	    var itemText = $("<span>", { text: attackText + " | " + defenseText });
-	    itemText.css({ position:"relative", top:"20px" });
-	    attackButton.append(itemText);
-	    attackButton.append(defenseIcon);
+	    attackButton.append($("<td>").append(attackIcon).css("width", 60));
+            attackButton.append(makeAttackStatsElem(attack, 1-defenderCover).css("width", 180));
+	    attackButton.append($("<td>").text("--"+attack.type+"--").css({ "text-align":"center" }));
+            attackButton.append(makeAttackStatsElem(defense, 1-attackerCover).css({ "width":180 }));
+	    attackButton.append($("<td>").append(defenseIcon).css("width", 60));
 
 	    attackListDOM.append(attackButton);
 
