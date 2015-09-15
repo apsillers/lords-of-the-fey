@@ -687,7 +687,7 @@ var ui = {
 	world.stage.addChild(ui.modal);
 
 	var promptWidth = 600;
-	var promptHeight = 68 * attacker.attacks.length + 30;
+	var promptHeight = 68 * attacker.attacks.length + 110;
 
 	var attackPromptDOM = $("#attack-prompt");
 	var attackListDOM = $("#attack-list");
@@ -703,7 +703,7 @@ var ui = {
 	attackListDOM.html("");
 
 	var makeAttackStatsElem = function(attack, hitChance) {
-	    if(!attack) { return "-- none --"; }
+	    if(!attack) { return $("<td>").text("-- none --"); }
             var hitPercent = Math.round(hitChance*100);
 	    return $("<td>").append([
                 $("<span>").text(attack.name).css("font-weight", "bold"),
@@ -711,20 +711,28 @@ var ui = {
                 $("<span>").text(attack.damage + "-" + attack.number + " " + (attack.properties?attack.properties.join(", "):"")),
                 $("<br>"),
                 $("<span>").text(hitPercent+"%").css("color", {
-                    "10": "#F00",
-                    "20": "#F00",
-                    "30": "#F00",
-                    "40": "#FF0",
-                    "50": "#FF0",
+                    "10": "#F00", "20": "#F00", "30": "#F00",
+                    "40": "#FF0", "50": "#FF0",
                     "60": "#ADFF2F",
-                    "70": "#0F0",
-                    "80": "#0F0",
-                    "90": "#0F0"
+                    "70": "#0F0", "80": "#0F0", "90": "#0F0"
                 }[hitPercent])
             ]);
-	}
+	};
+
+        var makeCombatantElem = function(combatant, floatDir) {
+            return [
+                $(combatant.imgObj).css("float",floatDir),
+                $("<div>").append([
+                    $("<span>").text(combatant.name),
+                    $("<br>"),
+                    $("<span>").text(combatant.hp + "/" + combatant.maxHp),
+                ]).css("float",floatDir),
+            ];
+        }
 
 	var selectedItem;
+
+        $("#attack-combatants").empty().append(makeCombatantElem(attacker, "left")).append(makeCombatantElem(defender, "right"));
 
 	for(var i=0; i<attacker.attacks.length; ++i) {
 	    var attack = attacker.attacks[i];
@@ -746,7 +754,6 @@ var ui = {
 		defenseIcon.src = defense.icon;
 	    } else {
 		defenseIcon = null;
-		defense = {};
 	    }
 
 	    var attackButton = $("<tr class='attack-item'>");

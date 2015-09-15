@@ -100,6 +100,21 @@ div.recruit-item.selected {
     background-color: #CCF;
 }
 
+#attack-combatants {
+    padding: 7px;
+}
+
+#attack-cancel {
+    text-align: center;
+}
+
+#attack-cancel button {
+    margin: 5px;
+    color: white;
+    background-color: #55F;
+    font-size: 12pt;
+}
+
 #attack-list {
     width: 100%;
 }
