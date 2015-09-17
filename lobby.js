@@ -183,12 +183,14 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	if(!room) { return; }
 	var user = socket.request.user;
 	if(!user) { return; }
-	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
-	if(!player) { return; }
 
-	player.faction = data.faction;
+        if(["Elves", "Orcs"].indexOf(data.faction) == -1) { return; }
 
-	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+        if(room.players[data.slot] && (room.players[data.slot].username == user.username || user.username == room.owner)) {
+	    room.players[data.slot].faction = data.faction;
+
+	    sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+        }
     });
 
     socket.on("set alliance", function(data) {
@@ -196,11 +198,13 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	if(!room) { return; }
 	var user = socket.request.user;
 	if(!user) { return; }
-	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
-	if(!player) { return; }
 
-	player.alliance = data.alliance;
+        if(parseInt(data.alliance) != data.alliance || data.alliance < 0 || data.alliance > room.totalSlots) { return; }
 
-	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+        if(room.players[data.slot] && (room.players[data.slot].username == user.username || user.username == room.owner)) {
+	    room.players[data.slot].alliance = data.alliance;
+
+	    sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+        }
     });
 }

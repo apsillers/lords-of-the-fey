@@ -69,6 +69,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 
 	if(!("gold" in playerItem)) { playerItem.gold = 100; }
 	if(!("faction" in playerItem) || playerItem.faction == "random") { playerItem.faction = Math.random()>0.5?"elves":"orcs"; }
+        else { playerItem.faction = playerItem.faction.toLowerCase(); }
     }
 
     loadMap(map, function(err, mapData) {
