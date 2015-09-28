@@ -63,6 +63,13 @@ socket.on("joined room", function(data) {
     }
 });
 
+socket.on("chatmsg", function(data) {
+    $("#chat-messages").append(
+        $("<div>").append([ $("<span>").text(data.from).css("font-weight","bold"), $("<span>").text(": " + data.msg)])
+    );
+    $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+});
+
 function renderPlayerList() {
     players.sort();
     var $playerList = $("#player-list");
@@ -78,7 +85,7 @@ function renderRoomList() {
 
     $.each(rooms, function(roomId, data) {
 	var roomItem = $("<div>");
-	roomItem.text(roomId + ": " + data.name + " " + data.filledSlots + "/" + data.totalSlots);
+	roomItem.text(data.name + " - " + data.map + " - " + data.filledSlots + "/" + data.totalSlots);
 	$roomList.append(roomItem);
 	roomItem.click(function() {
 	    socket.emit("join room", { id: roomId });
@@ -94,4 +101,10 @@ $("#launch-game").click(function() {
 	name: $("#create-dialog-name").val(),
 	map: $("#create-dialog-map").val()
     });
+});
+$("#chat-input").keyup(function(e) {
+    if(e.keyCode == 13) {
+        socket.emit("chat", { msg: $("#chat-input").val(), id:"lobby" });
+        $("#chat-input").val("");
+    }
 });

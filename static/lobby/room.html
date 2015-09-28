@@ -26,10 +26,17 @@
     <link rel="stylesheet" type="text/css" href="/css/lobby.css" />
   </head>
   <body>
+    <div id="room-container">
     <table id="room-player-list">
       <tr><th></th><th>Player</th><th>Faction</th><th>Alliance</th><tr>
     </table>
     <input type="button" value="Start game" id="start-game-button" disabled="disabled" title="When all players are ready, the game can be launched"><input type="button" value="Add anon player" id="add-anon-button" disabled="disabled" title="Only the room owner can add anonymous players">
+
+    <div id="chat">
+      <div id="chat-messages" style="height: 100px; border: thin solid gray; overflow-y: scroll;"></div>
+      <input type="text" id="chat-input">
+    </div>
+    </div>
     <script src="room.js"></script>
   </body>
 </html>

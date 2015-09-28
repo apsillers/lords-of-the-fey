@@ -65,6 +65,11 @@ function renderPlayerList() {
         $("#start-game-button").prop("disabled", true);
     }
 
+    if(!players.some(function(p) { return p.username == yourUsername; })) {
+        window.removeEventListener("beforeunload", confirmLeave);
+        window.location = "/lobby";
+    }
+
     $.each(players, function(i, data) {
 	data.alliance = data.alliance || i+1;
 
@@ -107,6 +112,13 @@ function renderPlayerList() {
 		socket.emit("set alliance", { id: roomId, alliance: allianceSelector.val(), slot: slotNum });
 	    }.bind(null, i));
 	    playerItem.append($("<td>").append(allianceSelector));
+
+            if(yourUsername == room.owner && data.username != yourUsername) {
+                var kickLink = $("<a>", {text:"x", title:"Kick"}).click(function(slotNum) {
+                    socket.emit("kick", { id: roomId, slot: slotNum });
+                }.bind(null, i)).css({"text-decoration":"underline", "cursor":"pointer" });
+                playerItem.append($("<td>").append(kickLink));
+            }
 	} else {
             playerItem.append($("<td>").text(data.ready?"✓ ":"_ "));
             playerItem.append($("<td>").text((i+1) + ": " + data.username));
@@ -127,6 +139,13 @@ socket.on("launched room", function(gameId) {
     window.location = "/client/#game="+gameId;
 });
 
+socket.on("chatmsg", function(data) {
+    $("#chat-messages").append(
+        $("<div>").append([ $("<span>").text(data.from).css("font-weight","bold"), $("<span>").text(": " + data.msg)])
+    );
+    $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+});
+
 $("#start-game-button").click(function() {
     if(players.filter(function(p) { return !p.empty; }).every(function(p) { return p.ready; })) {
 	socket.emit("launch room", roomId);
@@ -137,10 +156,16 @@ $("#add-anon-button").click(function() {
     socket.emit("add anon to room", { id: roomId });
 });
 
+$("#chat-input").keyup(function(e) {
+    if(e.keyCode == 13) {
+        socket.emit("chat", { msg: $("#chat-input").val(), id:roomId });
+        $("#chat-input").val("");
+    }
+});
 function confirmLeave(e) {
     var confirmationMessage = 'You are about to leave this room. If you are the owner, the room will be closed.';
 
     e.returnValue = confirmationMessage;
     return confirmationMessage;
 }
-window.addEventListener("beforeunload", confirmLeave);
+//window.addEventListener("beforeunload", confirmLeave);

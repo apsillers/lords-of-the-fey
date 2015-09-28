@@ -78,6 +78,8 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     socket.on("add anon to room", function(data) {
 	var room = rooms[+data.id];
 	var user = socket.request.user;
+        if(!room || room.owner != user.username) { return; }
+
         var token = (""+Math.random()).substr(2);
 	joinRoom({
             username: "anon"+token.substr(0,6),
@@ -123,6 +125,7 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
 	room.players[freeIndex] = { username: user.username, ready: user.ready };
         if(user.anonToken) { room.players[freeIndex].anonToken = user.anonToken; }
+        else { Object.defineProperty(room.players[freeIndex], "socket", { value: socket }); }
 	room.filledSlots++;
 
 	sockets.in("room"+room.id).emit("joined room", { username: user.username, players: room.players });
@@ -138,10 +141,13 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	var player = room.players.filter(function(o) { return o.username == username; })[0];
 	if(!player) { return; }
 
+console.log(username, "leaving room!");
+
 	room.filledSlots--;
 
 	room.players.splice(room.players.indexOf(player), 1, emptySlot);
-	socket.leave("room"+id);
+
+        if(!player.anonToken) { player.socket.leave("room"+id); }
 
 	sockets.in("lobby").emit("left room", { username: username, roomId: room.id });
 	sockets.in("room"+id).emit("left room", { username: username, players: room.players, roomId: id });
@@ -178,6 +184,21 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 	};
     });
 
+    socket.on("kick", function(data) {
+	var room = rooms[+data.id];
+	if(!room) { return; }
+	var user = socket.request.user;
+	if(!user) { return; }
+	var player = room.players[data.slot];
+	if(!player) { return; }
+
+        if(player && user.username == room.owner) {
+
+            if(!player.anonToken) { player.socket.emit("kicked", +data.id); }
+            leaveRoom(+data.id, player.username);
+        }
+    });
+
     socket.on("set faction", function(data) {
 	var room = rooms[+data.id];
 	if(!room) { return; }
@@ -206,5 +227,19 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
 
 	    sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
         }
+    });
+
+    socket.on("chat", function(data) {
+	var room = rooms[+data.id];
+	var user = socket.request.user;
+	if(!user) { return; }
+
+        var target;
+        if(room && room.players.some(function(p){ return p.username == user.username; })) {
+            target = sockets.in("room"+room.id);
+        } else if(!room && data.id=="lobby" && players.indexOf(user.username)!=-1) {
+            target = sockets.in("lobby");
+        }
+        if(target) { target.emit("chatmsg", { from: user.username, msg: data.msg }); }
     });
 }
