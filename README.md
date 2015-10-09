@@ -3,7 +3,11 @@ Lords of the Fey
 
 ![Lords of the Fey screenshot](https://apsillers.github.io/images/projects/fey.png)
 
-A multiplayer fantasy-themed turn-based strategy game that you can play in your browser using HTML5 technologies. The game's rules and artwork are taken from [Battle for Wesnoth](http://www.wesnoth.org).
+A multiplayer turn-based strategy game that you can play in your browser using HTML5 technologies. The game's rules and artwork are taken from [Battle for Wesnoth](http://www.wesnoth.org).
+
+# Demo
+
+To see a live demo, visit [https://lotf-apsillers.rhcloud.com](https://lotf-apsillers.rhcloud.com). Note that some parts of the the code are very experimental, so please feel free to []
 
 # Features
 
@@ -20,7 +24,7 @@ If you're interested in contributing, have a look at the [issue tracker](https:/
 
 For information about how to get started, check out [the project wiki](https://github.com/apsillers/lords-of-the-fey/wiki).
 
-# Setup
+# Running the Code
 
 The server requires:
 
@@ -34,13 +38,13 @@ To set up a test environment, clone the repository and do:
     npm install
     mongo < init.mongo.js
 
-Also edit the `/config.json` file. At minimum, you will need to edit the `mongoString` field to a valid [MongoDB connection string](http://docs.mongodb.org/manual/reference/connection-string/). You can also edit the other fields, e.g., to enable Facebook auth.
+Also edit the `/config.js` file. At minimum, you will need to edit the `mongoString` field to a valid [MongoDB connection string](http://docs.mongodb.org/manual/reference/connection-string/). You can also edit the other fields, e.g., to enable Facebook auth or change the port.
 
 To run the server, do:
 
     node server.js
 
-This will run a local server on port 8080. If you navigate to `http://127.0.0.1:8080/` in your browser, you can log in as either `hello` or `goodbye`, both with the password "`world`".
+This will run a local server on port 8080 (or another server, if you have changed the port in `config.js`). If you navigate to `http://127.0.0.1:8080/` in your browser, you can log in as either `hello` or `goodbye`, both with the password "`world`".
 
 To run a game, log in, and then click the link to create a new game. To play against an opponent, have the opponent log in as the other player and then visit the URL of the newly-created game. If testing both players on one computer, ensure you use some way to have both sets of credentials simultaneously (different browsers, Chrome incognito, etc.)
 
@@ -50,4 +54,14 @@ To learn more, check out [the project wiki](https://github.com/apsillers/lords-o
 
 The project as whole is licensed under the GNU Affero General Public License (AGPL) version 3, or (at your option) any later version. In addition to normal GNU GPL requirements, this means that, if you modify the software and host it on a network, you must offer your version's source code to anyone who interacts with the program over a network.
 
-All art assets (in `/static/data/img/`) are taken directly from Battle for Wesnoth and are licensed under the GNU General Public License (GPL), version 3 or (at your option) any later version.
+All art assets (in `/static/data/img/`) are taken directly from Battle for Wesnoth and are licensed under the GNU General Public License (GPL), version 3 or (at your option) any later version. A full list of Wesnoth art credits (some of which may not apply to the particular artwork used in this project) is here: http://wiki.wesnoth.org/Credits#Artwork_and_Graphics
+
+The project uses some libraries released under the MIT (X11) license:
+
+  * jQuery
+  * EaselJS
+  * PreloadJS
+
+Those libraries are included in /static/client/ and include their own licensing and copyright headers within each file.
+
+Utilities included in the /tools directory are licensed under the MIT (X11) license.
