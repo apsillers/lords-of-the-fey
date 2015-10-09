@@ -7,7 +7,7 @@ A multiplayer turn-based strategy game that you can play in your browser using H
 
 # Demo
 
-To see a live demo, visit [https://lotf-apsillers.rhcloud.com](https://lotf-apsillers.rhcloud.com). Note that some parts of the the code are very experimental, so please feel free to []
+To see a live demo, visit [https://lotf-apsillers.rhcloud.com](https://lotf-apsillers.rhcloud.com). Note that some parts of the the code are very experimental, so please feel free to [file a bug report](https://github.com/apsillers/lords-of-the-fey/issues).
 
 # Features
 
