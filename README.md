@@ -44,7 +44,7 @@ To run the server, do:
 
     node server.js
 
-This will run a local server on port 8080 (or another server, if you have changed the port in `config.js`). If you navigate to `http://127.0.0.1:8080/` in your browser, you can log in as either `hello` or `goodbye`, both with the password "`world`".
+This will run a local server on port 8080 (or another port, if you have changed the port in `config.js`). If you navigate to `http://127.0.0.1:8080/` in your browser, you can log in as either `hello` or `goodbye`, both with the password "`world`".
 
 To run a game, log in, and then click the link to create a new game. To play against an opponent, have the opponent log in as the other player and then visit the URL of the newly-created game. If testing both players on one computer, ensure you use some way to have both sets of credentials simultaneously (different browsers, Chrome incognito, etc.)
 
