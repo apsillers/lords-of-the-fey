@@ -954,7 +954,15 @@ var ui = {
         $("#player-overlay").empty().append($table).append($closeButton).css({ left: ($(window).width() - $("#player-overlay").width()) / 2 }).show();
     },
 
-    hidePlayerStats: function() { $("#player-overlay").hide(); }
+    hidePlayerStats: function() { $("#player-overlay").hide(); },
+
+    showCredits: function() {
+        $("#credits-overlay").css({ left: ($(window).width() - $("#credits-overlay").width()) / 2 }).show();
+    },
+
+    hideCredits: function() {
+        $("#credits-overlay").hide();
+    }
 };
 
 (function() {
