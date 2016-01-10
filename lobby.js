@@ -25,63 +25,63 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     var emptySlot = { empty: true };
 
     socket.on("join lobby", function() {
-	var user = socket.request.user;
-	if(!user) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
 
-	players.push(user.username);
+        players.push(user.username);
 
-	sockets.in("lobby").emit("joined lobby", user.username);
-	socket.emit("lobby data", { players: players, rooms: rooms, you: user.username });
-	socket.join("lobby");
+        sockets.in("lobby").emit("joined lobby", user.username);
+        socket.emit("lobby data", { players: players, rooms: rooms, you: user.username });
+        socket.join("lobby");
 
-	socket.on("disconnect", function() {
-	    var user = socket.request.user;
-	    if(!user) { return; }
-	    var index = players.indexOf(user.username);
-	    if(index != -1) { players.splice(index, 1); }
-	    sockets.in("lobby").emit("left lobby", user.username);
-	});
+        socket.on("disconnect", function() {
+            var user = socket.request.user;
+            if(!user) { return; }
+            var index = players.indexOf(user.username);
+            if(index != -1) { players.splice(index, 1); }
+            sockets.in("lobby").emit("left lobby", user.username);
+        });
     });
 
     socket.on("create room", function(data) {
-	var user = socket.request.user;
-	if(!user) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
 
-	var loadMap = require("./loadUtils").loadMap;
+        var loadMap = require("./loadUtils").loadMap;
 
-	var user = socket.request.user;
-	
-	loadMap(data.map, function(err, mapData) {
-	    var startPositions = require("./createGame").getStartPositions(mapData);
-	    var id = roomIndex++;
-	    rooms[id] = {
-		id: id,
-		name: data.name,
-		map: data.map,
-		totalSlots: startPositions.length - 1,
-		filledSlots: 0,
-		players: [],
-		owner:user.username
-	    };
+        var user = socket.request.user;
+        
+        loadMap(data.map, function(err, mapData) {
+            var startPositions = require("./createGame").getStartPositions(mapData);
+            var id = roomIndex++;
+            rooms[id] = {
+                id: id,
+                name: data.name,
+                map: data.map,
+                totalSlots: startPositions.length - 1,
+                filledSlots: 0,
+                players: [],
+                owner:user.username
+            };
             for(var i=0; i < rooms[id].totalSlots; i++) { rooms[id].players[i] = emptySlot; }
-	    sockets.in("lobby").emit("created room", rooms[id]);
-	    joinRoom(user, rooms[id]);
-	});
+            sockets.in("lobby").emit("created room", rooms[id]);
+            joinRoom(user, rooms[id]);
+        });
     });
 
     socket.on("join room", function(data) {
-	var room = rooms[+data.id];
-	var user = socket.request.user;
-	joinRoom(user, room);
+        var room = rooms[+data.id];
+        var user = socket.request.user;
+        joinRoom(user, room);
     });
 
     socket.on("add anon to room", function(data) {
-	var room = rooms[+data.id];
-	var user = socket.request.user;
+        var room = rooms[+data.id];
+        var user = socket.request.user;
         if(!room || room.owner != user.username) { return; }
 
         var token = (""+Math.random()).substr(2);
-	joinRoom({
+        joinRoom({
             username: "anon"+token.substr(0,6),
             ready: true,
             anonToken: token
@@ -89,108 +89,108 @@ module.exports.initLobbyListeners = function(sockets, socket, collections, app) 
     });
 
     socket.on("enter room", function(id) {
-	var user = socket.request.user;
-	socket.join("room"+id);
-	socket.emit("room data", { you: user.username, room: rooms[+id] });
+        var user = socket.request.user;
+        socket.join("room"+id);
+        socket.emit("room data", { you: user.username, room: rooms[+id] });
 
-	socket.on("disconnect", function() {
-	    var user = socket.request.user;
-	    if(!user) { return; }
+        socket.on("disconnect", function() {
+            var user = socket.request.user;
+            if(!user) { return; }
 
-	    leaveRoom(+id, user.username);
+            leaveRoom(+id, user.username);
 
-	    for(var roomId in rooms) {
-		if(rooms[roomId].owner == user.username) {
-		    sockets.in("lobby").emit("room destroyed", roomId);
-		    sockets.in("room"+roomId).emit("kicked", roomId);
+            for(var roomId in rooms) {
+                if(rooms[roomId].owner == user.username) {
+                    sockets.in("lobby").emit("room destroyed", roomId);
+                    sockets.in("room"+roomId).emit("kicked", roomId);
 
-		    for(var i=0; i<rooms[roomId].players.length; i++) {	
-			leaveRoom(roomId, rooms[roomId].players[i].username);
-		    }
+                    for(var i=0; i<rooms[roomId].players.length; i++) {        
+                        leaveRoom(roomId, rooms[roomId].players[i].username);
+                    }
 
-		    delete rooms[roomId];
-		}
-	    }
-	});
+                    delete rooms[roomId];
+                }
+            }
+        });
     });
 
     function joinRoom(user, room) {
-	if(!room || !user || room.players.some(function(o) { return o.username == user.username; }) || room.filledSlots >= room.totalSlots) {
-	    return;
-	}
+        if(!room || !user || room.players.some(function(o) { return o.username == user.username; }) || room.filledSlots >= room.totalSlots) {
+            return;
+        }
 
         // keep setting freeIndex until we find an empty slot, then stop
         var freeIndex;
         room.players.some(function(p,idx) { freeIndex = idx; return p.empty; });
 
-	room.players[freeIndex] = { username: user.username, ready: user.ready };
+        room.players[freeIndex] = { username: user.username, ready: user.ready };
         if(user.anonToken) { room.players[freeIndex].anonToken = user.anonToken; }
         else { Object.defineProperty(room.players[freeIndex], "socket", { value: socket }); }
-	room.filledSlots++;
+        room.filledSlots++;
 
-	sockets.in("room"+room.id).emit("joined room", { username: user.username, players: room.players });
-	socket.join("room"+room.id);
+        sockets.in("room"+room.id).emit("joined room", { username: user.username, players: room.players });
+        socket.join("room"+room.id);
 
-	sockets.in("lobby").emit("joined room", { username: user.username, room: room });
+        sockets.in("lobby").emit("joined room", { username: user.username, room: room });
     }
 
     function leaveRoom(id, username) {
-	var room = rooms[+id];
-	if(!room) { return; }
-	if(!username) { return; }
-	var player = room.players.filter(function(o) { return o.username == username; })[0];
-	if(!player) { return; }
+        var room = rooms[+id];
+        if(!room) { return; }
+        if(!username) { return; }
+        var player = room.players.filter(function(o) { return o.username == username; })[0];
+        if(!player) { return; }
 
 console.log(username, "leaving room!");
 
-	room.filledSlots--;
+        room.filledSlots--;
 
-	room.players.splice(room.players.indexOf(player), 1, emptySlot);
+        room.players.splice(room.players.indexOf(player), 1, emptySlot);
 
         if(!player.anonToken) { player.socket.leave("room"+id); }
 
-	sockets.in("lobby").emit("left room", { username: username, roomId: room.id });
-	sockets.in("room"+id).emit("left room", { username: username, players: room.players, roomId: id });
+        sockets.in("lobby").emit("left room", { username: username, roomId: room.id });
+        sockets.in("room"+id).emit("left room", { username: username, players: room.players, roomId: id });
     };
 
     socket.on("ready", function(data) {
-	var room = rooms[+data.id];
-	if(!room) { return; }
-	var user = socket.request.user;
-	if(!user) { return; }
-	var player = room.players.filter(function(o) { return o.username == user.username; })[0];
-	if(!player) { return; }
+        var room = rooms[+data.id];
+        if(!room) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
+        var player = room.players.filter(function(o) { return o.username == user.username; })[0];
+        if(!player) { return; }
 
-	player.ready = !!data.ready;
+        player.ready = !!data.ready;
 
-	sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+        sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
 
-//	sockets.in("room"+data.id).emit("ready change", { players: room.players, username: user.username, roomId: data.id, ready: !!data.ready });
+//        sockets.in("room"+data.id).emit("ready change", { players: room.players, username: user.username, roomId: data.id, ready: !!data.ready });
     });
 
     socket.on("launch room", function(roomId) {
-	var room = rooms[+roomId];
-	if(!room) { return; }
+        var room = rooms[+roomId];
+        if(!room) { return; }
 
         var filledSlots = room.players.filter(function(o) { return !o.empty; });
-	if(filledSlots.length < 2) { return; }
-	if(filledSlots.every(function(p) { return p.ready; })) {
-	    require("./createGame").createNewGame(collections, room.players, room.map, function(gameId) {
-		sockets.in("room"+roomId).emit("launched room", gameId);
-		// sockets.in("room"+data.id).leave("room"+data.id);
-		sockets.in("lobby").emit("room destroyed", room.id);
-		delete room;
-	    });
-	};
+        if(filledSlots.length < 2) { return; }
+        if(filledSlots.every(function(p) { return p.ready; })) {
+            require("./createGame").createNewGame(collections, room.players, room.map, function(gameId) {
+                sockets.in("room"+roomId).emit("launched room", gameId);
+                // sockets.in("room"+data.id).leave("room"+data.id);
+                sockets.in("lobby").emit("room destroyed", room.id);
+                delete room;
+            });
+        };
     });
 
     socket.on("kick", function(data) {
-	var room = rooms[+data.id];
-	if(!room) { return; }
-	var user = socket.request.user;
-	if(!user) { return; }
-	var player = room.players[data.slot];
-	if(!player) { return; }
+        var room = rooms[+data.id];
+        if(!room) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
+        var player = room.players[data.slot];
+        if(!player) { return; }
 
         if(player && user.username == room.owner) {
 
@@ -200,39 +200,39 @@ console.log(username, "leaving room!");
     });
 
     socket.on("set faction", function(data) {
-	var room = rooms[+data.id];
-	if(!room) { return; }
-	var user = socket.request.user;
-	if(!user) { return; }
+        var room = rooms[+data.id];
+        if(!room) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
 
         if(["Elves", "Orcs"].indexOf(data.faction) == -1) { return; }
 
         if(room.players[data.slot] && (room.players[data.slot].username == user.username || user.username == room.owner)) {
-	    room.players[data.slot].faction = data.faction;
+            room.players[data.slot].faction = data.faction;
 
-	    sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+            sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
         }
     });
 
     socket.on("set alliance", function(data) {
-	var room = rooms[+data.id];
-	if(!room) { return; }
-	var user = socket.request.user;
-	if(!user) { return; }
+        var room = rooms[+data.id];
+        if(!room) { return; }
+        var user = socket.request.user;
+        if(!user) { return; }
 
         if(parseInt(data.alliance) != data.alliance || data.alliance < 0 || data.alliance > room.totalSlots) { return; }
 
         if(room.players[data.slot] && (room.players[data.slot].username == user.username || user.username == room.owner)) {
-	    room.players[data.slot].alliance = data.alliance;
+            room.players[data.slot].alliance = data.alliance;
 
-	    sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
+            sockets.in("room"+data.id).emit("player update", { players: room.players, roomId: data.id });
         }
     });
 
     socket.on("chat", function(data) {
-	var room = rooms[+data.id];
-	var user = socket.request.user;
-	if(!user) { return; }
+        var room = rooms[+data.id];
+        var user = socket.request.user;
+        if(!user) { return; }
 
         var target;
         if(room && room.players.some(function(p){ return p.username == user.username; })) {

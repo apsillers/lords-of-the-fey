@@ -27,7 +27,7 @@ socket.emit("enter room", roomId);
 
 socket.on("room data", function(data) {
     if(data.room == undefined) {
-	window.removeEventListener("beforeunload", confirmLeave);
+        window.removeEventListener("beforeunload", confirmLeave);
         window.location.href = "/lobby"
     }
 
@@ -71,47 +71,47 @@ function renderPlayerList() {
     }
 
     $.each(players, function(i, data) {
-	data.alliance = data.alliance || i+1;
+        data.alliance = data.alliance || i+1;
 
-	var playerItem = $("<tr>");
+        var playerItem = $("<tr>");
         if(data.empty) {
             playerItem.append($("<td>", {colspan: 4}).text("-- empty --").css({ "text-align":"center" }));
         } else if(data.username == yourUsername || yourUsername == room.owner) {
-	    var readyBox;
+            var readyBox;
             if(data.username == yourUsername) {
                 readyBox = $("<input type='checkbox'>");
-	        readyBox.click(function() {
-		    socket.emit("ready", { ready: $(this).is(':checked'), id: roomId });
-	        });
-	        readyBox.prop("checked", data.ready);
+                readyBox.click(function() {
+                    socket.emit("ready", { ready: $(this).is(':checked'), id: roomId });
+                });
+                readyBox.prop("checked", data.ready);
             } else {
                 readyBox = data.ready?"✓":"_";
             }
-	    playerItem.append($("<td>").append(readyBox));
+            playerItem.append($("<td>").append(readyBox));
 
-	    var playerText = $("<span>");
-	    playerText.text((i+1) + ": " + data.username);
-	    playerItem.append($("<td>").append(playerText));
+            var playerText = $("<span>");
+            playerText.text((i+1) + ": " + data.username);
+            playerItem.append($("<td>").append(playerText));
 
-	    var factionSelector = $("<select>");
-	    factionSelector.append('<option value="Random">Random</option>')
-	    factionSelector.append('<option value="Elves">Elves</option>')
-	    factionSelector.append('<option value="Orcs">Orcs</option>')
-	    factionSelector.val(data.faction || "Random");
-	    factionSelector.change(function(slotNum) {
-		socket.emit("set faction", { id: roomId, faction: factionSelector.val(), slot: slotNum });
-	    }.bind(null, i));
-	    playerItem.append($("<td>").append(factionSelector));
+            var factionSelector = $("<select>");
+            factionSelector.append('<option value="Random">Random</option>')
+            factionSelector.append('<option value="Elves">Elves</option>')
+            factionSelector.append('<option value="Orcs">Orcs</option>')
+            factionSelector.val(data.faction || "Random");
+            factionSelector.change(function(slotNum) {
+                socket.emit("set faction", { id: roomId, faction: factionSelector.val(), slot: slotNum });
+            }.bind(null, i));
+            playerItem.append($("<td>").append(factionSelector));
 
-	    var allianceSelector = $("<select>");
-	    for(var j=0; j<room.totalSlots; ++j) {
-		allianceSelector.append('<option value="'+(j+1)+'">'+(j+1)+'</option>');
-	    }
-	    allianceSelector.val(data.alliance || (i+1));
-	    allianceSelector.change(function(slotNum) {
-		socket.emit("set alliance", { id: roomId, alliance: allianceSelector.val(), slot: slotNum });
-	    }.bind(null, i));
-	    playerItem.append($("<td>").append(allianceSelector));
+            var allianceSelector = $("<select>");
+            for(var j=0; j<room.totalSlots; ++j) {
+                allianceSelector.append('<option value="'+(j+1)+'">'+(j+1)+'</option>');
+            }
+            allianceSelector.val(data.alliance || (i+1));
+            allianceSelector.change(function(slotNum) {
+                socket.emit("set alliance", { id: roomId, alliance: allianceSelector.val(), slot: slotNum });
+            }.bind(null, i));
+            playerItem.append($("<td>").append(allianceSelector));
 
             if(yourUsername == room.owner && data.username != yourUsername) {
                 var kickLink = $("<a>", {text:"x", title:"Kick"}).click(function(slotNum) {
@@ -119,13 +119,13 @@ function renderPlayerList() {
                 }.bind(null, i)).css({"text-decoration":"underline", "cursor":"pointer" });
                 playerItem.append($("<td>").append(kickLink));
             }
-	} else {
+        } else {
             playerItem.append($("<td>").text(data.ready?"✓ ":"_ "));
             playerItem.append($("<td>").text((i+1) + ": " + data.username));
             playerItem.append($("<td>").text(data.faction||"Random"));
             playerItem.append($("<td>").text(data.alliance));
-	}
-	$playerList.append(playerItem);
+        }
+        $playerList.append(playerItem);
     });
 }
 
@@ -148,7 +148,7 @@ socket.on("chatmsg", function(data) {
 
 $("#start-game-button").click(function() {
     if(players.filter(function(p) { return !p.empty; }).every(function(p) { return p.ready; })) {
-	socket.emit("launch room", roomId);
+        socket.emit("launch room", roomId);
     }
 });
 

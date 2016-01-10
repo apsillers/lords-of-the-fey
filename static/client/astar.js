@@ -26,23 +26,23 @@ function aStar(world, unit, start, goal, prevPath, game) {
 
     // if the unit has already attacked, another unit cannot be a valid destination
     if(attackTarget && unit.hasAttacked) {
-	return false;
+        return false;
     }
 
     if(prevPath) {
-	var prevDest = prevPath[prevPath.length-1].space;
+        var prevDest = prevPath[prevPath.length-1].space;
 
-	// if the previous path was a move adjacent to an enemy, and now the path is *on* that abjecent enemy, do not recompute the path
-	// this allows the player to pcik the offense location, instead of relying on the normal A* path to the enemy
-	if(!world.getUnitAt(prevDest) && // if the previous path did not end on an occupied space (i.e., was not an attack)
-	   attackTarget &&                   // if the goal space is occupied...
-	   attackTarget.getAlliance(game) != unit.getAlliance(game) && // ...by an opponent
-	   world.getNeighbors(goal).indexOf(prevDest) != -1 // and the occupied goal space is adjacent to the end of the previous path
-	  ) {
-	    var newPath = prevPath.slice();
-	    newPath.push({ space: goal, g_score:prevDest.g_score }); // return the previous path with the enemy target appended
-	    return newPath;
-	}
+        // if the previous path was a move adjacent to an enemy, and now the path is *on* that abjecent enemy, do not recompute the path
+        // this allows the player to pcik the offense location, instead of relying on the normal A* path to the enemy
+        if(!world.getUnitAt(prevDest) && // if the previous path did not end on an occupied space (i.e., was not an attack)
+           attackTarget &&                   // if the goal space is occupied...
+           attackTarget.getAlliance(game) != unit.getAlliance(game) && // ...by an opponent
+           world.getNeighbors(goal).indexOf(prevDest) != -1 // and the occupied goal space is adjacent to the end of the previous path
+          ) {
+            var newPath = prevPath.slice();
+            newPath.push({ space: goal, g_score:prevDest.g_score }); // return the previous path with the enemy target appended
+            return newPath;
+        }
     }
 
     var g_score = {}, f_score = {};
@@ -73,14 +73,14 @@ function aStar(world, unit, start, goal, prevPath, game) {
         
         var neighbors = world.getNeighbors(current);
         neighbors = neighbors.filter(not_blocked_by_enemy).filter(not_blocked_by_friend).filter(function(n) {
-	    var currentOccupant = world.getUnitAt(current);
-	    var neighborOccupant = world.getUnitAt(n);
-	    // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
-	    // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
-	    // because the attacker would not have an empty final space to attack from
-	    if(n == goal && neighborOccupant && currentOccupant && currentOccupant != unit) return false;
-	    return true;
-	});
+            var currentOccupant = world.getUnitAt(current);
+            var neighborOccupant = world.getUnitAt(n);
+            // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
+            // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
+            // because the attacker would not have an empty final space to attack from
+            if(n == goal && neighborOccupant && currentOccupant && currentOccupant != unit) return false;
+            return true;
+        });
         for(var i=0; i < neighbors.length; ++i) {
             var neighbor = neighbors[i];
 
@@ -120,10 +120,10 @@ function aStar(world, unit, start, goal, prevPath, game) {
     }
 
     function cost_to_move_here(space) {
-	var occupant = world.getUnitAt(space);
+        var occupant = world.getUnitAt(space);
         var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
-	var normal_move_cost = unit.getMoveCostForSpace(space);
-	if(space == goal && is_enemy_present) { return 0; }
+        var normal_move_cost = unit.getMoveCostForSpace(space);
+        if(space == goal && is_enemy_present) { return 0; }
 
         // test if this pace has an enemy adjacent
         var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
@@ -136,7 +136,7 @@ function aStar(world, unit, start, goal, prevPath, game) {
         // if so, moving here either costs all our remaining move
         // OR the normal cost for this terrain (in case that's MORE than all our remaining move)
         // so you can move adjacent to an enemy only if you could move there normally
-	if(is_enemy_adjacent) {
+        if(is_enemy_adjacent) {
             var all_remaining_move = unit.moveLeft - g_score[current];
             return Math.max(all_remaining_move, normal_move_cost);
         } else {
@@ -188,28 +188,28 @@ function allAccessibleSpaces(world, start, unit, game) {
         
         var neighbors = world.getNeighbors(current);
         neighbors = neighbors.filter(not_blocked_by_enemy).filter(not_blocked_by_friend).filter(function(n) {
-	    var currentOccupant = world.getUnitAt(current);
-	    var neighborOccupant = world.getUnitAt(n);
-	    // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
-	    // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
-	    // because the attacker would not have an empty final space to attack from
-	    if(neighborOccupant && currentOccupant && currentOccupant != unit) return false;
-	    return true;
-	});
+            var currentOccupant = world.getUnitAt(current);
+            var neighborOccupant = world.getUnitAt(n);
+            // if this prospective neighbor is the goal and it occupied (i.e. this is an attack)
+            // AND the *current* space is occupied, you may not complete an attack path to the goal from this current space
+            // because the attacker would not have an empty final space to attack from
+            if(neighborOccupant && currentOccupant && currentOccupant != unit) return false;
+            return true;
+        });
         for(var i=0; i < neighbors.length; ++i) {
             var neighbor = neighbors[i];
 
             if(neighbor in closedset) { continue; }
 
-	    var occupant = world.getUnitAt(neighbor);
+            var occupant = world.getUnitAt(neighbor);
             var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
-	    if(is_enemy_present) { accessible_set[neighbor] = neighbor; }
+            if(is_enemy_present) { accessible_set[neighbor] = neighbor; }
 
             var tentative_g_score = g_score[current] + cost_to_move_here(neighbor);
             //neighbor.debugText.text = cost_to_move_here(neighbor);
 
             if(tentative_g_score > unit.moveLeft) { continue; }
-	    else { accessible_set[neighbor] = neighbor; }
+            else { accessible_set[neighbor] = neighbor; }
             //console.log(tentative_g_score, unit.moveLeft)
 
             if(!(neighbor in openset) || tentative_g_score < g_score[neighbor]) {
@@ -227,10 +227,10 @@ function allAccessibleSpaces(world, start, unit, game) {
 
 
     function cost_to_move_here(space) {
-	var occupant = world.getUnitAt(space);
+        var occupant = world.getUnitAt(space);
         var is_enemy_present = occupant && occupant.getAlliance(game) != unit.getAlliance(game);
-	var normal_move_cost = unit.getMoveCostForSpace(space);
-	if(is_enemy_present) { return unit.moveLeft - g_score[current];; }
+        var normal_move_cost = unit.getMoveCostForSpace(space);
+        if(is_enemy_present) { return unit.moveLeft - g_score[current];; }
 
         // test if this pace has an enemy adjacent
         var is_enemy_adjacent = world.getNeighbors(space).some(function(n) {
@@ -243,7 +243,7 @@ function allAccessibleSpaces(world, start, unit, game) {
         // if so, moving here either costs all our remaining move
         // OR the normal cost for this terrain (in case that's MORE than all our remaining move)
         // so you can move adjacent to an enemy only if you could move there normally
-	if(is_enemy_adjacent) {
+        if(is_enemy_adjacent) {
             var all_remaining_move = unit.moveLeft - g_score[current];
             return Math.max(all_remaining_move, normal_move_cost);
         } else {

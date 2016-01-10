@@ -41,13 +41,13 @@ To load a new version of this page, you must either delete or modify `/static/cl
     </head>
     <body>
         <div id="loading-overlay">
-	  <div>
-	    <div class="big">Lords of the Fey</div>
-	    <div id="load-text">Loading...</div>
-	    <progress id="load-progress" max="100" value="0"></progress>
-	    <div class="small-load-text">(This will load slowly the first time, and then much faster next time you load the page.)</div>
-	  </div>
-	</div>
+          <div>
+            <div class="big">Lords of the Fey</div>
+            <div id="load-text">Loading...</div>
+            <progress id="load-progress" max="100" value="0"></progress>
+            <div class="small-load-text">(This will load slowly the first time, and then much faster next time you load the page.)</div>
+          </div>
+        </div>
 
         <!-- start top stats bar -->
         <div id="top-bar" style="background-color:#555555; border-left: thin black solid; border-right: thin black solid; border-top: thin black solid; padding-right: 1px; top:0; z-index: 100; overflow-x: hidden;">
@@ -113,27 +113,27 @@ To load a new version of this page, you must either delete or modify `/static/cl
         <!-- right status column -->
         <div id="right-column">
 
-	<canvas height="125" width="125" id="minimap"></canvas>
+        <canvas height="125" width="125" id="minimap"></canvas>
 
-	<img id="right_time_of_day" style="clear: both;">
+        <img id="right_time_of_day" style="clear: both;">
 
         <div style="float:left; background-color:#222222; margin-right: 2px;" class="tilesize">
           <img id="right_data_image" style="display:block; margin:auto;"/>
         </div>
 
         <div>
-	  <div id="right_data_hp_container">
+          <div id="right_data_hp_container">
             HP<div id="right_data_hp" style="color:green;">&nbsp;</div>
             <div id="right_data_resistances"></div>
-	  </div>
+          </div>
           XP<div id="right_data_xp" style="color:puprle">&nbsp;</div>
         </div>
 
-	<div id="right_data_move_container">Move:
-	  <span id="right_data_move">&nbsp;</span>
-	  <div id="right_data_move_costs"></div>
-	</div>
-	
+        <div id="right_data_move_container">Move:
+          <span id="right_data_move">&nbsp;</span>
+          <div id="right_data_move_costs"></div>
+        </div>
+        
 
         <div style="clear: both; font-weight: bold;" id="right_data_name"></div>
 
@@ -141,7 +141,7 @@ To load a new version of this page, you must either delete or modify `/static/cl
 
         <div style="clear: both;" id="right_data_attacks"></div>
 
-	<input type="button" id="end-turn-button" value="End Turn" disabled="disabled">
+        <input type="button" id="end-turn-button" value="End Turn" disabled="disabled">
 
         </div>
         <!-- right status column end -->
@@ -167,25 +167,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         
 
-	<div id="recruit-prompt" style="display:none; background-color:#DDD;">
-	  <div id="recruit-list" style="overflow-y: auto; float:left; width: 270px; height:100%;"></div>
-	  <div id="recruit-stats" style="background-color: #AAA; width: 110px; height: 300px; padding: 0 10px; float: right;">
-	    <img id="recruit-stats-img"><br/>
-	    HP: <span id="recruit-stats-hp"></span><br/>
-	    XP: <span id="recruit-stats-xp"></span><br/>
-	    Move: <span id="recruit-stats-move"></span><br/><br/>
-	    <div id="recruit-stats-attacks"></div><br/>
-	  </div>
-	  <div style="clear: both;"></div>
-	  <div id="recruit-cancel" style="background-color: #AAA;"></div>
-	</div>
+        <div id="recruit-prompt" style="display:none; background-color:#DDD;">
+          <div id="recruit-list" style="overflow-y: auto; float:left; width: 270px; height:100%;"></div>
+          <div id="recruit-stats" style="background-color: #AAA; width: 110px; height: 300px; padding: 0 10px; float: right;">
+            <img id="recruit-stats-img"><br/>
+            HP: <span id="recruit-stats-hp"></span><br/>
+            XP: <span id="recruit-stats-xp"></span><br/>
+            Move: <span id="recruit-stats-move"></span><br/><br/>
+            <div id="recruit-stats-attacks"></div><br/>
+          </div>
+          <div style="clear: both;"></div>
+          <div id="recruit-cancel" style="background-color: #AAA;"></div>
+        </div>
 
-	<div id="attack-prompt" style="display:none; background-color:#DDD;">
+        <div id="attack-prompt" style="display:none; background-color:#DDD;">
           <div id="attack-combatants"></div>
-	  <table id="attack-list" cellspacing=0></table>
-	  <div style="clear: both;"></div>
-	  <div id="attack-cancel"></div>
-	</div>
+          <table id="attack-list" cellspacing=0></table>
+          <div style="clear: both;"></div>
+          <div id="attack-cancel"></div>
+        </div>
 
         <script src="../shared/terrain.js"></script>
         <script src="boot.js"></script>

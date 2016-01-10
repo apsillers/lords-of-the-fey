@@ -33,144 +33,144 @@ module.exports = function(collections, data, socket, socketList) {
             attackIndex = data.attackIndex,
             user = socket.request.user;
         collections.games.findOne({_id:gameId}, function(err, game) {
-	    if(!game) { socket.emit("no game"); return; }
+            if(!game) { socket.emit("no game"); return; }
             loadMap(game.map, function(err, mapData) {
                 collections.units.findOne({ x:path[0].x, y:path[0].y, gameId:gameId }, function(err, unit) {
 
-		    // ensure that the logged-in user has the right to move this unit
-		    var player = game.players.filter(function(p) { return p.username == user.username })[0];
-		    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
-			socket.emit("moved", { path:[path[0]] });
-			return;
-		    }
+                    // ensure that the logged-in user has the right to move this unit
+                    var player = game.players.filter(function(p) { return p.username == user.username })[0];
+                    if(!socketOwnerCanAct(socket, game) && player && player.team != unit.team) {
+                        socket.emit("moved", { path:[path[0]] });
+                        return;
+                    }
 
-		    unit = new Unit(unit);
+                    unit = new Unit(unit);
 
                     collections.units.find({ gameId: gameId }, function(err, cursor) {
                         cursor.toArray(function(err, unitArray) {
-			    unitArray = unitArray.map(function(u) { return new Unit(u); });
+                            unitArray = unitArray.map(function(u) { return new Unit(u); });
 
                             var isInitiallyHidden = unit.hasCondition("hidden");
 
-			    // make the move
+                            // make the move
                             var moveResult = executePath(path, unit, unitArray, mapData, game);
 
                             var endPoint = moveResult.path[moveResult.path.length-1];
                             unit.x = endPoint.x;
                             unit.y = endPoint.y;
-			    unit.moveLeft -= moveResult.moveCost || 0;
+                            unit.moveLeft -= moveResult.moveCost || 0;
 
                             if(isInitiallyHidden) { moveResult.unit = unit.getStorableObj(); }
 
-			    if(moveResult.hide) {
-				unit.addCondition("hidden");
-			    } else {
-				unit.removeCondition("hidden");
-			    }
+                            if(moveResult.hide) {
+                                unit.addCondition("hidden");
+                            } else {
+                                unit.removeCondition("hidden");
+                            }
 
-			    if(moveResult.revealedUnits.length) {
-				moveResult.revealedUnits = moveResult.revealedUnits.map(function(u) { u.removeCondition("hidden"); return u.getStorableObj(); });
-			    }
+                            if(moveResult.revealedUnits.length) {
+                                moveResult.revealedUnits = moveResult.revealedUnits.map(function(u) { u.removeCondition("hidden"); return u.getStorableObj(); });
+                            }
 
-			    // if there is a village here and
-			    // if the village is not co-team with the unit, capture it
-			    if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
-			       game.villages[endPoint.x+","+endPoint.y] != unit.team) {
-				game.villages[endPoint.x+","+endPoint.y] = unit.team;
-				moveResult.capture = true;
-				unit.moveLeft = 0;
-				collections.games.save(game, {safe: true}, saveRevealedUnits);
-			    } else {
-				saveRevealedUnits();
-			    }
+                            // if there is a village here and
+                            // if the village is not co-team with the unit, capture it
+                            if(mapData[endPoint.x+","+endPoint.y].terrain.properties.indexOf("village") != -1 &&
+                               game.villages[endPoint.x+","+endPoint.y] != unit.team) {
+                                game.villages[endPoint.x+","+endPoint.y] = unit.team;
+                                moveResult.capture = true;
+                                unit.moveLeft = 0;
+                                collections.games.save(game, {safe: true}, saveRevealedUnits);
+                            } else {
+                                saveRevealedUnits();
+                            }
 
-			    function saveRevealedUnits() {
-				(function saveRevealedUnit(index) {
-				    if(!moveResult.revealedUnits[index]) { return concludeMove(); }
-				    collections.units.save(moveResult.revealedUnits[index], {safe:true}, function() { saveRevealedUnit(index+1); });
-				}(0))
-			    }
-			    
-			    function concludeMove() {
+                            function saveRevealedUnits() {
+                                (function saveRevealedUnit(index) {
+                                    if(!moveResult.revealedUnits[index]) { return concludeMove(); }
+                                    collections.units.save(moveResult.revealedUnits[index], {safe:true}, function() { saveRevealedUnit(index+1); });
+                                }(0))
+                            }
+                            
+                            function concludeMove() {
                                 var emitMove = function() {
-					var alliedUsernames = game.players.filter(function(p) { return p.alliance == game.players[game.activeTeam-1].alliance; }).map(function(p) { return p.username; });
-					var alliedPlayerSocketData = socketList.filter(function(o) {
-					    return o.username && o.gameId.equals(gameId) &&
-					    alliedUsernames.indexOf(o.username) != -1;
-					});
+                                        var alliedUsernames = game.players.filter(function(p) { return p.alliance == game.players[game.activeTeam-1].alliance; }).map(function(p) { return p.username; });
+                                        var alliedPlayerSocketData = socketList.filter(function(o) {
+                                            return o.username && o.gameId.equals(gameId) &&
+                                            alliedUsernames.indexOf(o.username) != -1;
+                                        });
 
-					alliedPlayerSocketData.forEach(function(s) {
-					    s.socket.emit("moved", moveResult);
-					});
+                                        alliedPlayerSocketData.forEach(function(s) {
+                                            s.socket.emit("moved", moveResult);
+                                        });
 
-					moveResult.path = moveResult.publicPath || moveResult.path;
-					var unalliedPlayerSocketData = socketList.filter(function(o){ return alliedPlayerSocketData.indexOf(o)==-1; });
-					unalliedPlayerSocketData.forEach(function(s) {
-					    s.socket.emit("moved", moveResult);
-					});
+                                        moveResult.path = moveResult.publicPath || moveResult.path;
+                                        var unalliedPlayerSocketData = socketList.filter(function(o){ return alliedPlayerSocketData.indexOf(o)==-1; });
+                                        unalliedPlayerSocketData.forEach(function(s) {
+                                            s.socket.emit("moved", moveResult);
+                                        });
                                 };
-				
-				// perform the attack
-				if(moveResult.attack && !unit.hasAttacked) {
-				    var targetCoords = path[path.length-1];
-				    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
-					defender = new Unit(defender);
+                                
+                                // perform the attack
+                                if(moveResult.attack && !unit.hasAttacked) {
+                                    var targetCoords = path[path.length-1];
+                                    collections.units.findOne({ x:targetCoords.x, y:targetCoords.y, gameId:gameId }, function(err, defender) {
+                                        defender = new Unit(defender);
 
-					if(defender == null || defender.getAlliance(game) == unit.getAlliance(game)) { 
-					    collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
-					    return;
-					}
+                                        if(defender == null || defender.getAlliance(game) == unit.getAlliance(game)) { 
+                                            collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
+                                            return;
+                                        }
 
-					unit.hasAttacked = true;
-					unit.moveLeft = 0;
+                                        unit.hasAttacked = true;
+                                        unit.moveLeft = 0;
 
-					// resolve combat
+                                        // resolve combat
                                         var attackSpace = moveResult.path[moveResult.path.length-1];
-					if(unit.hasCondition("hidden")) {
-					     unit.removeCondition("hidden");
-					}
-					moveResult.combat = executeAttack(unit, attackIndex, attackSpace, defender, unitArray, mapData, game);
+                                        if(unit.hasCondition("hidden")) {
+                                             unit.removeCondition("hidden");
+                                        }
+                                        moveResult.combat = executeAttack(unit, attackIndex, attackSpace, defender, unitArray, mapData, game);
 
-					collections.games.save(game, { safe: true }, function() {
-					    // injure/kill units models
-					    var updateUnitDamage = function(unit, callback) {
-						if(unit.hp <= 0) {
-						    collections.units.remove({ _id: unit._id }, function() {
-							if(unit.isCommander) {
-							    collections.units.findOne({
-								gameId: unit.gameId,
-								isCommander: true,
-								team: unit.team
-							    }, function(err, commander) {
-								if(!commander) {
-								    console.log("COMMANDER DEATH");
-								    checkForVictory(game, collections, function(victoryResult) {
-									callback();
-									console.log("VICTORY: ", victoryResult);
-								    });
-								} else {
-								    callback();
-								}
-							    });
-							} else {
-							    callback();
-							}
-						    });
-						}
-						else { collections.units.save(unit.getStorableObj(), {safe: true}, callback); }
-					    }
+                                        collections.games.save(game, { safe: true }, function() {
+                                            // injure/kill units models
+                                            var updateUnitDamage = function(unit, callback) {
+                                                if(unit.hp <= 0) {
+                                                    collections.units.remove({ _id: unit._id }, function() {
+                                                        if(unit.isCommander) {
+                                                            collections.units.findOne({
+                                                                gameId: unit.gameId,
+                                                                isCommander: true,
+                                                                team: unit.team
+                                                            }, function(err, commander) {
+                                                                if(!commander) {
+                                                                    console.log("COMMANDER DEATH");
+                                                                    checkForVictory(game, collections, function(victoryResult) {
+                                                                        callback();
+                                                                        console.log("VICTORY: ", victoryResult);
+                                                                    });
+                                                                } else {
+                                                                    callback();
+                                                                }
+                                                            });
+                                                        } else {
+                                                            callback();
+                                                        }
+                                                    });
+                                                }
+                                                else { collections.units.save(unit.getStorableObj(), {safe: true}, callback); }
+                                            }
 
-					    var handleDefender = function() {
-						updateUnitDamage(defender, emitMove);
-					    }
-					
-					    updateUnitDamage(unit, handleDefender);
-					});
-				    });
-				} else {
+                                            var handleDefender = function() {
+                                                updateUnitDamage(defender, emitMove);
+                                            }
+                                        
+                                            updateUnitDamage(unit, handleDefender);
+                                        });
+                                    });
+                                } else {
                                     collections.units.save(unit.getStorableObj(), {safe:true}, emitMove);
-				}
-			    }
+                                }
+                            }
                         });
                     });
                 });
@@ -184,7 +184,7 @@ var getNeighborCoords = require("./static/shared/terrain.js").Terrain.getNeighbo
 function areNeighbors(space1, space2) {
     var neighbors = getNeighborCoords(space1);
     for(var i=0; i<neighbors.length; ++i) {
-	if(space2.x == neighbors[i].x && space2.y == neighbors[i].y) { return true; }
+        if(space2.x == neighbors[i].x && space2.y == neighbors[i].y) { return true; }
     }
     return false;
 }
@@ -208,51 +208,51 @@ function executePath(path, unit, unitArray, mapData, game) {
     var revealedUnits = [];
 
     for(var i=1; i<path.length; ++i) {
-	var coords = path[i];
-	var isLastSpace = (i == path.length-1);
+        var coords = path[i];
+        var isLastSpace = (i == path.length-1);
 
-	if(!areNeighbors(path[i], path[i-1])) { return { path:[path[0]], revealedUnits:[] }; }
+        if(!areNeighbors(path[i], path[i-1])) { return { path:[path[0]], revealedUnits:[] }; }
 
-	var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
-	if(occupant) {
-	    if(occupant.getAlliance(game) != unit.getAlliance(game)) {
-		if(isLastSpace && standingClear) {
+        var occupant = unitArray.filter(function(u) { return u.x == coords.x && u.y == coords.y; })[0];
+        if(occupant) {
+            if(occupant.getAlliance(game) != unit.getAlliance(game)) {
+                if(isLastSpace && standingClear) {
                     // attack if the unit is not hidden (we couldn't have planned to attack a hidden unit)
-		    return concludePathing(!occupant.hasCondition("hidden"));
-		}
-		return { path:[path[0]], revealedUnits:[] };
-	    } else {
-		// invalid move; ending space must be clear
-		if(isLastSpace) return { path:[path[0]], revealedUnits: [] };
-	    }
+                    return concludePathing(!occupant.hasCondition("hidden"));
+                }
+                return { path:[path[0]], revealedUnits:[] };
+            } else {
+                // invalid move; ending space must be clear
+                if(isLastSpace) return { path:[path[0]], revealedUnits: [] };
+            }
 
-	    standingClear = false;
-	} else {
-	    standingClear = true;
-	}
+            standingClear = false;
+        } else {
+            standingClear = true;
+        }
 
-	if(totalMoveCost == unit.moveLeft) {
-	    return concludePathing();
-	}
+        if(totalMoveCost == unit.moveLeft) {
+            return concludePathing();
+        }
 
-	// add cost to move on this sapce
-	totalMoveCost += unit.getMoveCostForSpace(mapData[coords.x+","+coords.y]);
-	// Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return unit.terrain[i].cost || Infinity; }));
+        // add cost to move on this sapce
+        totalMoveCost += unit.getMoveCostForSpace(mapData[coords.x+","+coords.y]);
+        // Math.min.apply(Math, mapData[coords.x+","+coords.y].terrain.properties.map(function(i) { return unit.terrain[i].cost || Infinity; }));
 
-	// if the move is too costly, abort
-	if(totalMoveCost > unit.moveLeft) {
-	    return { path:[path[0]], revealedUnits: [] };
-	}
+        // if the move is too costly, abort
+        if(totalMoveCost > unit.moveLeft) {
+            return { path:[path[0]], revealedUnits: [] };
+        }
 
-	actualPath.push(path[i]);
+        actualPath.push(path[i]);
 
-	// if any enemy is adjacent to this space, end the path now
-	var adjacentEnemies = getAdjacentEnemies(coords);
-	if(adjacentEnemies.length > 0) {
-	    totalMoveCost = unit.moveLeft;
-	    var hiddenEnemies = adjacentEnemies.filter(function(e) { return e.hasCondition("hidden"); });
-	    revealedUnits = revealedUnits.concat(hiddenEnemies);
-	}
+        // if any enemy is adjacent to this space, end the path now
+        var adjacentEnemies = getAdjacentEnemies(coords);
+        if(adjacentEnemies.length > 0) {
+            totalMoveCost = unit.moveLeft;
+            var hiddenEnemies = adjacentEnemies.filter(function(e) { return e.hasCondition("hidden"); });
+            revealedUnits = revealedUnits.concat(hiddenEnemies);
+        }
     }
 
     return concludePathing();
@@ -260,18 +260,18 @@ function executePath(path, unit, unitArray, mapData, game) {
     function concludePathing(isAttack) {
         if(unit.attributes && unit.attributes.indexOf("ambush") != -1) {
             var prevSpaceHidden = null;
-	    var publicPath = actualPath.map(function(s,i) {
+            var publicPath = actualPath.map(function(s,i) {
                 var result;
-		// if you started visible on forest, you're visible
-	        if(!unit.hasCondition("hidden") && i==0) { return s; }
-		// if you ended adjacent to enemies on forset, you're visible
-		if(adjacentEnemies.length>0 && i==actualPath.length-1) { return s; }
+                // if you started visible on forest, you're visible
+                if(!unit.hasCondition("hidden") && i==0) { return s; }
+                // if you ended adjacent to enemies on forset, you're visible
+                if(adjacentEnemies.length>0 && i==actualPath.length-1) { return s; }
 
                 if(mapData[s.x+","+s.y].terrain.properties.indexOf("forest")!=-1) {
                     return { x: s.x, y: s.y, hidden: true };
                 }
-	        return s;
-	    }).map(function (s,i,array) {
+                return s;
+            }).map(function (s,i,array) {
                 var prev = array[i-1],
                     next = array[i+1];
                 // if unit is hidden on this tile, and will be hidden on the
@@ -285,29 +285,29 @@ function executePath(path, unit, unitArray, mapData, game) {
                 return s;
             });
         } else {
-	    publicPath = actualPath;
+            publicPath = actualPath;
         }
 
         console.log(publicPath);
 
         return {
-	         path: actualPath,
-	         publicPath: publicPath,
-	         moveCost: totalMoveCost,
-	         revealedUnits: revealedUnits,
-	         hide: publicPath[publicPath.length-1].hidden,
-		 attack: isAttack
-	       };
+                 path: actualPath,
+                 publicPath: publicPath,
+                 moveCost: totalMoveCost,
+                 revealedUnits: revealedUnits,
+                 hide: publicPath[publicPath.length-1].hidden,
+                 attack: isAttack
+               };
     }
 
     function getAdjacentEnemies(coords) {
-	var neighborSpaces = getNeighborCoords(coords);
-	var adjacentEnemies = unitArray.filter(function(u) {
-	    for(var i=0; i<neighborSpaces.length; ++i) {
-		if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.getAlliance(game) != unit.getAlliance(game)) { return true; }
-	    }
-	    return false;
-	});
-	return adjacentEnemies;
+        var neighborSpaces = getNeighborCoords(coords);
+        var adjacentEnemies = unitArray.filter(function(u) {
+            for(var i=0; i<neighborSpaces.length; ++i) {
+                if(u.x == neighborSpaces[i].x && u.y == neighborSpaces[i].y && u.getAlliance(game) != unit.getAlliance(game)) { return true; }
+            }
+            return false;
+        });
+        return adjacentEnemies;
     }
 }

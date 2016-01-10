@@ -59,7 +59,7 @@ socket.on("joined room", function(data) {
     rooms[data.room.id] = data.room;
     renderRoomList();
     if(username == data.username) {
-	window.location = "/lobby/room.html?id="+data.room.id;
+        window.location = "/lobby/room.html?id="+data.room.id;
     }
 });
 
@@ -75,7 +75,7 @@ function renderPlayerList() {
     var $playerList = $("#player-list");
     $playerList.html("");
     $.each(players, function(i, p) {
-	$playerList.append($("<div>").text(p));
+        $playerList.append($("<div>").text(p));
     });
 };
 
@@ -84,12 +84,12 @@ function renderRoomList() {
     $roomList.html("");
 
     $.each(rooms, function(roomId, data) {
-	var roomItem = $("<div>");
-	roomItem.text(data.name + " - " + data.map + " - " + data.filledSlots + "/" + data.totalSlots);
-	$roomList.append(roomItem);
-	roomItem.click(function() {
-	    socket.emit("join room", { id: roomId });
-	});
+        var roomItem = $("<div>");
+        roomItem.text(data.name + " - " + data.map + " - " + data.filledSlots + "/" + data.totalSlots);
+        $roomList.append(roomItem);
+        roomItem.click(function() {
+            socket.emit("join room", { id: roomId });
+        });
     });
 }
 
@@ -98,8 +98,8 @@ $("#create-game").click(function() {
 });
 $("#launch-game").click(function() {
     socket.emit("create room", {
-	name: $("#create-dialog-name").val(),
-	map: $("#create-dialog-map").val()
+        name: $("#create-dialog-name").val(),
+        map: $("#create-dialog-map").val()
     });
 });
 $("#chat-input").keyup(function(e) {

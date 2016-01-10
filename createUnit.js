@@ -27,24 +27,24 @@ var socketOwnerCanAct = require("./auth").socketOwnerCanAct;
     @mapData {Object}
 */
 module.exports = function(collections, data, socket, socketList) {
-	var gameId = ObjectID(data.gameId);
-	var user = socket.request.user;
+        var gameId = ObjectID(data.gameId);
+        var user = socket.request.user;
 
         collections.games.findOne({_id:gameId}, function(err, game) {
-	    if(!game) { socket.emit("no game"); return; }
+            if(!game) { socket.emit("no game"); return; }
             loadMap(game.map, function(err, mapData) {
-		var player = game.players.filter(function(p) { return p.username == user.username })[0];
+                var player = game.players.filter(function(p) { return p.username == user.username })[0];
 
-		if(socketOwnerCanAct(socket, game)) {
-		    createUnit(data, mapData, collections, game, player, function(createResult) {
-			socketList.filter(function(o){ return o.gameId.equals(gameId); }).forEach(function(o) { o.socket.emit("created", createResult); })
-			socket.emit("playerUpdate", { gold: player.gold });
-		    });
-		} else {
-		    socket.emit("created", {});
-		}
-	    });
-	});
+                if(socketOwnerCanAct(socket, game)) {
+                    createUnit(data, mapData, collections, game, player, function(createResult) {
+                        socketList.filter(function(o){ return o.gameId.equals(gameId); }).forEach(function(o) { o.socket.emit("created", createResult); })
+                        socket.emit("playerUpdate", { gold: player.gold });
+                    });
+                } else {
+                    socket.emit("created", {});
+                }
+            });
+        });
 }
 
 function createUnit(data, mapData, collections, game, player, callback) {
@@ -53,56 +53,56 @@ function createUnit(data, mapData, collections, game, player, callback) {
     var loadFaction = require("./loadUtils").loadFaction;
     
     loadFaction(player.faction, function(err, faction) {
-	if(faction.recruitList.indexOf(data.type) == -1) { callback({}); }
+        if(faction.recruitList.indexOf(data.type) == -1) { callback({}); }
 
-	collections.units.findOne({ gameId: gameId, x: data.x, y: data.y }, function(err, occupant) {
-	    // if the space is populated, abort
-	    if(occupant) {
-		callback({});
-		return;
-	    }
-	    
-	    collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
-		commanderCursor.toArray(function(err, commanders) {
-		    var createValid = false;
-		    
-		    for(var i=0; i < commanders.length; ++i) {
-			var commander = commanders[i];
-			
-			if(mapData[commander.x+","+commander.y].terrain.properties.indexOf("keep") != -1 && // check that the commander is on a keep
-			   mapData[data.x+","+data.y].terrain.properties.indexOf("castle") != -1 && // check target is a castle
-			   castlePathExists(commander, data, mapData) // find a castle-only path from commander to target
-			  ) { createValid = true; }
-		    }
-		    
-		    if(!createValid) { callback({}); return; }
+        collections.units.findOne({ gameId: gameId, x: data.x, y: data.y }, function(err, occupant) {
+            // if the space is populated, abort
+            if(occupant) {
+                callback({});
+                return;
+            }
+            
+            collections.units.find({ gameId: gameId, team: player.team, isCommander: true }, function(err, commanderCursor) {
+                commanderCursor.toArray(function(err, commanders) {
+                    var createValid = false;
+                    
+                    for(var i=0; i < commanders.length; ++i) {
+                        var commander = commanders[i];
+                        
+                        if(mapData[commander.x+","+commander.y].terrain.properties.indexOf("keep") != -1 && // check that the commander is on a keep
+                           mapData[data.x+","+data.y].terrain.properties.indexOf("castle") != -1 && // check target is a castle
+                           castlePathExists(commander, data, mapData) // find a castle-only path from commander to target
+                          ) { createValid = true; }
+                    }
+                    
+                    if(!createValid) { callback({}); return; }
 
-		    data.team = player.team;
-		    
-		    var sanatizedData = {};
-		    sanatizedData.x = data.x;
-		    sanatizedData.y = data.y;
-		    sanatizedData.team = data.team;
-		    sanatizedData.type = data.type;
-		    sanatizedData.gameId = gameId;
+                    data.team = player.team;
+                    
+                    var sanatizedData = {};
+                    sanatizedData.x = data.x;
+                    sanatizedData.y = data.y;
+                    sanatizedData.team = data.team;
+                    sanatizedData.type = data.type;
+                    sanatizedData.gameId = gameId;
 
-		    var unit = new Unit(sanatizedData, true);
+                    var unit = new Unit(sanatizedData, true);
 
-		    data = unit.getStorableObj();
+                    data = unit.getStorableObj();
 
-		    if(player.gold < unit.cost) { callback({}); return; }
+                    if(player.gold < unit.cost) { callback({}); return; }
 
-		    player.gold -= unit.cost;
-		    
-		    collections.games.save(game, { safe: true }, function() {
-			collections.units.insert(data, function(err) {
-			    if(!err) {
-				callback(data);
-			    }
-			});
-		    });
-		});
-	    });
-	});
+                    player.gold -= unit.cost;
+                    
+                    collections.games.save(game, { safe: true }, function() {
+                        collections.units.insert(data, function(err) {
+                            if(!err) {
+                                callback(data);
+                            }
+                        });
+                    });
+                });
+            });
+        });
     });
 };

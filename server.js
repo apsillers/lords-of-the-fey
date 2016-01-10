@@ -37,26 +37,26 @@ new MongoClient.connect(config.mongoString, function(err, mongo) {
 
     mongo.collection("games", function(err, gamesCollection) {
         mongo.collection("units", function(err, unitsCollection) {
-	    mongo.collection("users", function(err, usersCollection) {
-		collections.games = gamesCollection;
-		collections.units = unitsCollection;
-		collections.users = usersCollection;
+            mongo.collection("users", function(err, usersCollection) {
+                collections.games = gamesCollection;
+                collections.units = unitsCollection;
+                collections.users = usersCollection;
             });
-	});
+        });
     });
 
     require("./auth").initAuth(app, mongo, collections);
     require("./gameList").initListing(app, collections);
 
     app.get("/", function(req, res) {
-	var user = req.user || {};
-	res.render("index", { username: user.username });
+        var user = req.user || {};
+        res.render("index", { username: user.username });
     });
 
     unitLib.init(function() {
-	io.sockets.on('connection', function (socket) {
+        io.sockets.on('connection', function (socket) {
             initListeners(socket, collections);
-	});
+        });
     });
 
 });
@@ -101,7 +101,7 @@ function onAuthorizeSuccess(data, accept){
 
 function onAuthorizeFail(data, message, error, accept){
     if(error)
-	throw new Error(message);
+        throw new Error(message);
     console.log('failed connection to socket.io:', message);
 
   // We use this callback to log all of our failed connections.
@@ -124,33 +124,33 @@ function initListeners(socket, collections) {
     initLobbyListeners(io.sockets, socket, collections);
 
     socket.on("anon auth", function(data) {
-	collections.games.findOne({ _id:ObjectID(data.gameId) }, function(err, game) {
-	    if(!game) { socket.emit("no game"); return; }
-	    if(data.anonToken) { var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0]; }
-	    if(player) {
-		socket.request.user = { username: player.username };
-	    }
-	    socket.emit("anon auth done");
+        collections.games.findOne({ _id:ObjectID(data.gameId) }, function(err, game) {
+            if(!game) { socket.emit("no game"); return; }
+            if(data.anonToken) { var player = game.players.filter(function(p) { return p.anonToken == data.anonToken })[0]; }
+            if(player) {
+                socket.request.user = { username: player.username };
+            }
+            socket.emit("anon auth done");
         });
     });
 
     // request for all game data
     socket.on("alldata", function(data) {
-	console.log("serving data to", socket.request.user.username);
+        console.log("serving data to", socket.request.user.username);
         var gameId = ObjectID(data.gameId);
-	var user = socket.request.user;
+        var user = socket.request.user;
 
         collections.units.find({ gameId:gameId }, function(err, cursor) {
             collections.games.findOne({ _id:gameId }, function(err, game) {
-		if(!game) { socket.emit("no game"); return; }
-		var player = game.players.filter(function(p) { return p.username == user.username })[0];
-		var players = game.players.map(function(p) {
-		    var ret = { username: p.username, team: p.team, alliance: p.alliance };
-		    if(player && player.team == 1) { ret.anonToken = p.anonToken; }
-		    return ret;
-		});
+                if(!game) { socket.emit("no game"); return; }
+                var player = game.players.filter(function(p) { return p.username == user.username })[0];
+                var players = game.players.map(function(p) {
+                    var ret = { username: p.username, team: p.team, alliance: p.alliance };
+                    if(player && player.team == 1) { ret.anonToken = p.anonToken; }
+                    return ret;
+                });
                 cursor.toArray(function(err, units) {
-		    units = units.filter(function(u) { return !u.conditions || u.conditions.indexOf("hidden")==-1 || u.team==(player||{}).team; });
+                    units = units.filter(function(u) { return !u.conditions || u.conditions.indexOf("hidden")==-1 || u.team==(player||{}).team; });
                     socket.emit("initdata", {map: game.map, units: units, player: player, players: players, activeTeam: game.activeTeam, villages:game.villages, timeOfDay: game.timeOfDay, alliances: game.alliances });
                 });
             });
@@ -159,22 +159,22 @@ function initListeners(socket, collections) {
 
     // subscribe to a game channel
     socket.on("join game", function(gameId) {
-	var gameId = ObjectID(gameId);
+        var gameId = ObjectID(gameId);
         socket.join("game"+gameId);
-	if(socket.request.user) {
-	    socketList.push({ gameId: gameId, username: socket.request.user.username, socket: socket });
-	} else {
+        if(socket.request.user) {
+            socketList.push({ gameId: gameId, username: socket.request.user.username, socket: socket });
+        } else {
             socketList.push({ gameId: gameId, socket: socket });
         }
     });
 
     socket.on("disconnect", function() {
-	var socketData = socketList.filter(function(o) {
-	    return o.socket == socket;
-	})[0];
-	if(socketList.indexOf(socketData) != -1) {
-	    socketList.splice(socketList.indexOf(socketData), 1);
-	}
+        var socketData = socketList.filter(function(o) {
+            return o.socket == socket;
+        })[0];
+        if(socketList.indexOf(socketData) != -1) {
+            socketList.splice(socketList.indexOf(socketData), 1);
+        }
     });
 
     // move a unit
@@ -191,7 +191,7 @@ function initListeners(socket, collections) {
     socket.on("levelup", function(data) {
         require("./levelUp").levelUp(collections, data, socket, socketList);
     });
-	    
+            
 
     socket.on("endTurn", function(data) {
         require("./endTurn")(collections, data, socket, socketList, io);

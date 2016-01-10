@@ -22,24 +22,24 @@
 (function() {
     var exports;
     if(typeof module != "undefined") {
-	exports = module.exports;
+        exports = module.exports;
     } else {
-	exports = window.utils = window.utils || {};
+        exports = window.utils = window.utils || {};
     }
 
     /** 
-	Decide if a path of castle tiles exists between a commander and some
-	target space
+        Decide if a path of castle tiles exists between a commander and some
+        target space
 
-	@param {Object} commander - object with `x` and `y` properties for the
-	commander location
-	@param {Object} target - object with `x` and `y` properties for the
-	target location
-	@param {module:terrain~MapData} mapData - MapData dictionary
+        @param {Object} commander - object with `x` and `y` properties for the
+        commander location
+        @param {Object} target - object with `x` and `y` properties for the
+        target location
+        @param {module:terrain~MapData} mapData - MapData dictionary
      */
     exports.castlePathExists = function(commander, target, mapData) {
-	
-	function getNeighbors(space) {
+        
+        function getNeighbors(space) {
             var neighbors = [];
             
             var x = space.x, y = space.y;
@@ -49,29 +49,29 @@
             var coords = [(x-1)+","+(y+offset), x+","+(y+offset), (x+1)+","+(y+offset), (x-1)+","+y, x+","+(y-offset), (x+1)+","+y];
             
             for(var i=0; i<coords.length; ++i) {
-		var prospect = mapData[coords[i]];
-		if(prospect && prospect != space) { neighbors.push(prospect); }
+                var prospect = mapData[coords[i]];
+                if(prospect && prospect != space) { neighbors.push(prospect); }
             }
             return neighbors;
-	}
-	
-	var openSet = [commander];
-	var closedSet = [];
-	var currentSpace = null;
-	
-	while(currentSpace = openSet.pop()) {
-	    
-	    if(currentSpace.x == target.x && currentSpace.y == target.y) { return true; }
-	    
-	    openSet = openSet.concat(getNeighbors(currentSpace).filter(function(s) {
-		return (s.terrain.properties.indexOf("castle") != -1 || s.terrain.properties.indexOf("keep") != -1) &&
-		    openSet.indexOf(s) == -1 &&
-		    closedSet.indexOf(s) == -1
-	    }));
-	    
-	    closedSet.push(currentSpace);
-	}
-	
-	return false;
+        }
+        
+        var openSet = [commander];
+        var closedSet = [];
+        var currentSpace = null;
+        
+        while(currentSpace = openSet.pop()) {
+            
+            if(currentSpace.x == target.x && currentSpace.y == target.y) { return true; }
+            
+            openSet = openSet.concat(getNeighbors(currentSpace).filter(function(s) {
+                return (s.terrain.properties.indexOf("castle") != -1 || s.terrain.properties.indexOf("keep") != -1) &&
+                    openSet.indexOf(s) == -1 &&
+                    closedSet.indexOf(s) == -1
+            }));
+            
+            closedSet.push(currentSpace);
+        }
+        
+        return false;
     }
 }());

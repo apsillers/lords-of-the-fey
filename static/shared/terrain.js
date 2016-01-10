@@ -57,20 +57,20 @@
 (function() {
     var exports;
     if(typeof module != "undefined") {
-	exports = module.exports;
+        exports = module.exports;
     } else {
-	exports = window.mapUtils = {};
+        exports = window.mapUtils = {};
     }
 
     var Terrain = 
-	/**
-	   Terrain object
-	   @namespace module:terrain.Terrain
-	   @prop {Object.<string,TerrainType>} bases - dictionary of base tile types
-	   @prop {Object.<string,TerrainType>} overlays - dictionary of overlay tile types
-	*/
+        /**
+           Terrain object
+           @namespace module:terrain.Terrain
+           @prop {Object.<string,TerrainType>} bases - dictionary of base tile types
+           @prop {Object.<string,TerrainType>} overlays - dictionary of overlay tile types
+        */
     exports.Terrain = {
-	bases: {
+        bases: {
             GRASS: { symbol: "Gg", name: "grass", img: "/data/img/terrain/green.png", properties: ["flat"], color:"#0F0" },
             SEMI_GRASS: { symbol: "Gs", name: "semi-dry grass", img: "/data/img/terrain/semi-dry.png", properties: ["flat"], color:"#0F0" },
             DRY_GRASS: { symbol: "Gd", name: "dry grass", img: "/data/img/terrain/dry.png", properties: ["flat"], color:"#0F0" },
@@ -120,9 +120,9 @@
             ROCKBOUND_CAVE: { symbol: "Uh", name: "rockbound cave", img: "/data/img/terrain/rockbound-cave.png", properties:["cave"], color:"#666" },
 
             VOLCANO: { symbol: "Mv", name: "volcano", img: "/data/img/terrain/volcano-tile.png", properties:["impassable"], color:"#666" },
-	    },
+            },
 
-	overlays: {
+        overlays: {
             SUMMER_DFOREST: { symbol: "Fd", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
             WINTER_DFOREST: { symbol: "Fdw", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
             AUTUMN_DFOREST: { symbol: "Fdf", name: "forest", img: "/data/img/terrain/forest.png", properties: ["forest"], color:"#090" },
@@ -147,78 +147,78 @@
             WOODEN_BRIDGE_N: { symbol: "Bw|", name: "wooden bridge", img: "/data/img/terrain/wood-n-s.png", properties: ["flat","water"], color:"#DDD" },
             WOODEN_BRIDGE_NE: { symbol: "Bw/", name: "wooden bridge", img: "/data/img/terrain/wood-ne-sw.png", properties: ["flat","water"], color:"#DDD" },
             IMPASSABLE_MOUNTAIN: { symbol: "Xm", name: "impassable mountain", img: "/data/img/terrain/cloud.png", properties: ["impassable"], color:"#DDD" }
-	},
+        },
 
-	transitionRank:["FORD", "SHALLOW_WATER", "DEEP_WATER", "DRY_GRASS", "SEMI_GRASS", "GRASS", "HUMAN_CASTLE", "HUMAN_KEEP", "ENCAMPMENT_CASTLE", "ENCAMPMENT_KEEP"],
+        transitionRank:["FORD", "SHALLOW_WATER", "DEEP_WATER", "DRY_GRASS", "SEMI_GRASS", "GRASS", "HUMAN_CASTLE", "HUMAN_KEEP", "ENCAMPMENT_CASTLE", "ENCAMPMENT_KEEP"],
 
-	transitions: {
-	    FORD: { imgBase:"/data/img/terrain/trans/ford", dirs:['n','s','ne','nw','se','sw'] },
-	    GRASS: { imgBase:"/data/img/terrain/trans/green", dirs:['n','s','ne','nw','se','sw'] },
-	    DRY_GRASS: { imgBase:"/data/img/terrain/trans/dry", dirs:['n','s','ne','nw','se','sw'] },
-	    SEMI_GRASS: { imgBase:"/data/img/terrain/trans/semi-dry", dirs:['n','s','ne','nw','se','sw'] },
-	    DEEP_WATER: { imgBase:"/data/img/terrain/trans/ocean-A01", dirs:['n','s','ne','nw','se','sw'] },
-	    SHALLOW_WATER: { imgBase:"/data/img/terrain/trans/ocean-blend-A01", dirs:['n','s','ne','nw','se','sw'] }
-	},
+        transitions: {
+            FORD: { imgBase:"/data/img/terrain/trans/ford", dirs:['n','s','ne','nw','se','sw'] },
+            GRASS: { imgBase:"/data/img/terrain/trans/green", dirs:['n','s','ne','nw','se','sw'] },
+            DRY_GRASS: { imgBase:"/data/img/terrain/trans/dry", dirs:['n','s','ne','nw','se','sw'] },
+            SEMI_GRASS: { imgBase:"/data/img/terrain/trans/semi-dry", dirs:['n','s','ne','nw','se','sw'] },
+            DEEP_WATER: { imgBase:"/data/img/terrain/trans/ocean-A01", dirs:['n','s','ne','nw','se','sw'] },
+            SHALLOW_WATER: { imgBase:"/data/img/terrain/trans/ocean-blend-A01", dirs:['n','s','ne','nw','se','sw'] }
+        },
 
-	/**
-	   Takes one or two strings from the Wesnoth map file and returns a TerrainType object. Base and overlay are represented in the map file as either a 2 or 3 char symbol string like "Bb" (just base) or two symbols joined by a carret "Bb^Oo" (base and overlay)
-	   @memberof module:terrain.Terrain
-	   @prop {string} baseSymbol - symbol for tiles with no carret or symbole from the left side of the carret
-	   @prop {string} overlaySymbol - optional symbol from the right side of the carret
-	   @return {TerrainType} an object representing the aggregate types and images of the combination of base and overlay types
-	*/
-	getTerrainBySymbol: function(baseSymbol, overlaySymbol) {
+        /**
+           Takes one or two strings from the Wesnoth map file and returns a TerrainType object. Base and overlay are represented in the map file as either a 2 or 3 char symbol string like "Bb" (just base) or two symbols joined by a carret "Bb^Oo" (base and overlay)
+           @memberof module:terrain.Terrain
+           @prop {string} baseSymbol - symbol for tiles with no carret or symbole from the left side of the carret
+           @prop {string} overlaySymbol - optional symbol from the right side of the carret
+           @return {TerrainType} an object representing the aggregate types and images of the combination of base and overlay types
+        */
+        getTerrainBySymbol: function(baseSymbol, overlaySymbol) {
             var terrainObj = { properties:[] };
             for(var prop in this.bases) {
-		if(this.bases[prop].symbol == baseSymbol) {
+                if(this.bases[prop].symbol == baseSymbol) {
                     var base = this.bases[prop];
-		    terrainObj.tileType = prop;
+                    terrainObj.tileType = prop;
                     terrainObj.properties = terrainObj.properties.concat(base.properties);
                     terrainObj.img = base.img;
                     terrainObj.imgObj = base.imgObj;
                     terrainObj.color = base.color;
-		}
+                }
             }
             for(var prop in this.overlays) {
-		if(this.overlays[prop].symbol == overlaySymbol) {
+                if(this.overlays[prop].symbol == overlaySymbol) {
                     var overlay = this.overlays[prop];
                     
                     // overlays that confer terrain properties eliminate the "flat" terrain type from the base terrain
                     // e.g., green grass overlayed with forest is "forest"-type only, not "forest" and "flat"
                     if(overlay.properties.length > 0) {
-			var flatIndex = terrainObj.properties.indexOf("flat");
-			if(flatIndex != -1) { terrainObj.properties.splice(flatIndex, 1); }
+                        var flatIndex = terrainObj.properties.indexOf("flat");
+                        if(flatIndex != -1) { terrainObj.properties.splice(flatIndex, 1); }
                     }
 
                     terrainObj.properties = terrainObj.properties.concat(overlay.properties);
                     terrainObj.overlayImg = overlay.img;
                     terrainObj.overlayImgObj = overlay.imgObj;
                     terrainObj.color = overlay.color;
-		}
+                }
 
-		if(terrainObj.properties.length == 0) {
+                if(terrainObj.properties.length == 0) {
                     terrainObj = { properties: ["flat"], img: "/data/img/terrain/void-editor.png", color: "#000" };
 
                     if(overlaySymbol) { terrainObj.overlayImg = "/data/img/terrain/forest.png"; }
-		}
+                }
             }
 
-	    if(overlaySymbol && !overlay) {
-		//console.log("Missing overlay:", overlaySymbol);
-	    }
+            if(overlaySymbol && !overlay) {
+                //console.log("Missing overlay:", overlaySymbol);
+            }
 
             return terrainObj;
-	},
+        },
 
-	/**
-	   Given an object with `x` and `y` properties, return array 
-	   of adjacent coordinate objects (without regard to the existence
-	   of an actual space at those coordinates)
-	   @memberof module:terrain.Terrain
-	   @param {{x:number, y:number}} space - object with x and y properties
-	   @return {Object[]} list of objects with x and y properties
-	*/
-	getNeighborCoords: function(space) {
+        /**
+           Given an object with `x` and `y` properties, return array 
+           of adjacent coordinate objects (without regard to the existence
+           of an actual space at those coordinates)
+           @memberof module:terrain.Terrain
+           @param {{x:number, y:number}} space - object with x and y properties
+           @return {Object[]} list of objects with x and y properties
+        */
+        getNeighborCoords: function(space) {
             var x = space.x, y = space.y;
             
             // -1 if odd, +1 if even
@@ -229,20 +229,20 @@
                     { x: x-1, y: y },
                     { x: x,   y: y-offset },
                     { x: x+1, y: y }];
-	},
+        },
 
-	/**
-	   Given two objects with `x` and `y` properties, return a string
-	   representing the compass direction from the first space to the
-	   second. (The spaces need not be adjacent.)
-	   @memberof module:terrain.Terrain
-	   @param {{x:number, y:number}} s1 - source corrdinates
-	   @param {{x:number, y:number}} s1 - destination coordinates
-	   @return {string} one of `n`, `s`, `ne`, `nw`, `se`, `sw`
-	 */
-	getDirection: function(s1, s2) {
+        /**
+           Given two objects with `x` and `y` properties, return a string
+           representing the compass direction from the first space to the
+           second. (The spaces need not be adjacent.)
+           @memberof module:terrain.Terrain
+           @param {{x:number, y:number}} s1 - source corrdinates
+           @param {{x:number, y:number}} s1 - destination coordinates
+           @return {string} one of `n`, `s`, `ne`, `nw`, `se`, `sw`
+         */
+        getDirection: function(s1, s2) {
             if(s1.x == s2.x) {
-		return s1.y > s2.y ? "n" : "s";
+                return s1.y > s2.y ? "n" : "s";
             }
 
             // is a high space on a row
@@ -250,25 +250,25 @@
             var result = "";
             
             if((isHigh && s1.y == s2.y) || (!isHigh && s1.y < s2.y)) {
-		result = "s";
+                result = "s";
             } else {
-		result = "n";
+                result = "n";
             }
 
             if(s1.x > s2.x) { result += "w"; }
             else { result += "e"; }
 
             return result;
-	}
+        }
     }
 
     // TerrainType objects should stringify to their name
     var terrainToString = function() { return this.name; };
     for(var i in Terrain.bases) {
-	Terrain.bases[i].toString = terrainToString;
+        Terrain.bases[i].toString = terrainToString;
     }
     for(var i in Terrain.overlays) {
-	Terrain.overlays[i].toString = terrainToString;
+        Terrain.overlays[i].toString = terrainToString;
     }
 
     /**
@@ -278,23 +278,23 @@
        @return {MapData} a dictionary-based representation of the Wesnoth map
     */
     exports.toMapDict = function(map_data) {
-	var misc_lines = 0;
-	var row = 0;
-	var map_array = map_data.split('\n');
-	var map_dict = {};
+        var misc_lines = 0;
+        var row = 0;
+        var map_array = map_data.split('\n');
+        var map_dict = {};
 
-	// read each line in the map file
-	for(var line_num = 0; line_num < map_array.length; line_num++) {
+        // read each line in the map file
+        for(var line_num = 0; line_num < map_array.length; line_num++) {
             var line = map_array[line_num];
             line = line.trim();
             line = line.replace(/\s+/g, ' ');
 
             // use this line only if it describes terrain
             if(line.indexOf('=') == -1 && line != '') {
-		var tiles = line.split(",");
+                var tiles = line.split(",");
 
-		// place each tile described in the line
-		for(var tile_num = 0; tile_num < tiles.length; tile_num++) {
+                // place each tile described in the line
+                for(var tile_num = 0; tile_num < tiles.length; tile_num++) {
                     var tile = tiles[tile_num];
                     tile = tile.trim();
                     var tileObj = { x:tile_num, y:row }
@@ -302,7 +302,7 @@
 
                     // if the tile has a start position, add it
                     if(componentsBySpace.length == 2) {
-			tileObj.start = componentsBySpace[0];
+                        tileObj.start = componentsBySpace[0];
                     }
 
                     var componentsByCarret = componentsBySpace.pop().split("^");
@@ -314,14 +314,14 @@
 
                     map_dict[tile_num+","+row] = tileObj;
 
-		}
-		row++;
+                }
+                row++;
             } else {
-		misc_lines += 1;
+                misc_lines += 1;
             }
-	}
-	
-	return map_dict;
+        }
+        
+        return map_dict;
     }
 
 }());
