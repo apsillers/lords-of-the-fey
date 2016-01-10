@@ -486,7 +486,12 @@ unitLib.unitProto = {
 	
 	return 0;
     },
-	    
+
+    /**
+        Given an update dictionary, alter this unit's stats
+
+        This function triggers level-ups when attempting to update XP higher than max XP
+    */
     update: function(update) {
 	// remove expired conditions
 	var prop, conditionName;
@@ -610,7 +615,7 @@ unitLib.unitProto = {
 
     // select a defnsive attack to counter the attack `offense` offered by `offender`
     // TODO: calculte odds of damage, killing, etc.
-    selectDefense: function(offender, offense) {
+    selectDefense: function(offender, offense, timeOfDay, offenderCover, defenderCover) {
 	var defense = null;
 	var defenseIndex = -1;
 	for(var j=0; j < this.attacks.length; ++j){
