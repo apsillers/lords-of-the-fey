@@ -208,6 +208,7 @@ div.recruit-item.selected {
     border: thin solid #77F;
     color: white;
     cursor: pointer;
+    font-size: 12pt;
 }
 
 #top-menu-list {
@@ -252,6 +253,14 @@ div.recruit-item.selected {
 }
 
 #player-overlay {
+    width: 600px;
+    padding: 10px;
+    background-color: #999;
+    position: absolute;
+    display: none;
+}
+
+#credits-overlay {
     width: 600px;
     padding: 10px;
     background-color: #999;
