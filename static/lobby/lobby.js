@@ -102,6 +102,11 @@ $("#launch-game").click(function() {
         map: $("#create-dialog-map").val()
     });
 });
+$("body").keyup(function(e) {
+    if(e.keyCode == 27) {
+        $("#create-dialog").hide();
+    }
+});
 $("#chat-input").keyup(function(e) {
     if(e.keyCode == 13) {
         socket.emit("chat", { msg: $("#chat-input").val(), id:"lobby" });

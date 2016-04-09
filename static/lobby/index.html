@@ -42,16 +42,19 @@
       <input type="text" id="chat-input">
     </div>
 
-    <div style="display:none; width:400px; margin: auto 0; background-color: gray; position: fixed; top: 2px;" id="create-dialog">
-      <div>Name: <input type="text" id="create-dialog-name"></div>
-      <div>
-        <select id="create-dialog-map">
-          <option value="test_map.map">2p - Test Map</option>
-          <option value="2p_Hornshark_Island.map">2p - Hornshark Island</option>
-          <option value="4p_King_of_the_Hill.map">4p - King of the Hill</option>
-        </select>
-      </div>
-      <div><input type="button" value="Launch Room" id="launch-game"></div>
+    <div style="display:none; width:100%; height:100%; background-color:rgba(0, 0, 0, 0.7); position: fixed; top: 0px;" id="create-dialog">
+      <div id="create-dialog-inner" style="background-color: #F7F6F3; width:400px; margin: auto; padding: 20px; margin-top:10px;">
+          <div><span style="font-weight:bold;">New Game</span><span style="float:right; font-size:70%; clear:right;">(Press Esc to return)</span></div>
+          <div>Name: <input type="text" id="create-dialog-name"></div>
+          <div>
+            <select id="create-dialog-map">
+              <option value="test_map.map">2p - Test Map</option>
+              <option value="2p_Hornshark_Island.map">2p - Hornshark Island</option>
+              <option value="4p_King_of_the_Hill.map">4p - King of the Hill</option>
+            </select>
+          </div>
+          <div><input type="button" value="Launch Room" id="launch-game"></div>
+        </div>
     </div>
 
     <script src="lobby.js"></script>

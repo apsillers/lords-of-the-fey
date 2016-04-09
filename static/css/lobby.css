@@ -51,6 +51,7 @@ div#player-list {
 
 #room-player-list {
     border-collapse: collapse;
+    width: 75%;
 }
 
 #room-player-list td, select, input, #create-dialog {
@@ -60,6 +61,7 @@ div#player-list {
 #room-player-list td {
     padding: 0px 5px;
     height: 50px;
+    text-align: center;
 }
 #room-player-list th {
     height: 50px;

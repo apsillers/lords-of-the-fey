@@ -75,7 +75,7 @@ function renderPlayerList() {
 
         var playerItem = $("<tr>");
         if(data.empty) {
-            playerItem.append($("<td>", {colspan: 4}).text("-- empty --").css({ "text-align":"center" }));
+            playerItem.append($("<td>", {colspan: 4}).text("-- empty --").css({ "text-align":"center" }).addClass("empty"));
         } else if(data.username == yourUsername || yourUsername == room.owner) {
             var readyBox;
             if(data.username == yourUsername) {
