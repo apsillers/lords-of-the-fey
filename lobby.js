@@ -21,8 +21,16 @@ var roomIndex = 1;
 var rooms = {};
 var players = [];
 
+var fs = require("fs");
+
 module.exports.initLobbyListeners = function(sockets, socket, collections, app) {
     var emptySlot = { empty: true };
+
+    socket.on("list maps", function() {
+        fs.readdir("static/data/maps", function(err, data) {
+            socket.emit("map list", data);
+        });
+    });
 
     socket.on("join lobby", function() {
         var user = socket.request.user;

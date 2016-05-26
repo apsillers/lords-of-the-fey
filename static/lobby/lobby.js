@@ -20,8 +20,18 @@ var socket = io();
 var rooms = {};
 var players = [];
 var username;
+var maps = [];
 
 socket.emit("join lobby");
+socket.emit("list maps");
+
+socket.on("map list", function(maps) {
+console.log(maps);
+    maps.forEach(function(v) {
+console.log(v);
+        $("#create-dialog-map").append($("<option>", { value:v, text: v.replace(/_/g," ").replace(/\.map$/,"") }));
+    });
+});
 
 socket.on("lobby data", function(data) {
     rooms = data.rooms;
