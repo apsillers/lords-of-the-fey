@@ -245,8 +245,19 @@ window.addEventListener("load", function() {
                 actionQueue.addAction(function() {
                     ui.updatePlayer(data);
                 });
+            });
 
-        
+            socket.on("victory", function(data) {
+                actionQueue.addAction(function() {
+                    if(data.victory) {
+                        if("team" in gameInfo.player) {
+                            if(gameInfo.player.alliance == data.alliance) { alert("You are victorious!"); }
+                            else { alert("You were defeated!"); }
+                        } else {
+                            alert("Alliance " + data.alliance + "wins!");
+                        }
+                    }
+                });
             });
 
     });

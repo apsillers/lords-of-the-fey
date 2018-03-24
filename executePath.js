@@ -26,6 +26,7 @@ var executeAttack = require("./executeAttack");
 var Terrain = require("./static/shared/terrain.js").Terrain;
 var executeAttack = require("./executeAttack");
 var ObjectID = function(input) { if(input.length!=12 && input.length!=24) { return; } return require('mongodb').ObjectID.apply(this, arguments); }
+var checkForVictory = require("./endGame").checkForVictory;
 
 module.exports = function(collections, data, socket, socketList) {
         var gameId = ObjectID(data.gameId),
@@ -90,9 +91,11 @@ module.exports = function(collections, data, socket, socketList) {
                                     collections.units.save(moveResult.revealedUnits[index], {safe:true}, function() { saveRevealedUnit(index+1); });
                                 }(0))
                             }
-                            
+
                             function concludeMove() {
-                                var emitMove = function() {
+                                var victoryResult = {};
+
+                                var emitMove = function(victory) {
                                         var alliedUsernames = game.players.filter(function(p) { return p.alliance == game.players[game.activeTeam-1].alliance; }).map(function(p) { return p.username; });
                                         var alliedPlayerSocketData = socketList.filter(function(o) {
                                             return o.username && o.gameId.equals(gameId) &&
@@ -108,8 +111,12 @@ module.exports = function(collections, data, socket, socketList) {
                                         unalliedPlayerSocketData.forEach(function(s) {
                                             s.socket.emit("moved", moveResult);
                                         });
+
+                                        if(victoryResult.victory) {
+                                            socketList.filter(function(o) { return o.gameId.equals(gameId) }).forEach(function(s) { s.socket.emit("victory", victoryResult); })
+                                        }
                                 };
-                                
+
                                 // perform the attack
                                 if(moveResult.attack && !unit.hasAttacked) {
                                     var targetCoords = path[path.length-1];
@@ -144,9 +151,10 @@ module.exports = function(collections, data, socket, socketList) {
                                                             }, function(err, commander) {
                                                                 if(!commander) {
                                                                     console.log("COMMANDER DEATH");
-                                                                    checkForVictory(game, collections, function(victoryResult) {
+                                                                    checkForVictory(game, collections, function(victoryState) {
+                                                                        victoryResult = victoryState;
                                                                         callback();
-                                                                        console.log("VICTORY: ", victoryResult);
+                                                                        console.log("VICTORY: ", victoryState);
                                                                     });
                                                                 } else {
                                                                     callback();
