@@ -496,7 +496,17 @@ var ui = {
             if(nextSpace && currSpace) {
                 var diffX = nextSpace.shape.x - currSpace.shape.x,
                     diffY = nextSpace.shape.y - currSpace.shape.y;
-            
+
+                // flip unit left or right to match x-direction
+                if(diffX < 0) {
+		    unit.bodyShape.regX = 72;
+                    unit.bodyShape.scaleX = -1;
+                }
+                if(diffX > 0){
+                    unit.bodyShape.regX = 0;
+                    unit.bodyShape.scaleX = 1;
+                }
+
                 unit.shape.x = prevX + stepProgress * diffX;
                 unit.shape.y = prevY + stepProgress * diffY;
 
@@ -576,6 +586,20 @@ var ui = {
 
         var dX = (offender.shape.x - defender.shape.x) / 15;
         var dY = (offender.shape.y - defender.shape.y) / 15;
+
+        // flip unit left or right to match x-direction
+        if(dX > 0) {
+            offender.bodyShape.regX = 72;
+            offender.bodyShape.scaleX = -1;
+            defender.bodyShape.regX = 0;
+            defender.bodyShape.scaleX = 1;
+        }
+        if(dX < 0){
+            offender.bodyShape.regX = 0;
+            offender.bodyShape.scaleX = 1;
+            defender.bodyShape.regX = 72;
+            defender.bodyShape.scaleX = -1;
+        }
 
         var attackStep = function(entry, i, retreat) {
             return function() {
