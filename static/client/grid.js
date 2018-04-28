@@ -17,7 +17,11 @@
     along with Lords of the Fey.  If not, see <http://www.gnu.org/licenses/>.
 */
 function World(canvasName) {
-    this.stage = new createjs.Stage(canvasName);
+    var stage = this.stage = new createjs.Stage(canvasName);
+    createjs.Ticker.on("tick", function (event) {
+        stage.update(event);
+    });
+
     this.stage.enableMouseOver(83);
     createjs.Touch.enable(this.stage);
     this.mapContainer = new createjs.Container();

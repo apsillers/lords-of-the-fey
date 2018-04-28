@@ -92,8 +92,14 @@ div.recruit-item {
     height: 72px;
 }
 
-div.recruit-item img {
+div.recruit-item .img-wrapper {
     float: left;
+}
+
+div.img-wrapper {
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
 }
 
 div.recruit-item.selected {

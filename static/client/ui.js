@@ -375,8 +375,8 @@ var ui = {
             var unit = unitLib.protos[unitId];
 
             var listItem = $("<div class='recruit-item'>");
-            
-            listItem.append(unit.imgObj);
+             
+            listItem.append($("<div>", { class: "img-wrapper"}).append(unit.imgObj));
 
             var unitText = $("<div>");
             unitText.append($("<span>", { text: unit.name }));
@@ -607,10 +607,18 @@ var ui = {
                 var hittee = entry.offense ? defender : offender;
 
                 var attack = entry.offense?offense:defense;
+                var attackIndex = actor.attacks.indexOf(attack);
 
                 var direction;
                 if(entry.offense) { direction = world.getDirection(offender.shape.owner, defender.shape.owner); }
                 else {              direction = world.getDirection(defender.shape.owner, offender.shape.owner); }
+
+                if(!retreat && attack.animation) {
+                    var frameCount = attack.animation[1] - attack.animation[0] + 1;
+                    // get in all frames in half a second, multiplied by animationFactor speedup
+                    actor.bodyShape.framerate  = frameCount * 2 * ui.animationFactor;
+                    actor.bodyShape.gotoAndPlay("attack-"+attackIndex);
+                }
 
                 if(attack.type == "melee") {
                     actor.shape.x += (retreat ? 1 : -1) * (entry.offense ? 1 : -1) * dX;
@@ -632,6 +640,14 @@ var ui = {
                         projectile.graphics.beginFill("black").drawRect(0,0,7,7);
                         projectile.x = actor.shape.x + Space.WIDTH / 2;;
                         projectile.y = actor.shape.y + Space.HEIGHT / 2;;
+                    }
+
+                    if(!retreat && actor.bodyShape.spriteSheet.animations.indexOf("") > -1) {
+                        var attackFrames = actor.animations.attack;
+                        var frameCount = attackFrames[1] - attackFrames[0] + 1;
+                        // get in all frames in half a second, multiplied by animationFactor speedup
+                        actor.bodyShape.framerate  = frameCount * 2 * ui.animationFactor;
+                        actor.bodyShape.gotoAndPlay("ranged");
                     }
 
                     for(var j=0; j<15; j++) {
@@ -745,7 +761,7 @@ var ui = {
 
         var makeCombatantElem = function(combatant, floatDir) {
             return [
-                $(combatant.imgObj).css("float",floatDir),
+                $($("<div>", { class: "img-wrapper" }).append(combatant.imgObj)).css("float",floatDir),
                 $("<div>").append([
                     $("<span>").text(combatant.name),
                     $("<br>"),
@@ -843,7 +859,7 @@ var ui = {
 
             var listItem = $("<div class='recruit-item'>");
             
-            listItem.append(unit.imgObj);
+            listItem.append($("<div>", { class: "img-wrapper", style:{float:"left"} }).appendChild(unit.imgObj));
 
             var unitText = $("<span>");
             unitText.text(unit.name);

@@ -1,6 +1,8 @@
 {
   "name":"Orcish Grunt",
   "img":"/data/img/units/orcish_grunt.png",
+  "sprite":"/data/img/units/grunt-sprite.png",
+  "animations":{"die":[6,13]},
   "cost":12,
   "maxHp":38,
   "move":5,
@@ -15,7 +17,8 @@
       "type":"melee",
       "damage":9,
       "number":2,
-      "damageType":"blade"
+      "damageType":"blade",
+      "animation":[1,5]
     }
   ],
   "terrain":{

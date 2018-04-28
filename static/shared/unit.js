@@ -111,7 +111,7 @@ var unitLib = {
             queue.on("progress", progressCallback);
             queue.on("complete", handleComplete, this);
             queue.loadManifest(
-                Object.keys(unitLib.protos).map(function(k){ return {id:k, src:unitLib.protos[k].img }; })
+                Object.keys(unitLib.protos).map(function(k){ return {id:k, src: unitLib.protos[k].sprite || unitLib.protos[k].img }; })
             );
 
             var attackAnimationList = [];
@@ -354,7 +354,22 @@ function Unit(unitData, isCreation, isLevelUp) {
 
         unit.shape = new createjs.Container();
         unit.shape.owner = unit;
-        unit.bodyShape = new createjs.Bitmap(unit.imgObj);
+        for(var i=0; i<unit.attacks.length; i++) {
+            if(unit.attacks[i].animation) {
+                unit.attacks[i].animation.push("stand");
+                unit.animations["attack-"+i] = unit.attacks[i].animation;
+            }
+        }
+        
+        if(unit.animations) {
+            unit.animations.stand = 0;
+            for(var animation in unit.animations) {
+                if(animation.push) { animation.push("stand"); }
+            }
+        }
+        var sheet = new createjs.SpriteSheet({ images: [unit.imgObj], frames: { height: 72, width: 72 }, animations: unit.animations });
+        unit.bodyShape = new createjs.Sprite(sheet);
+        unit.bodyShape.addEventListener("change", function() { unit.bodyShape.cache(0,0,72,72); });
         unit.shape.addChild(unit.bodyShape);
 
         // forward click to underlying space
@@ -608,7 +623,8 @@ unitLib.unitProto = {
                 filters.push(new createjs.ColorFilter(1,1,1,0.75, 0,0,0,0));
             }
             this.bodyShape.filters = filters;
-            this.bodyShape.cache(0, 0, this.bodyShape.image.width, this.bodyShape.image.height);
+            //this.bodyShape.cache(0, 0, this.bodyShape.image.width, this.bodyShape.image.height);
+            this.bodyShape.cache(0, 0, 72, 72);
             world.stage.update();
         }        
     },
