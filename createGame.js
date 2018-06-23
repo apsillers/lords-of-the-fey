@@ -85,8 +85,8 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
 
         if(playerList.length > startPositions.length - 1) { resolutionCallback(false); return; }
         
-        collections.games.insert(gameData, {safe: true}, function(err, items) {    
-            var game = items[0];
+        collections.games.insert([gameData], {safe: true}, function(err, items) {    
+            var game = items.ops[0];
             var index = -1;
             (function addCommander() {
                 index++;
@@ -94,7 +94,7 @@ exports.createNewGame = function(collections, playerList, map, resolutionCallbac
                 if(playerList[index].empty) { addCommander(); return; }
                 var typeName = playerList[index].faction=="elves"?"elvish_ranger":"orcish_warrior";
                 var coords = startPositions[playerList[index].team];
-
+				
                 var unit = new Unit({
                     gameId: game._id,
                     x: +coords[0],
