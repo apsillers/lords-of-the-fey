@@ -36,7 +36,7 @@ The browser client only requires a modern browser that supports the [canvas API]
 To set up a test environment, clone the repository and do:
 
     npm install
-    mongo < init.mongo.js
+    mongosh < init.mongo.js
 
 Also edit the `/config.js` file. At minimum, you will need to edit the `mongoString` field to a valid [MongoDB connection string](http://docs.mongodb.org/manual/reference/connection-string/). You can also edit the other fields, e.g., to enable Facebook auth or change the port.
 
